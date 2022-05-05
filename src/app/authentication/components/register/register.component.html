@@ -14,10 +14,12 @@
         type="text"
         class="text-capitalize"
       />
-      <mat-error *ngIf="form.get('firstName')?.hasError('required')">
+      <mat-error *ngIf="form.controls['firstName']?.errors?.['required']">
         First name required.
       </mat-error>
-      <mat-error *ngIf="form.get('firstName')?.hasError('invalidNameFormat')">
+      <mat-error
+        *ngIf="form.controls['firstName']?.errors?.['invalidNameFormat']"
+      >
         Invalid format.
       </mat-error>
     </mat-form-field>
@@ -31,10 +33,12 @@
         type="text"
         class="text-capitalize"
       />
-      <mat-error *ngIf="form.get('lastName')?.hasError('required')">
+      <mat-error *ngIf="form.controls['lastName']?.errors?.['required']">
         Last name required.
       </mat-error>
-      <mat-error *ngIf="form.get('lastName')?.hasError('invalidNameFormat')">
+      <mat-error
+        *ngIf="form.controls['lastName']?.errors?.['invalidNameFormat']"
+      >
         Invalid format.
       </mat-error>
     </mat-form-field>
@@ -42,11 +46,11 @@
     <mat-form-field id="email" appearance="outline">
       <mat-label>Email</mat-label>
       <input matInput formControlName="email" placeholder="john@example.com" />
-      <mat-error *ngIf="form.get('email')?.hasError('required')">
+      <mat-error *ngIf="form.controls['email']?.errors?.['required']">
         Email address required.
       </mat-error>
 
-      <mat-error *ngIf="form.get('email')?.hasError('email')">
+      <mat-error *ngIf="form.controls['email']?.errors?.['email']">
         Invalid format.
       </mat-error>
     </mat-form-field>
@@ -62,12 +66,12 @@
         #phoneNumber
         appValidatePhoneFormat
       />
-      <mat-error *ngIf="form.get('phoneNumber')?.hasError('required')">
+      <mat-error *ngIf="form.controls['phoneNumber']?.errors?.['required']">
         Phone number required.
       </mat-error>
 
       <mat-error
-        *ngIf="form.get('phoneNumber')?.hasError('invalidPhoneFormat')"
+        *ngIf="form.controls['phoneNumber']?.errors?.['invalidPhoneFormat']"
       >
         Invalid phone number format.
       </mat-error>
@@ -81,23 +85,36 @@
           group
         }}</mat-option>
       </mat-select>
-      <mat-error *ngIf="form.get('group')?.hasError('required')">
-        Group required.
+      <mat-error *ngIf="form.controls['group']?.errors?.['required']">
+        Group is required.
       </mat-error>
     </mat-form-field>
 
-    <mat-form-field [hidden]="form?.get('group')?.value !== 'Technician'">
-      <mat-label>Technician Category</mat-label>
-      <mat-select formControlName="specificGroup">
-        <mat-option value="" selected>--select your group--</mat-option>
+    <mat-form-field *ngIf="form.controls['group']?.value === 'Technician'" appearance="outline"  >
+      <mat-label>Technician Group</mat-label>
+      <mat-select #technicianGroupSelect formControlName="technicianGroup">
         <mat-option
-          *ngFor="let technician of technicians"
-          value="{{ technician }}"
-          >{{ technician }}</mat-option
+          *ngFor="let technicianGroup of technicianGroups"
+          value="{{ technicianGroup }}"
+          >{{ technicianGroup }}</mat-option
         >
       </mat-select>
-      <mat-error *ngIf="form.get('specificGroup')?.hasError('required')">
-        Specific Technician Group required.
+      <mat-error *ngIf="form.controls['technicianGroup']?.errors?.['required']">
+        Specific technician group required.
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field *ngIf="form.controls['group']?.value === 'Supervisor'" appearance="outline">
+      <mat-label>Supervisor Group</mat-label>
+      <mat-select #supervisorGroupSelect formControlName="supervisorGroup">
+        <mat-option
+          *ngFor="let supervisorGroup of supervisorGroups"
+          value="{{ supervisorGroup }}"
+          >{{ supervisorGroup }}</mat-option
+        >
+      </mat-select>
+      <mat-error *ngIf="form.controls['supervisorGroup']?.errors?.['required']">
+        Specific supervisor group required.
       </mat-error>
     </mat-form-field>
 
@@ -126,7 +143,7 @@
         }}</mat-icon>
       </button>
 
-      <mat-error *ngIf="form.get('password')?.hasError('required')">
+      <mat-error *ngIf="form.controls['password']?.errors?.['required']">
         Password required.
       </mat-error>
     </mat-form-field>
@@ -153,27 +170,15 @@
           hideConfirmPassword ? "visibility_off" : "visibility"
         }}</mat-icon>
       </button>
-      <mat-error *ngIf="form.get('confirmPassword')?.hasError('required')">
+      <mat-error *ngIf="form.controls['confirmPassword']?.errors?.['required']">
         Confirmation password required.
       </mat-error>
       <mat-error
-        *ngIf="form.get('confirmPassword')?.hasError('passwordsMismatch')"
+        *ngIf="form.controls['confirmPassword']?.errors?.['passwordsMismatch']"
         >Passwords do not match.
       </mat-error>
     </mat-form-field>
 
-    <div class="mx-auto">
-      <button class="my-4 btn btn-primary" type="submit">Register</button>
-    </div>
-    <div class="mx-auto">
-      Already Registered?
-      <button
-        class="btn btn-link link-button"
-        type="button"
-        routerLink="../sign-in"
-      >
-        Log In
-      </button>
-    </div>
+    <button class="my-2 btn btn-primary" type="submit">Register</button>
   </form>
 </div>

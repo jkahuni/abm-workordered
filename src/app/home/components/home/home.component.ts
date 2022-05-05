@@ -129,6 +129,8 @@ export class HomeComponent implements OnInit {
                 // user is not technician/supervisor
                 else {
                   this.getRaisedWorkorders();
+                  this.getOtherApprovedWorkorders();
+                  this.getOtherRejectedWorkorders();
                   this.isOperatorOrOperatorLike = true;
 
                 }
@@ -271,6 +273,58 @@ export class HomeComponent implements OnInit {
         this.hideSpinnerOnError();
         console.log('ERROR H04', err);
         this.toast.error('Error Code H04: An error occured. Please report this code to support to have it fixed.', { duration: 8000 });
+      });
+  }
+
+  private getOtherApprovedWorkorders(): void {
+    const workordersQuery = query(
+      this.workordersCollectionReference,
+      orderBy('workorder.number'),
+      where('approved.status', '==', true),
+      where('rejected.status', '==', false),
+      where('raiser.uid', '==', this.userUid)
+    );
+
+    this.workordersService.getWorkorders(workordersQuery)
+      .then((workorders: IntWorkorder[]) => {
+        this.approvedWorkordersSet = true;
+        this.approvedWorkorders = workorders;
+        this.hideSpinnerOnSuccess();
+
+      }).catch((err: any) => {
+        this.hideSpinnerOnError();
+        console.log('ERROR H09', err);
+        if (err.code === 'failed-precondition') {
+          this.toast.error(`An indexing error of error code H-09 occured. Report this error code to support for its resolution.`, { duration: 8000, id: 'error-h-09' });
+        } else {
+          this.toast.error('Error Code H09: An error occured. Please report this code to support to have it fixed.', { duration: 8000, id: 'error-h-09' });
+        }
+      });
+  }
+
+  private getOtherRejectedWorkorders(): void {
+    const workordersQuery = query(
+      this.workordersCollectionReference,
+      orderBy('workorder.number'),
+      where('approved.status', '==', false),
+      where('rejected.status', '==', true),
+      where('raiser.uid', '==', this.userUid)
+    );
+
+    this.workordersService.getWorkorders(workordersQuery)
+      .then((workorders: IntWorkorder[]) => {
+        this.rejectedWorkordersSet = true;
+        this.rejectedWorkorders = workorders;
+        this.hideSpinnerOnSuccess();
+
+      }).catch((err: any) => {
+        this.hideSpinnerOnError();
+        console.log('ERROR H10', err);
+        if (err.code === 'failed-precondition') {
+          this.toast.error(`An indexing error of error code H-10 occured. Report this error code to support for its resolution.`, { duration: 8000, id: 'error-h-10' });
+        } else {
+          this.toast.error('Error Code H10: An error occured. Please report this code to support to have it fixed.', { duration: 8000, id: 'error-h-10' });
+        }
       });
   }
 

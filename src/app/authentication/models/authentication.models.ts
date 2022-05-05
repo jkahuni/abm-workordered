@@ -12,8 +12,9 @@ export interface IntFirestoreUser {
     fullName: string;
     email: string;
     phoneNumber: string;
-    role: string;
-    technicianRole: string;
+    group: string;
+    technicianGroup: string;
+    supervisorGroup: string;
     canEditWorkorder: boolean;
     canDeleteWorkorder: boolean;
     isAdmin: boolean;

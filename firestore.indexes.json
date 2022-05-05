@@ -1,0 +1,121 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "spares",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "searchParams",
+          "arrayConfig": "CONTAINS"
+        },
+        {
+          "fieldPath": "code",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "users",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "role",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "fullName",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "workorders",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "approved.status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "closed.status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "rejected.status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "storesTechnician.uid",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "workorder.number",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "workorders",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "approved.status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "closed.status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "rejected.status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "technician.uid",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "workorder.number",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "workorders",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "approved.status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "rejected.status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "supervisor.uid",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "workorder.number",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "workorders",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "raiser.uid",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "workorder.number",
+          "order": "ASCENDING"
+        }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

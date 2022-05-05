@@ -10,191 +10,170 @@
         class="raise-and-raised workorders"
         *ngIf="isOperatorOrOperatorLike"
       >
-        <mat-card class="home-page-card">
+        <mat-card class="home-page-card-links">
           <mat-card-header>
             <mat-card-title class="text-center">
               Welcome to ABM Workordered
             </mat-card-title>
           </mat-card-header>
-          <mat-card-content>
-            <p class="raise-workorder-router">
+          <mat-card-content class="home-navigation-links-container">
+            <div class="raise-workorder-router">
               <a
-                mat-raised-button
-                color="primary"
-                class="router-link"
+                type="button"
+                class="btn btn-link home-nav-button shadow-none"
                 routerLink="/new-workorder"
               >
                 Raise New Workorder
               </a>
-            </p>
+            </div>
 
-            <p class="raised-workorders">
+            <div class="raised-workorders">
               <a
-                mat-raised-button
-                color="primary"
-                class="router-link"
-                [routerLink]="[
-                  '/workorders/other/raised',
-                  userUid
-                ]"
+                type="button"
+                class="btn btn-link home-nav-button shadow-none"
+                [routerLink]="['/workorders/other/raised', userUid]"
               >
-                Raised Workorders - ( {{ raisedWorkorders?.length }} )
+                Raised Workorders - ( {{ raisedWorkorders ? raisedWorkorders.length  : 0 }} )
               </a>
-            </p>
+            </div>
+            <div class="approved-workorders">
+              <a
+                type="button"
+                class="btn btn-outline-success home-nav-button shadow-none"
+                [routerLink]="['/workorders/other/approved', userUid]"
+                >Approved Workorders - ( {{ approvedWorkorders ? approvedWorkorders.length : 0 }} )
+              </a>
+            </div>
+
+            <div class="rejected-workorders">
+              <a
+                type="button"
+                class="btn btn-outline-warning home-nav-button shadow-none"
+                [routerLink]="['/workorders/other/rejected', userUid]"
+                >Rejected Workorders - ( {{ rejectedWorkorders ? rejectedWorkorders.length : 0 }} )
+              </a>
+            </div>
           </mat-card-content>
         </mat-card>
       </ng-container>
 
       <!-- user is a supervisor -->
       <ng-container class="supervisors" *ngIf="isSupervisor">
-        <mat-card class="home-page-card">
+        <mat-card class="home-page-card-links">
           <mat-card-header>
             <mat-card-title class="text-center">
               Welcome to ABM Workordered
             </mat-card-title>
           </mat-card-header>
-          <mat-card-content>
-            <p class="raise-workorder-router">
+          <mat-card-content class="home-navigation-links-container">
+            <div class="raise-workorder-router">
               <a
-                mat-raised-button
-                color="primary"
-                class="router-link"
+                type="button"
+                class="btn btn-link home-nav-button shadow-none"
                 routerLink="/new-workorder"
               >
                 Raise New Workorder
               </a>
-            </p>
+            </div>
 
-            <p class="raised-workorders">
+            <div class="raised-workorders">
               <a
-                mat-raised-button
-                color="primary"
-                class="router-link"
-                [routerLink]="[
-                  '/workorders/supervisor/raised',
-                  userUid
-                ]"
+                type="button"
+                class="btn btn-link home-nav-button shadow-none"
+                [routerLink]="['/workorders/supervisor/raised', userUid]"
               >
-                Raised Workorders - ( {{ raisedWorkorders?.length }} )
+                Raised Workorders - ( {{ raisedWorkorders ? raisedWorkorders.length  : 0 }} )
               </a>
-            </p>
+            </div>
 
-            <p class="unverified-workorders">
+            <div class="unverified-workorders">
               <a
-                mat-raised-button
-                color="primary"
-                class="router-link"
-                [routerLink]="[
-                  '/workorders/supervisor/unverified',
-                  userUid
-                ]"
+                type="button"
+                class="btn btn-link home-nav-button shadow-none"
+                [routerLink]="['/workorders/supervisor/unverified', userUid]"
                 >Unverified Workorders - (
-                {{ unverifiedWorkorders?.length }} )</a
+                {{ unverifiedWorkorders ? unverifiedWorkorders.length : 0 }} )</a
               >
-            </p>
+            </div>
 
-            <p class="approved-workorders">
+            <div class="approved-workorders">
               <a
-                mat-raised-button
-                color="primary"
-                class="router-link"
-                [routerLink]="[
-                  '/workorders/supervisor/approved',
-                  userUid
-                ]"
-                >Approved Workorders - ( {{ approvedWorkorders?.length }} )
+                type="button"
+                class="btn btn-outline-success home-nav-button shadow-none"
+                [routerLink]="['/workorders/supervisor/approved', userUid]"
+                >Approved Workorders - ( {{ approvedWorkorders ? approvedWorkorders.length : 0 }} )
               </a>
-            </p>
+            </div>
 
-            <p class="rejected-workorders">
+            <div class="rejected-workorders">
               <a
-                mat-raised-button
-                color="warn"
-                class="router-link"
-                [routerLink]="[
-                  '/workorders/supervisor/rejected',
-                  userUid
-                ]"
-                >Rejected Workorders - ( {{ rejectedWorkorders?.length }} )
+                type="button"
+                class="btn btn-outline-warning home-nav-button shadow-none"
+                [routerLink]="['/workorders/supervisor/rejected', userUid]"
+                >Rejected Workorders - ( {{ rejectedWorkorders ? rejectedWorkorders.length : 0 }} )
               </a>
-            </p>
+            </div>
           </mat-card-content>
         </mat-card>
       </ng-container>
 
       <!-- user is an eng technician -->
       <ng-container class="technicians" *ngIf="isEngineeringTechnician">
-        <mat-card class="home-page-card">
+        <mat-card class="home-page-card-links">
           <mat-card-header>
             <mat-card-title class="text-center">
               Welcome to ABM Workordered
             </mat-card-title>
           </mat-card-header>
-          <mat-card-content>
-            <p class="open-workorders">
+          <mat-card-content class="home-navigation-links-container">
+            <div class="open-workorders">
               <a
-                mat-raised-button
-                color="primary"
-                class="router-link"
-                [routerLink]="[
-                  '/workorders/engineering/open',
-                  userUid
-                ]"
-                >Open Workorders - ( {{ engTechnicianOpenWorkorders?.length }} )
+                type="button"
+                class="btn btn-link home-nav-button shadow-none"
+                [routerLink]="['/workorders/engineering/open', userUid]"
+                >Open Workorders - ( {{ engTechnicianOpenWorkorders ? engTechnicianOpenWorkorders.length : 0 }} )
               </a>
-            </p>
-            <p class="closed-workorders">
+            </div>
+            <div class="closed-workorders">
               <a
-                mat-raised-button
-                color="primary"
-                class="router-link"
-                [routerLink]="[
-                  '/workorders/engineering/closed',
-                  userUid
-                ]"
+                type="button"
+                class="btn btn-link home-nav-button shadow-none"
+                [routerLink]="['/workorders/engineering/closed', userUid]"
                 >Closed Workorders - (
-                {{ engTechnicianClosedWorkorders?.length }} )
+                {{ engTechnicianClosedWorkorders ? engTechnicianClosedWorkorders.length : 0 }} )
               </a>
-            </p>
+            </div>
           </mat-card-content>
         </mat-card>
       </ng-container>
 
       <!-- user is a stores technician -->
       <ng-container class="technicians" *ngIf="isStoresTechnician">
-        <mat-card class="home-page-card">
+        <mat-card class="home-page-card-links">
           <mat-card-header>
             <mat-card-title class="text-center">
               Welcome to ABM Workordered
             </mat-card-title>
           </mat-card-header>
-          <mat-card-content>
-            <p class="open-workorders">
+          <mat-card-content class="home-navigation-links-container">
+            <div class="open-workorders">
               <a
-                mat-raised-button
-                color="primary"
-                class="router-link"
-                [routerLink]="[
-                  '/workorders/stores/open',
-                  userUid
-                ]"
+                type="button"
+                class="btn btn-link home-nav-button shadow-none"
+                [routerLink]="['/workorders/stores/open', userUid]"
                 >Open Workorders - (
-                {{ storesTechnicianOpenWorkorders?.length }} )
+                {{ storesTechnicianOpenWorkorders ? storesTechnicianOpenWorkorders.length : 0 }} )
               </a>
-            </p>
-            <p class="closed-workorders">
+            </div>
+            <div class="closed-workorders">
               <a
-                mat-raised-button
-                color="primary"
-                class="router-link"
-                [routerLink]="[
-                  '/workorders/stores/closed',
-                  userUid
-                ]"
+                type="button"
+                class="btn btn-link home-nav-button shadow-none"
+                [routerLink]="['/workorders/stores/closed', userUid]"
                 >Closed Workorders - (
-                {{ storesTechnicianClosedWorkorders?.length }} )
+                {{ storesTechnicianClosedWorkorders ? storesTechnicianClosedWorkorders.length : 0 }} )
               </a>
-            </p>
+            </div>
           </mat-card-content>
         </mat-card>
       </ng-container>
@@ -224,7 +203,11 @@
           <p>If 15 minutes have passed and you still did not get the email,</p>
           <p>
             Try,
-            <a class="btn btn-link link-button" type="button" (click)="resendVerificationCode()">
+            <a
+              class="btn btn-link link-button"
+              type="button"
+              (click)="resendVerificationCode()"
+            >
               Resend Verification Code
             </a>
           </p>

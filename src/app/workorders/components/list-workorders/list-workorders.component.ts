@@ -264,6 +264,31 @@ export class ListWorkordersComponent implements OnInit {
 
           return raisedWorkordersQuery;
         }
+        
+        else if (this.workordersType === 'approved') {
+          const approvedWorkordersQuery = query(
+            workordersColRef,
+            orderBy('workorder.number'),
+            where('approved.status', '==', true),
+            where('rejected.status', '==', false),
+            where('raiser.uid', '==', this.userUid)
+          );
+
+
+          return approvedWorkordersQuery;
+        }
+
+        else if (this.workordersType === 'rejected') {
+          const rejectedWorkordersQuery = query(
+            workordersColRef,
+            orderBy('workorder.number'),
+            where('approved.status', '==', false),
+            where('rejected.status', '==', true),
+            where('raiser.uid', '==', this.userUid)
+          );
+
+          return rejectedWorkordersQuery;
+        }
       }
     }
     return;

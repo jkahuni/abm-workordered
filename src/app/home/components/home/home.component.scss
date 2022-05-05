@@ -10,21 +10,40 @@ span.emailAddress:hover {
     border: 2px solid #73ad21;
 }
 
-// div.home-page {
-//   display: flex;
-//   max-width: 100%;
-//   width: 100%;
-//   min-width: 100%;
-//   flex-flow: row wrap;
-// }
-mat-card.home-page-card {
+mat-card.home-page-card,
+.home-page-card-links {
     display: flex;
     justify-content: flex-start;
     align-items: center;
     flex-flow: row wrap;
     max-width: 300px;
     padding: 15px;
-    background: #c5c6c7;
     border-radius: 20px;
     margin: 16px auto;
+}
+
+mat-card.home-page-card {
+    background: #c5c6c7;
+}
+
+.home-navigation-links-container {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex-flow: row wrap;
+
+    div {
+        width: 100%;
+        margin-top: 10px;
+
+        a.btn {
+            text-decoration: none;
+        }
+
+        a.btn.btn-link:hover,
+        a.btn.btn-link:focus {
+            background: #002ead;
+            color: white;
+        }
+    }
 }
