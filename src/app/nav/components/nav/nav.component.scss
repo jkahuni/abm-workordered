@@ -1,0 +1,26 @@
+div.toolbar-container {
+  min-width: 100%;
+  width: 100%;
+  display: flex;
+  flex-flow: row wrap;
+}
+
+.wrapped-mat-toolbar {
+  flex: 0 1 auto;
+}
+
+span.company-name-text {
+  font-size: 17px;
+}
+
+mat-divider.mat-divider:not(.menu-items-divider) {
+  margin: 0px;
+  border-right-color: white;
+  border-right-width: 2px;
+  height: 30px;
+}
+
+mat-divider.menu-items-divider {
+  border-top-width: 2px;
+  border-top-color: white;
+}

@@ -1,0 +1,179 @@
+<ngx-spinner type="ball-newton-cradle" name="app-sign-up-spinner">
+  <p style="font-size: 20px; color: white">Adding you to the family...</p>
+</ngx-spinner>
+
+<div class="form-container mat-elevation-z5">
+  <h2 color="primary">Registration Form</h2>
+  <form [formGroup]="form" (ngSubmit)="register()">
+    <mat-form-field id="firstName" appearance="outline">
+      <mat-label>First Name</mat-label>
+      <input
+        matInput
+        appValidateNameFormat
+        formControlName="firstName"
+        type="text"
+        class="text-capitalize"
+      />
+      <mat-error *ngIf="form.get('firstName')?.hasError('required')">
+        First name required.
+      </mat-error>
+      <mat-error *ngIf="form.get('firstName')?.hasError('invalidNameFormat')">
+        Invalid format.
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field id="lastName" appearance="outline">
+      <mat-label>Last Name</mat-label>
+      <input
+        matInput
+        appValidateNameFormat
+        formControlName="lastName"
+        type="text"
+        class="text-capitalize"
+      />
+      <mat-error *ngIf="form.get('lastName')?.hasError('required')">
+        Last name required.
+      </mat-error>
+      <mat-error *ngIf="form.get('lastName')?.hasError('invalidNameFormat')">
+        Invalid format.
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field id="email" appearance="outline">
+      <mat-label>Email</mat-label>
+      <input matInput formControlName="email" placeholder="john@example.com" />
+      <mat-error *ngIf="form.get('email')?.hasError('required')">
+        Email address required.
+      </mat-error>
+
+      <mat-error *ngIf="form.get('email')?.hasError('email')">
+        Invalid format.
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field id="phoneNumber" appearance="outline">
+      <mat-label>Phone Number</mat-label>
+      <input
+        matInput
+        formControlName="phoneNumber"
+        maxlength="10"
+        minlength="10"
+        placeholder="07xxxxxxxx/01xxxxxxxx"
+        #phoneNumber
+        appValidatePhoneFormat
+      />
+      <mat-error *ngIf="form.get('phoneNumber')?.hasError('required')">
+        Phone number required.
+      </mat-error>
+
+      <mat-error
+        *ngIf="form.get('phoneNumber')?.hasError('invalidPhoneFormat')"
+      >
+        Invalid phone number format.
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field id="group" appearance="outline">
+      <mat-label>Group</mat-label>
+      <mat-select formControlName="group">
+        <mat-option value="" selected> -- select your group -- </mat-option>
+        <mat-option *ngFor="let group of groups" value="{{ group }}">{{
+          group
+        }}</mat-option>
+      </mat-select>
+      <mat-error *ngIf="form.get('group')?.hasError('required')">
+        Group required.
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field [hidden]="form?.get('group')?.value !== 'Technician'">
+      <mat-label>Technician Category</mat-label>
+      <mat-select formControlName="specificGroup">
+        <mat-option value="" selected>--select your group--</mat-option>
+        <mat-option
+          *ngFor="let technician of technicians"
+          value="{{ technician }}"
+          >{{ technician }}</mat-option
+        >
+      </mat-select>
+      <mat-error *ngIf="form.get('specificGroup')?.hasError('required')">
+        Specific Technician Group required.
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field id="password" appearance="outline">
+      <mat-label>Password</mat-label>
+      <input
+        matInput
+        formControlName="password"
+        [type]="hidePassword ? 'password' : 'text'"
+        id="password"
+        name="password"
+        placeholder="Use atleast 6 characters"
+        #password
+      />
+      <button
+        mat-icon-button
+        matSuffix
+        (click)="hidePassword = !hidePassword"
+        [attr.aria-label]="'Hide password'"
+        [attr.aria-pressed]="hidePassword"
+        type="button"
+        tabindex="-1"
+      >
+        <mat-icon>{{
+          hidePassword ? "visibility_off" : "visibility"
+        }}</mat-icon>
+      </button>
+
+      <mat-error *ngIf="form.get('password')?.hasError('required')">
+        Password required.
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field id="confirmPassword" appearance="outline">
+      <mat-label>Confirm Password</mat-label>
+      <input
+        matInput
+        formControlName="confirmPassword"
+        [type]="hideConfirmPassword ? 'password' : 'text'"
+        appComparePasswords
+        compareWith="password"
+      />
+      <button
+        mat-icon-button
+        matSuffix
+        (click)="hideConfirmPassword = !hideConfirmPassword"
+        [attr.aria-label]="'Hide password'"
+        [attr.aria-pressed]="hideConfirmPassword"
+        type="button"
+        tabindex="-1"
+      >
+        <mat-icon>{{
+          hideConfirmPassword ? "visibility_off" : "visibility"
+        }}</mat-icon>
+      </button>
+      <mat-error *ngIf="form.get('confirmPassword')?.hasError('required')">
+        Confirmation password required.
+      </mat-error>
+      <mat-error
+        *ngIf="form.get('confirmPassword')?.hasError('passwordsMismatch')"
+        >Passwords do not match.
+      </mat-error>
+    </mat-form-field>
+
+    <div class="mx-auto">
+      <button class="my-4 btn btn-primary" type="submit">Register</button>
+    </div>
+    <div class="mx-auto">
+      Already Registered?
+      <button
+        class="btn btn-link link-button"
+        type="button"
+        routerLink="../sign-in"
+      >
+        Log In
+      </button>
+    </div>
+  </form>
+</div>

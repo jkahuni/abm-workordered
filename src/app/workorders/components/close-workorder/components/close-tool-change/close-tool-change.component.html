@@ -1,0 +1,337 @@
+<div *ngIf="loadingWorkorder && !workorderClosed">
+  <div class="bootstrap-spinner-container">
+    <div class="bootstrap-spinner">
+      <div
+        #loadingWorkorderSpinner
+        class="spinner-border"
+        style="width: 3rem; height: 3rem"
+        role="status"
+      ></div>
+      <span class="loading-tag my-3"
+        ><strong>Loading workorder...</strong></span
+      >
+    </div>
+  </div>
+</div>
+
+<div *ngIf="!loadingWorkorder && !workorderClosed">
+  <div *ngIf="workorder && !showErrorMessage">
+    <div class="form-container mat-elevation-z5">
+      <div class="form-header"><h2>Close Tool Change</h2></div>
+      <form [formGroup]="form" (ngSubmit)="closeWorkorder()" autocomplete="off">
+        <!-- wokrorder number -->
+        <mat-form-field>
+          <mat-label>Workorder Number</mat-label>
+          <input
+            matInput
+            readonly
+            type="text"
+            formControlName="workorderNumber"
+          />
+        </mat-form-field>
+
+        <!-- workorder type -->
+        <mat-form-field>
+          <mat-label>Workorder Type</mat-label>
+          <input
+            matInput
+            readonly
+            type="text"
+            formControlName="workorderType"
+            class="text-capitalize"
+          />
+        </mat-form-field>
+
+        <!-- tool-change-from-to -->
+        <div>
+          <mat-form-field class="shareWidth">
+            <mat-label>Tool Change From</mat-label>
+            <input
+              matInput
+              readonly
+              type="text"
+              formControlName="toolChangeFrom"
+              class="tool-change-from"
+            />
+          </mat-form-field>
+
+          <mat-form-field class="shareWidth">
+            <mat-label>Tool Change To</mat-label>
+            <input
+              matInput
+              readonly
+              type="text"
+              formControlName="toolChangeTo"
+              class="tool-change-to"
+            />
+          </mat-form-field>
+        </div>
+
+        <!-- raiser -->
+        <mat-form-field>
+          <mat-label>Raised By</mat-label>
+          <input
+            matInput
+            readonly
+            type="text"
+            formControlName="raiser"
+            class="text-capitalize"
+          />
+        </mat-form-field>
+
+        <!-- supervisor -->
+        <mat-form-field>
+          <mat-label>Supervisor</mat-label>
+          <input
+            matInput
+            readonly
+            type="text"
+            formControlName="supervisor"
+            class="text-capitalize"
+          />
+        </mat-form-field>
+
+        <!-- eng technician -->
+        <mat-form-field>
+          <mat-label>Eng Technician</mat-label>
+          <input
+            matInput
+            readonly
+            type="text"
+            formControlName="technician"
+            class="text-capitalize"
+          />
+        </mat-form-field>
+
+        <!-- stores technician -->
+        <mat-form-field>
+          <mat-label>Store Technician</mat-label>
+          <input
+            type="text"
+            matInput
+            readonly
+            class="text-capitalize"
+            formControlName="storesTechnician"
+          />
+        </mat-form-field>
+
+        <!-- date time raised -->
+        <div>
+          <mat-form-field class="shareWidth">
+            <mat-label>Raised On</mat-label>
+            <input
+              matInput
+              readonly
+              type="text"
+              formControlName="dateRaised"
+              class="date-raised"
+            />
+          </mat-form-field>
+
+          <mat-form-field class="shareWidth">
+            <mat-label>Raised At</mat-label>
+            <input
+              matInput
+              readonly
+              type="text"
+              formControlName="timeRaised"
+              class="time-raised"
+            />
+          </mat-form-field>
+        </div>
+
+        <!-- date time approved -->
+        <div>
+          <mat-form-field class="shareWidth">
+            <mat-label>Date Approved</mat-label>
+            <input
+              matInput
+              readonly
+              type="text"
+              formControlName="dateApproved"
+            />
+          </mat-form-field>
+
+          <mat-form-field class="shareWidth">
+            <mat-label>Time Approved</mat-label>
+            <input
+              matInput
+              readonly
+              type="text"
+              formControlName="timeApproved"
+            />
+          </mat-form-field>
+        </div>
+
+        <!-- section -->
+        <mat-form-field>
+          <mat-label>Section</mat-label>
+          <input
+            matInput
+            readonly
+            type="text"
+            formControlName="section"
+            class="text-capitalize"
+          />
+        </mat-form-field>
+
+        <!-- machine -->
+        <mat-form-field>
+          <mat-label>Machine/Resource</mat-label>
+          <input
+            matInput
+            readonly
+            type="text"
+            formControlName="machine"
+            class="text-capitalize"
+          />
+        </mat-form-field>
+
+        <!-- workorder description -->
+        <mat-form-field>
+          <mat-label>Workorder Description</mat-label>
+          <textarea
+            matInput
+            readonly
+            type="text"
+            formControlName="workorderDescription"
+            class="text-capitalize"
+            cdkTextareaAutosize
+            cdkAutosizeMinRows="2"
+            cdkAutosizeMaxRows="7"
+          ></textarea>
+        </mat-form-field>
+
+        <!-- display issued spares -->
+        <ng-container
+          *ngIf="workorder.sparesUsed.status"
+          formArrayName="sparesUsedArray"
+        >
+          <!-- label -->
+          <ng-container *ngIf="sparesUsedArray?.length !== 0">
+            <mat-label class="mx-auto fw-bold">Issued Spares</mat-label>
+            <!-- spare fields labels -->
+            <div class="spare-form-header-row">
+              <div class="code-label">
+                <span>code</span>
+              </div>
+              <div class="quantity-label">
+                <span>qty</span>
+              </div>
+              <div class="total-cost-label">
+                <span>total cost</span>
+              </div>
+            </div>
+
+            <!-- issued spares -->
+            <ng-container
+              *ngFor="let spareForm of sparesUsedArray.controls; let i = index"
+            >
+              <div class="spare-form-row" [formGroup]="spareForm">
+                <mat-form-field class="code">
+                  <input type="text" matInput readonly formControlName="code" />
+                </mat-form-field>
+                <mat-form-field class="quantity">
+                  <input type="text" matInput formControlName="quantity" />
+                </mat-form-field>
+                <mat-form-field class="total-cost">
+                  <input
+                    type="text"
+                    matInput
+                    readonly
+                    formControlName="totalCost"
+                  />
+                </mat-form-field>
+              </div>
+            </ng-container>
+
+            <!-- total spares cost -->
+            <div class="total-spares-cost-row">
+              <div class="spares-cost-tag">
+                <div>
+                  <span><strong>Total Spares Cost</strong></span>
+                </div>
+              </div>
+              <div class="spares-cost-value">
+                <div>
+                  <span
+                    ><strong>{{ getTotalSparesCost }}</strong></span
+                  >
+                </div>
+              </div>
+            </div>
+          </ng-container>
+        </ng-container>
+
+        <!-- maintenance actions taken -->
+        <mat-form-field>
+          <mat-label>Maintenance Actions</mat-label>
+          <textarea
+            type="text"
+            matInput
+            formControlName="maintenanceActions"
+            appValidateSentenceFormat
+            maxlength="600"
+            cdkTextareaAutosize
+            cdkAutosizeMinRows="1"
+            cdkAutosizeMaxRows="15"
+            class="text-capitalize"
+          ></textarea>
+          <mat-error
+            *ngIf="form.controls['maintenanceActions']?.errors?.['required']"
+          >
+            Maintenance action(s) required.
+          </mat-error>
+          <mat-error
+            *ngIf="form.controls['maintenanceActions']?.errors
+                      ?.['invalidSentenceFormat']
+                  "
+          >
+            {{
+                    form.controls['maintenanceActions']?.errors
+                      ?.['invalidSentenceFormat']?.value
+            }}
+          </mat-error>
+        </mat-form-field>
+
+        <!-- submit buttons -->
+        <button
+          *ngIf="!closingWorkorder"
+          type="submit"
+          class="btn btn-primary my-2 shadow-none"
+        >
+          Close Workorder
+        </button>
+
+        <button
+          *ngIf="closingWorkorder"
+          type="button"
+          class="btn btn-success my-2"
+          disabled
+        >
+          <span
+            #closingWorkorderButtonSpinner
+            class="spinner-border spinner-border-sm"
+            role="status"
+            aria-hidden="true"
+          >
+          </span>
+          Closing Workorder...
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <div *ngIf="!workorder && showErrorMessage">
+    <div class="form-container mat-elevation-z5">
+      Failed to load workorder. Please try reloading the page or select the
+      workorder again from the previous page.
+    </div>
+  </div>
+</div>
+
+<div *ngIf="workorderClosed">
+  <div class="form-container mat-elevation-z5">
+    Closing workorder and redirecting...
+  </div>
+</div>

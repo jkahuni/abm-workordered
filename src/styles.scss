@@ -1,0 +1,50 @@
+/* You can add global styles to this file, and also import other style files */
+html,
+body {
+  height: 100%;
+}
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  background-color: #efe2ba;
+}
+
+.form-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-flow: column wrap;
+  max-width: 300px;
+  padding: 15px;
+  background: #eceff1;
+  border-radius: 16px;
+  margin: 16px auto; // margin = top,right,bottom,left
+}
+
+form {
+  display: flex;
+  // flex-direction: column;
+  // flex-wrap: wrap;
+  flex-flow: column wrap;
+  justify-content: center; // left-right mvmnt
+  // align-items: center; // up-down mvmnt
+  mat-form-field {
+    width: 100%;
+  }
+  mat-form-field.shareWidth {
+    width: 50%;
+  }
+}
+
+a.router-link {
+  cursor: pointer;
+  text-decoration: none;
+  color: white;
+}
+
+.link-button {
+  cursor: pointer;
+  text-decoration: none;
+  font-size: 14px;
+  padding: 0px;
+}

@@ -1,0 +1,2426 @@
+<mat-sidenav-container [hasBackdrop]="false" class="sidenav-container">
+  <!-- left sidenav -->
+  <mat-sidenav
+    #leftSidenav
+    class="left-sidenav sidenav"
+    mode="side"
+    position="start"
+    [(opened)]="showLeftSidenav"
+    (opened)="closeRightSidenav()"
+  >
+    <!-- sidenav header -->
+    <div class="sidenav-heading-container left-sidenav-heading">
+      <div class="sidenav-heading">
+        <h2>Workorders</h2>
+      </div>
+    </div>
+
+    <!-- loading workorders -->
+    <div *ngIf="loadingWorkorders">
+      <div class="workorders-sidenav-text-container">
+        <div class="loading-workorders workorders-sidenav-text">
+          Loading workorders...
+        </div>
+      </div>
+    </div>
+
+    <!-- workorders loaded -->
+    <div *ngIf="!loadingWorkorders && workorders">
+      <!-- no pending workorders -->
+      <div *ngIf="workorders.length === 0">
+        <div class="workorders-sidenav-text-container">
+          <div class="workorders-sidenav-text">
+            You have 0 pending workorders.
+          </div>
+        </div>
+      </div>
+
+      <!-- pending workorders -->
+      <div *ngIf="workorders.length !== 0">
+        <div class="display-workorder-numbers">
+          <mat-action-list role="list">
+            <!-- corrective maintenance workorders -->
+            <div
+              *ngIf="
+                filterWorkorders(
+                  'Corrective Maintenance'
+                ) as correctiveMaintenanceWorkorders
+              "
+            >
+              <div *ngIf="correctiveMaintenanceWorkorders.length !== 0">
+                <div class="workorder-numbers">
+                  <div mat-subheader class="workorders-subheader">
+                    Corrective Mtnc
+                  </div>
+                </div>
+                <mat-list-item
+                  role="listitem"
+                  *ngFor="
+                    let workorder of correctiveMaintenanceWorkorders;
+                    let last = last
+                  "
+                >
+                  <button
+                    type="button"
+                    class="action-button btn btn-link shadow-none"
+                    (click)="displayWorkorder(workorder.workorder.number)"
+                  >
+                    <span
+                      class="d-inline-block text-truncate"
+                      style="max-width: 100px"
+                      >{{
+                        workorder.raised.dateTime | formatWorkorderNumber
+                      }}</span
+                    >
+                  </button>
+                  <mat-divider *ngIf="!last"></mat-divider>
+                </mat-list-item>
+                <mat-divider class="mb-2"></mat-divider>
+              </div>
+            </div>
+
+            <!-- breakdown workorders -->
+            <div *ngIf="filterWorkorders('Breakdown') as breakdownWorkorders">
+              <div *ngIf="breakdownWorkorders.length !== 0">
+                <div class="workorder-numbers">
+                  <div mat-subheader class="workorders-subheader">
+                    Breakdown
+                  </div>
+                </div>
+                <mat-list-item
+                  role="listitem"
+                  *ngFor="let workorder of breakdownWorkorders; let last = last"
+                >
+                  <button
+                    type="button"
+                    class="action-button btn btn-link shadow-none"
+                    (click)="displayWorkorder(workorder.workorder.number)"
+                  >
+                    <span
+                      class="d-inline-block text-truncate"
+                      style="max-width: 100px"
+                      >{{
+                        workorder.raised.dateTime | formatWorkorderNumber
+                      }}</span
+                    >
+                  </button>
+                  <mat-divider *ngIf="!last"></mat-divider>
+                </mat-list-item>
+                <mat-divider class="mb-2"></mat-divider>
+              </div>
+            </div>
+
+            <!-- tool change workorders -->
+            <div
+              *ngIf="filterWorkorders('Tool Change') as toolChangeWorkorders"
+            >
+              <div *ngIf="toolChangeWorkorders.length !== 0">
+                <div class="workorder-numbers">
+                  <div mat-subheader class="workorders-subheader">
+                    Tool Change
+                  </div>
+                </div>
+                <mat-list-item
+                  role="listitem"
+                  *ngFor="
+                    let workorder of toolChangeWorkorders;
+                    let last = last
+                  "
+                >
+                  <button
+                    type="button"
+                    class="action-button btn btn-link shadow-none"
+                    (click)="displayWorkorder(workorder.workorder.number)"
+                  >
+                    <span
+                      class="d-inline-block text-truncate"
+                      style="max-width: 100px"
+                      >{{
+                        workorder.raised.dateTime | formatWorkorderNumber
+                      }}</span
+                    >
+                  </button>
+                  <mat-divider *ngIf="!last"></mat-divider>
+                </mat-list-item>
+                <mat-divider class="mb-2"></mat-divider>
+              </div>
+            </div>
+
+            <!-- am workorders -->
+            <div *ngIf="filterWorkorders('AM') as amWorkorders">
+              <div *ngIf="amWorkorders.length !== 0">
+                <div class="workorder-numbers">
+                  <div mat-subheader class="workorders-subheader">AM</div>
+                </div>
+                <mat-list-item
+                  role="listitem"
+                  *ngFor="let workorder of amWorkorders; let last = last"
+                >
+                  <button
+                    type="button"
+                    class="action-button btn btn-link shadow-none"
+                    (click)="displayWorkorder(workorder.workorder.number)"
+                  >
+                    <span
+                      class="d-inline-block text-truncate"
+                      style="max-width: 100px"
+                      >{{
+                        workorder.raised.dateTime | formatWorkorderNumber
+                      }}</span
+                    >
+                  </button>
+                  <mat-divider *ngIf="!last"></mat-divider>
+                </mat-list-item>
+                <mat-divider class="mb-2"></mat-divider>
+              </div>
+            </div>
+
+            <!-- pm workorders -->
+            <div *ngIf="filterWorkorders('PM') as pmWorkorders">
+              <div *ngIf="pmWorkorders.length !== 0">
+                <div class="workorder-numbers">
+                  <div mat-subheader class="workorders-subheader">PM</div>
+                </div>
+                <mat-list-item
+                  role="listitem"
+                  *ngFor="let workorder of pmWorkorders; let last = last"
+                >
+                  <button
+                    type="button"
+                    class="action-button btn btn-link shadow-none"
+                    (click)="displayWorkorder(workorder.workorder.number)"
+                  >
+                    <span
+                      class="d-inline-block text-truncate"
+                      style="max-width: 100px"
+                      >{{
+                        workorder.raised.dateTime | formatWorkorderNumber
+                      }}</span
+                    >
+                  </button>
+                  <mat-divider *ngIf="!last"></mat-divider>
+                </mat-list-item>
+                <mat-divider class="mb-2"></mat-divider>
+              </div>
+            </div>
+
+            <!-- abnormality card workorders -->
+            <div
+              *ngIf="
+                filterWorkorders(
+                  'Abnormality Card'
+                ) as abnormalityCardWorkorders
+              "
+            >
+              <div *ngIf="abnormalityCardWorkorders.length !== 0">
+                <div class="workorder-numbers">
+                  <div mat-subheader class="workorders-subheader">
+                    Abnormality Card
+                  </div>
+                </div>
+                <mat-list-item
+                  role="listitem"
+                  *ngFor="
+                    let workorder of abnormalityCardWorkorders;
+                    let last = last
+                  "
+                >
+                  <button
+                    type="button"
+                    class="action-button btn btn-link shadow-none"
+                    (click)="displayWorkorder(workorder.workorder.number)"
+                  >
+                    <span
+                      class="d-inline-block text-truncate"
+                      style="max-width: 100px"
+                      >{{
+                        workorder.raised.dateTime | formatWorkorderNumber
+                      }}</span
+                    >
+                  </button>
+                  <mat-divider *ngIf="!last"></mat-divider>
+                </mat-list-item>
+                <mat-divider class="mb-2"></mat-divider>
+              </div>
+            </div>
+
+            <!-- mold service workorders -->
+            <div
+              *ngIf="filterWorkorders('Mold Service') as moldServiceWorkorders"
+            >
+              <div *ngIf="moldServiceWorkorders.length !== 0">
+                <div class="workorder-numbers">
+                  <div mat-subheader class="workorders-subheader">
+                    Mold Service
+                  </div>
+                </div>
+                <mat-list-item
+                  role="listitem"
+                  *ngFor="
+                    let workorder of moldServiceWorkorders;
+                    let last = last
+                  "
+                >
+                  <button
+                    type="button"
+                    class="action-button btn btn-link shadow-none"
+                    (click)="displayWorkorder(workorder.workorder.number)"
+                  >
+                    <span
+                      class="d-inline-block text-truncate"
+                      style="max-width: 100px"
+                      >{{
+                        workorder.raised.dateTime | formatWorkorderNumber
+                      }}</span
+                    >
+                  </button>
+                  <mat-divider *ngIf="!last"></mat-divider>
+                </mat-list-item>
+                <mat-divider class="mb-2"></mat-divider>
+              </div>
+            </div>
+
+            <!-- service workorders -->
+            <div *ngIf="filterWorkorders('Service') as serviceWorkorders">
+              <div *ngIf="serviceWorkorders.length !== 0">
+                <div class="workorder-numbers">
+                  <div mat-subheader class="workorders-subheader">Service</div>
+                </div>
+                <mat-list-item
+                  role="listitem"
+                  *ngFor="let workorder of serviceWorkorders; let last = last"
+                >
+                  <button
+                    type="button"
+                    class="action-button btn btn-link shadow-none"
+                    (click)="displayWorkorder(workorder.workorder.number)"
+                  >
+                    <span
+                      class="d-inline-block text-truncate"
+                      style="max-width: 100px"
+                      >{{
+                        workorder.raised.dateTime | formatWorkorderNumber
+                      }}</span
+                    >
+                  </button>
+                  <mat-divider *ngIf="!last"></mat-divider>
+                </mat-list-item>
+                <mat-divider class="mb-2"></mat-divider>
+              </div>
+            </div>
+
+            <!-- kaizen card workorders -->
+            <div
+              *ngIf="filterWorkorders('Kaizen Card') as kaizenCardWorkorders"
+            >
+              <div *ngIf="kaizenCardWorkorders.length !== 0">
+                <div class="workorder-numbers">
+                  <div mat-subheader class="workorders-subheader">
+                    Kaizen Card
+                  </div>
+                </div>
+                <mat-list-item
+                  role="listitem"
+                  *ngFor="
+                    let workorder of kaizenCardWorkorders;
+                    let last = last
+                  "
+                >
+                  <button
+                    type="button"
+                    class="action-button btn btn-link shadow-none"
+                    (click)="displayWorkorder(workorder.workorder.number)"
+                  >
+                    <span
+                      class="d-inline-block text-truncate"
+                      style="max-width: 100px"
+                      >{{
+                        workorder.raised.dateTime | formatWorkorderNumber
+                      }}</span
+                    >
+                  </button>
+                  <mat-divider *ngIf="!last"></mat-divider>
+                </mat-list-item>
+                <mat-divider class="mb-2"></mat-divider>
+              </div>
+            </div>
+
+            <!-- project workorders -->
+            <div *ngIf="filterWorkorders('Project') as projectWorkorders">
+              <div *ngIf="projectWorkorders.length !== 0">
+                <div class="workorder-numbers">
+                  <div mat-subheader class="workorders-subheader">Project</div>
+                </div>
+                <mat-list-item
+                  role="listitem"
+                  *ngFor="let workorder of projectWorkorders; let last = last"
+                >
+                  <button
+                    type="button"
+                    class="action-button btn btn-link shadow-none"
+                    (click)="displayWorkorder(workorder.workorder.number)"
+                  >
+                    <span
+                      class="d-inline-block text-truncate"
+                      style="max-width: 100px"
+                      >{{
+                        workorder.raised.dateTime | formatWorkorderNumber
+                      }}</span
+                    >
+                  </button>
+                  <mat-divider *ngIf="!last"></mat-divider>
+                </mat-list-item>
+                <mat-divider class="mb-2"></mat-divider>
+              </div>
+            </div>
+          </mat-action-list>
+        </div>
+      </div>
+    </div>
+  </mat-sidenav>
+
+  <!-- right sidenav -->
+  <mat-sidenav
+    #rightSidenav
+    class="right-sidenav sidenav"
+    mode="side"
+    position="end"
+    [(opened)]="showRightSidenav"
+    (opened)="closeLeftSidenav()"
+  >
+    <!-- sidenav header -->
+    <div class="sidenav-heading-container right-sidenav-heading">
+      <div class="sidenav-heading">
+        <h2>Actions</h2>
+      </div>
+    </div>
+
+    <!-- no workorder selected -->
+    <div *ngIf="!workorder">
+      <div class="workorders-sidenav-text">
+        Select a workorder in the left pane to see available actions.
+      </div>
+    </div>
+
+    <!-- workorder selected -->
+    <div *ngIf="workorder">
+      <div class="display-workorder-actions">
+        <mat-action-list role="list">
+          <!-- SUPERVISOR ACTIONS -->
+          <div *ngIf="userType === 'supervisor'">
+            <!-- approve workorder -->
+            <mat-list-item role="listitem">
+              <div *ngIf="approveWorkorderLoading">
+                <button
+                  class="action-button btn btn-link shadow-none"
+                  type="button"
+                  disabled
+                >
+                  <span
+                    #appprovingWorkorderLoadingSpinner
+                    class="spinner-border spinner-border-sm"
+                    role="status"
+                    aria-hidden="true"
+                  >
+                  </span>
+                  Approving...
+                </button>
+              </div>
+
+              <div *ngIf="!approveWorkorderLoading">
+                <button
+                  class="action-button btn btn-link shadow-none"
+                  type="button"
+                  (click)="approve()"
+                >
+                  Approve
+                </button>
+              </div>
+              <mat-divider></mat-divider>
+            </mat-list-item>
+
+            <!-- reject -->
+            <mat-list-item role="listitem">
+              <button
+                class="action-button btn btn-link shadow-none"
+                type="button"
+                (click)="refreshModals()"
+                data-bs-toggle="modal"
+                data-bs-target="#rejectWorkorderModal"
+              >
+                Reject
+              </button>
+              <mat-divider></mat-divider>
+            </mat-list-item>
+
+            <!-- supervisor handover -->
+            <mat-list-item role="listitem">
+              <button
+                class="action-button btn btn-link shadow-none"
+                type="button"
+                (click)="refreshModals()"
+                data-bs-toggle="modal"
+                data-bs-target="#supervisorHandoverModal"
+              >
+                Delegate
+              </button>
+              <mat-divider></mat-divider>
+            </mat-list-item>
+
+            <!-- change technicians -->
+            <mat-list-item role="listitem" class="long-button-text">
+              <button
+                class="action-button btn btn-link shadow-none"
+                type="button"
+                (click)="refreshModals()"
+                data-bs-toggle="modal"
+                data-bs-target="#changeTechniciansModal"
+              >
+                Change Technicians
+              </button>
+              <mat-divider></mat-divider>
+            </mat-list-item>
+
+            <!-- assign technicians -->
+            <div *ngIf="workorder.abnormalityCard.status">
+              <mat-list-item role="listitem" class="long-button-text">
+                <button
+                  class="action-button btn btn-link shadow-none"
+                  type="button"
+                  (click)="(refreshModals)"
+                  data-bs-toggle="modal"
+                  data-bs-target="#assignTechniciansModal"
+                >
+                  Assign Technicians
+                </button>
+                <mat-divider></mat-divider>
+              </mat-list-item>
+            </div>
+          </div>
+
+          <!-- ENGINEERING ACTIONS -->
+          <div *ngIf="userType === 'engineering'">
+            <!-- acknowledge -->
+            <mat-list-item role="listitem">
+              <div *ngIf="!workorder.acknowledged.status">
+                <div *ngIf="acknowledgeWorkorderLoading">
+                  <button
+                    class="action-button btn btn-link shadow-none"
+                    type="button"
+                    disabled
+                  >
+                    <span
+                      #acknowledgeWorkorderLoadingButtonSpinner
+                      class="spinner-border spinner-border-sm"
+                      role="status"
+                      aria-hidden="true"
+                    >
+                    </span>
+                    Updating...
+                  </button>
+                </div>
+
+                <div *ngIf="!acknowledgeWorkorderLoading">
+                  <button
+                    class="action-button btn btn-link shadow-none"
+                    type="button"
+                    (click)="acknowledge()"
+                  >
+                    Acknowledge
+                  </button>
+                </div>
+              </div>
+
+              <div *ngIf="workorder.acknowledged.status">
+                <button
+                  class="action-button btn btn-link shadow-none"
+                  type="button"
+                  disabled
+                >
+                  Acknowledged
+                </button>
+              </div>
+              <mat-divider></mat-divider>
+            </mat-list-item>
+
+            <!-- mark as done -->
+            <mat-list-item role="listitem">
+              <div *ngIf="!workorder.acknowledged.status">
+                <button
+                  class="action-button btn btn-link shadow-none"
+                  type="button"
+                  (click)="markDoneBeforeAcknowledged()"
+                >
+                  Mark Done
+                </button>
+              </div>
+
+              <div *ngIf="workorder.acknowledged.status">
+                <div *ngIf="!workorder.done.status">
+                  <div *ngIf="markWorkorderDoneLoading">
+                    <button
+                      class="action-button btn btn-link shadow-none"
+                      type="button"
+                      disabled
+                    >
+                      <span
+                        #markWorkorderDoneLoadingButtonSpinner
+                        class="spinner-border spinner-border-sm"
+                        role="status"
+                        aria-hidden="true"
+                      >
+                      </span>
+                      Updating...
+                    </button>
+                  </div>
+
+                  <div *ngIf="!markWorkorderDoneLoading">
+                    <button
+                      class="action-button btn btn-link shadow-none"
+                      type="button"
+                      (click)="markDone()"
+                    >
+                      Mark Done
+                    </button>
+                  </div>
+                </div>
+
+                <div *ngIf="workorder?.done?.status">
+                  <button class="action-button btn" type="button" disabled>
+                    Done
+                  </button>
+                </div>
+              </div>
+              <mat-divider></mat-divider>
+            </mat-list-item>
+
+            <!-- close -->
+            <mat-list-item role="listitem">
+              <div
+                *ngIf="workorder.acknowledged.status && workorder.done.status"
+              >
+                <button
+                  type="button"
+                  class="action-button btn btn-link shadow-none"
+                  (click)="close(workorder)"
+                >
+                  Close
+                </button>
+              </div>
+
+              <div
+                *ngIf="!workorder.acknowledged.status || !workorder.done.status"
+              >
+                <button
+                  type="button"
+                  class="action-button btn btn-link shadow-none"
+                  (click)="closeBeforeAcknowledgedOrDone()"
+                >
+                  Close
+                </button>
+              </div>
+              <mat-divider></mat-divider>
+            </mat-list-item>
+
+            <!-- handover -->
+            <mat-list-item role="listitem">
+              <div
+                *ngIf="!workorder.acknowledged.status && !workorder.done.status"
+              >
+                <button
+                  type="button"
+                  class="action-button btn btn-link shadow-none"
+                  (click)="refreshModals()"
+                  data-bs-toggle="modal"
+                  data-bs-target="#engineeringTechnicianHandoverModal"
+                >
+                  Handover
+                </button>
+              </div>
+
+              <div
+                *ngIf="workorder.acknowledged.status && !workorder.done.status"
+              >
+                <button
+                  type="button"
+                  class="action-button btn btn-link shadow-none"
+                  (click)="handoverAfterAcknowledged()"
+                >
+                  Handover
+                </button>
+              </div>
+
+              <div
+                *ngIf="workorder.acknowledged.status && workorder.done.status"
+              >
+                <button
+                  type="button"
+                  class="action-button btn btn-link shadow-none"
+                  (click)="handoverAfterDone()"
+                >
+                  Handover
+                </button>
+              </div>
+              <mat-divider></mat-divider>
+            </mat-list-item>
+          </div>
+
+          <!-- STORES ACTIONS -->
+          <div *ngIf="userType === 'stores'">
+            <mat-list-item role="listitem">
+              <button
+                type="button"
+                class="action-button btn btn-link shadow-none"
+                [routerLink]="[
+                  '/issue-spares',
+                  workorderUid,
+                  userUid,
+                  workordersType
+                ]"
+              >
+                Issue Spares
+              </button>
+              <mat-divider></mat-divider>
+            </mat-list-item>
+
+            <mat-list-item role="listitem">
+              <button
+                type="button"
+                class="action-button btn btn-link shadow-none"
+                (click)="refreshModals()"
+                data-bs-toggle="modal"
+                data-bs-target="#storesTechnicianHandoverModal"
+              >
+                Handover
+              </button>
+              <mat-divider></mat-divider>
+            </mat-list-item>
+          </div>
+
+          <!-- common actions for all users -->
+          <mat-list-item role="listitem">
+            <button
+              type="button"
+              class="action-button btn btn-link shadow-none"
+              data-bs-toggle="modal"
+              data-bs-target="#guidelinesModal"
+            >
+              Help?
+            </button>
+          </mat-list-item>
+        </mat-action-list>
+      </div>
+    </div>
+  </mat-sidenav>
+
+  <!-- main sidenav content -->
+  <mat-sidenav-content class="sidenav-content-container">
+    <!-- loading workorders -->
+    <div *ngIf="loadingWorkorders">
+      <div class="loading-workorders-bootstrap-spinner">
+        <div
+          #loadingWorkordersSpinner
+          class="spinner-border"
+          style="width: 3rem; height: 3rem"
+          role="status"
+        ></div>
+
+        <div class="loading-workorders-spinner-text">
+          <strong>Loading workorders...</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- loading workorders done -->
+    <div *ngIf="!loadingWorkorders && workorders">
+      <!-- no workorders -->
+      <div *ngIf="workorders.length === 0">
+        <div class="no-workorders-to-display">
+          <p>There are no workorders to display.</p>
+        </div>
+      </div>
+
+      <!-- workorders present -->
+      <div *ngIf="workorders.length !== 0">
+        <!-- no workorder selected in left pane -->
+        <div *ngIf="!workorder">
+          <div class="no-workorders-to-display">
+            <p>
+              <span class="text-decoration-underline">Select</span> a workorder
+              in the
+              <span class="text-decoration-underline">left pane</span>
+              to view details.
+            </p>
+            <p *ngIf="workorderHasActions">
+              The available
+              <span class="text-decoration-underline">actions</span> for the
+              workorder will be in the
+              <span class="text-decoration-underline">right pane.</span>
+              Click on <strong>Help?</strong> to get a guideline on what each of
+              the actions does.
+            </p>
+          </div>
+        </div>
+
+        <!-- workorder selected in left pane -->
+        <div *ngIf="workorder">
+          <div class="workorder-selected-container">
+            <!-- toggle sidenavs status -->
+            <div class="toggle-sidenavs-status">
+              <!-- workorder has actions -->
+              <div *ngIf="workorderHasActions">
+                <div class="workorder-has-actions">
+                  <button
+                    class="toggle-left-sidenav toggle-sidenav-button"
+                    mat-icon-button
+                    type="button"
+                    (click)="leftSidenav.toggle()"
+                  >
+                    <mat-icon *ngIf="showLeftSidenav">chevron_left</mat-icon>
+                    <mat-icon *ngIf="!showLeftSidenav">chevron_right</mat-icon>
+                  </button>
+
+                  <button
+                    class="toggle-right-sidenav toggle-sidenav-button"
+                    mat-icon-button
+                    type="button"
+                    (click)="rightSidenav.toggle()"
+                  >
+                    <mat-icon *ngIf="showRightSidenav">chevron_right</mat-icon>
+                    <mat-icon *ngIf="!showRightSidenav">chevron_left</mat-icon>
+                  </button>
+                </div>
+              </div>
+
+              <!-- workorder has no actions -->
+              <div *ngIf="!workorderHasActions">
+                <div class="workorder-has-no-actions">
+                  <button
+                    class="toggle-left-sidenav toggle-sidenav-button"
+                    mat-icon-button
+                    type="button"
+                    (click)="showLeftSidenav = !showLeftSidenav"
+                  >
+                    <mat-icon *ngIf="showLeftSidenav">chevron_left</mat-icon>
+                    <mat-icon *ngIf="!showLeftSidenav">chevron_right</mat-icon>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- workorder form -->
+            <div class="display-workorder">
+              <div class="form-container mat-elevation-z5">
+                <div class="form-header-container">
+                  <h2
+                    class="text-center"
+                    *ngIf="workorder.workorder.type === 'Breakdown'"
+                  >
+                    Breakdown Workorder
+                  </h2>
+                  <h2
+                    class="text-center"
+                    *ngIf="
+                      workorder.workorder.type === 'Corrective Maintenance'
+                    "
+                  >
+                    Corrective Maintenance Workorder
+                  </h2>
+                  <h2
+                    class="text-center"
+                    *ngIf="workorder.workorder.type === 'Mold Service'"
+                  >
+                    Mold Service Workorder
+                  </h2>
+                  <h2
+                    class="text-center"
+                    *ngIf="workorder.workorder.type === 'Tool Change'"
+                  >
+                    Tool Change Workorder
+                  </h2>
+                  <h2
+                    class="text-center"
+                    *ngIf="workorder.workorder.type === 'Abnormality Card'"
+                  >
+                    Abnormality Card Workorder
+                  </h2>
+                  <h2
+                    class="text-center"
+                    *ngIf="workorder.workorder.type === 'AM'"
+                  >
+                    AM Workorder
+                  </h2>
+                  <h2
+                    class="text-center"
+                    *ngIf="workorder.workorder.type === 'PM'"
+                  >
+                    PM Workorder
+                  </h2>
+                  <h2
+                    class="text-center"
+                    *ngIf="workorder.workorder.type === 'Service'"
+                  >
+                    Service Workorder
+                  </h2>
+                  <h2
+                    class="text-center"
+                    *ngIf="workorder.workorder.type === 'Project'"
+                  >
+                    Project Workorder
+                  </h2>
+                  <h2
+                    class="text-center"
+                    *ngIf="workorder.workorder.type === 'Kaizen Card'"
+                  >
+                    Kaizen Card
+                  </h2>
+                </div>
+
+                <form [formGroup]="form">
+                  <!-- workorder number -->
+                  <ng-container
+                    class="workorder-number"
+                    *ngIf="workorder.workorder.number"
+                  >
+                    <mat-form-field>
+                      <mat-label>Workorder Number</mat-label>
+                      <input
+                        type="text"
+                        readonly
+                        matInput
+                        class=""
+                        formControlName="workorderNumber"
+                      />
+                    </mat-form-field>
+                  </ng-container>
+
+                  <!-- raiser fullName -->
+                  <ng-container
+                    class="raised-by"
+                    *ngIf="workorder.raiser.fullName"
+                  >
+                    <mat-form-field>
+                      <mat-label>Raised By</mat-label>
+                      <input
+                        type="text"
+                        readonly
+                        matInput
+                        class="text-capitalize"
+                        formControlName="raiser"
+                      />
+                    </mat-form-field>
+                  </ng-container>
+
+                  <!-- supervisor -->
+                  <ng-container
+                    class="supevisor"
+                    *ngIf="workorder.supervisor.fullName"
+                  >
+                    <mat-form-field>
+                      <mat-label>Supervisor</mat-label>
+
+                      <input
+                        type="text"
+                        readonly
+                        matInput
+                        class="text-capitalize"
+                        formControlName="supervisor"
+                      />
+                    </mat-form-field>
+                  </ng-container>
+
+                  <!-- technician -->
+                  <ng-container
+                    class="technician"
+                    *ngIf="workorder.technician.fullName"
+                  >
+                    <mat-form-field>
+                      <mat-label>Eng. Technician</mat-label>
+                      <input
+                        type="text"
+                        readonly
+                        matInput
+                        class="text-capitalize"
+                        formControlName="technician"
+                      />
+                    </mat-form-field>
+                  </ng-container>
+
+                  <!-- stores technician -->
+                  <ng-container
+                    class="storesTechnician"
+                    *ngIf="workorder.storesTechnician.fullName"
+                  >
+                    <mat-form-field>
+                      <mat-label>Store Technician</mat-label>
+
+                      <input
+                        type="text"
+                        readonly
+                        matInput
+                        class="text-capitalize"
+                        formControlName="storesTechnician"
+                      />
+                    </mat-form-field>
+                  </ng-container>
+
+                  <!-- workorder type -->
+                  <ng-container
+                    class="workorderType"
+                    *ngIf="workorder.workorder.type"
+                  >
+                    <mat-form-field>
+                      <mat-label>Workorder Type</mat-label>
+                      <input
+                        type="text"
+                        readonly
+                        matInput
+                        class="text-capitalize"
+                        formControlName="workorderType"
+                      />
+                    </mat-form-field>
+                  </ng-container>
+
+                  <!-- breakdown date and time -->
+                  <ng-container
+                    class="breakdown-date"
+                    *ngIf="workorder.breakdown.status"
+                  >
+                    <div>
+                      <mat-form-field class="shareWidth">
+                        <mat-label>M/c Stopped On</mat-label>
+                        <input
+                          type="text"
+                          readonly
+                          matInput
+                          class=""
+                          formControlName="breakdownDate"
+                        />
+                      </mat-form-field>
+
+                      <mat-form-field class="shareWidth">
+                        <mat-label>M/c Stopped At</mat-label>
+                        <input
+                          type="text"
+                          readonly
+                          matInput
+                          class=""
+                          formControlName="breakdownTime"
+                        />
+                      </mat-form-field>
+                    </div>
+                  </ng-container>
+
+                  <!-- raised date and time -->
+                  <ng-container
+                    class="date-time-raised"
+                    *ngIf="workorder.raised.dateTime"
+                  >
+                    <div>
+                      <mat-form-field class="shareWidth">
+                        <mat-label>Raised On</mat-label>
+
+                        <input
+                          type="text"
+                          readonly
+                          matInput
+                          class=""
+                          formControlName="dateRaised"
+                        />
+                      </mat-form-field>
+
+                      <mat-form-field class="shareWidth">
+                        <mat-label>Raised At</mat-label>
+
+                        <input
+                          type="text"
+                          readonly
+                          matInput
+                          class=""
+                          formControlName="timeRaised"
+                        />
+                      </mat-form-field>
+                    </div>
+                  </ng-container>
+
+                  <!--approved date and time -->
+                  <ng-container
+                    class="date-time-approved"
+                    *ngIf="
+                      workorder.approved.status && workorder.approved.dateTime
+                    "
+                  >
+                    <div>
+                      <mat-form-field class="shareWidth">
+                        <mat-label>Approved On</mat-label>
+                        <input
+                          type="text"
+                          readonly
+                          matInput
+                          class=""
+                          formControlName="dateApproved"
+                        />
+                      </mat-form-field>
+
+                      <mat-form-field class="shareWidth">
+                        <mat-label>Approved At</mat-label>
+
+                        <input
+                          type="text"
+                          readonly
+                          matInput
+                          class=""
+                          formControlName="timeApproved"
+                        />
+                      </mat-form-field>
+                    </div>
+                  </ng-container>
+
+                  <!-- rejected date and time -->
+                  <ng-container
+                    class="date-time-rejected"
+                    *ngIf="
+                      workorder.rejected.status && workorder.rejected.dateTime
+                    "
+                  >
+                    <div>
+                      <mat-form-field class="shareWidth">
+                        <mat-label>Rejected On</mat-label>
+                        <input
+                          type="text"
+                          readonly
+                          matInput
+                          class=""
+                          formControlName="dateRejected"
+                        />
+                      </mat-form-field>
+
+                      <mat-form-field class="shareWidth">
+                        <mat-label>Rejected At</mat-label>
+
+                        <input
+                          type="text"
+                          readonly
+                          matInput
+                          class=""
+                          formControlName="timeRejected"
+                        />
+                      </mat-form-field>
+                    </div>
+                    <mat-form-field>
+                      <mat-label>Rejection Reason</mat-label>
+
+                      <input
+                        type="text"
+                        readonly
+                        matInput
+                        class="text-capitalize"
+                        formControlName="rejectionReason"
+                      />
+                    </mat-form-field>
+                  </ng-container>
+
+                  <!-- acknowledged date and time -->
+                  <ng-container
+                    class="date-time-acknowledged"
+                    *ngIf="workorder.acknowledged.dateTime"
+                  >
+                    <div class="shareWidth">
+                      <mat-form-field class="shareWidth">
+                        <mat-label>Acknowledged On</mat-label>
+                        <input
+                          type="text"
+                          readonly
+                          matInput
+                          class=""
+                          formControlName="dateAcknowledged"
+                        />
+                      </mat-form-field>
+
+                      <mat-form-field class="shareWidth">
+                        <mat-label>Acknowledged At</mat-label>
+                        <input
+                          type="text"
+                          readonly
+                          matInput
+                          class=""
+                          formControlName="timeAcknowledged"
+                        />
+                      </mat-form-field>
+                    </div>
+                  </ng-container>
+
+                  <!-- done date and time -->
+                  <ng-container
+                    class="date-time-acknowledged"
+                    *ngIf="workorder.done.dateTime"
+                  >
+                    <div>
+                      <mat-form-field class="shareWidth">
+                        <mat-label>Marked Done On</mat-label>
+
+                        <input
+                          type="text"
+                          readonly
+                          matInput
+                          class=""
+                          formControlName="dateDone"
+                        />
+                      </mat-form-field>
+
+                      <mat-form-field class="shareWidth">
+                        <mat-label>Marked Done At</mat-label>
+
+                        <input
+                          type="text"
+                          readonly
+                          matInput
+                          class=""
+                          formControlName="timeDone"
+                        />
+                      </mat-form-field>
+                    </div>
+                  </ng-container>
+
+                  <!-- time taken -->
+                  <ng-container *ngIf="workorder.done.status">
+                    <mat-label>Total Time Taken (min)</mat-label>
+                    <!-- from time machine stopped -->
+                    <mat-form-field
+                      *ngIf="workorder.timeTaken.fromTimeMachineStopped"
+                    >
+                      <mat-label>From Time M/c Stopped</mat-label>
+                      <input
+                        type="text"
+                        matInput
+                        readonly
+                        formControlName="timeFromTimeMachineStopped"
+                      />
+                    </mat-form-field>
+
+                    <!-- from time raised -->
+                    <mat-form-field *ngIf="workorder.timeTaken.fromTimeRaised">
+                      <mat-label>From Time Raised</mat-label>
+                      <input
+                        type="text"
+                        matInput
+                        readonly
+                        formControlName="timeFromTimeRaised"
+                      />
+                    </mat-form-field>
+
+                    <!-- from time approved -->
+                    <mat-form-field
+                      *ngIf="workorder.timeTaken.fromTimeApproved"
+                    >
+                      <mat-label>From Time Approved</mat-label>
+                      <input
+                        type="text"
+                        matInput
+                        readonly
+                        formControlName="timeFromTimeApproved"
+                      />
+                    </mat-form-field>
+
+                    <!-- from time acknowledged -->
+                    <mat-form-field
+                      *ngIf="workorder.timeTaken.fromTimeAcknowledged >= '0'"
+                    >
+                      <mat-label>From Time Acknowledged</mat-label>
+                      <input
+                        type="text"
+                        matInput
+                        readonly
+                        formControlName="timeFromTimeAcknowledged"
+                      />
+                    </mat-form-field>
+                  </ng-container>
+
+                  <!-- section -->
+                  <ng-container class="section" *ngIf="workorder.section.name">
+                    <mat-form-field>
+                      <mat-label>Section</mat-label>
+
+                      <input
+                        type="text"
+                        readonly
+                        matInput
+                        class="text-capitalize"
+                        formControlName="section"
+                      />
+                    </mat-form-field>
+                  </ng-container>
+
+                  <!-- machine -->
+                  <ng-container class="machine" *ngIf="workorder.machine.name">
+                    <mat-form-field>
+                      <mat-label>Machine</mat-label>
+
+                      <input
+                        type="text"
+                        readonly
+                        matInput
+                        class="text-capitalize"
+                        formControlName="machine"
+                      />
+                    </mat-form-field>
+                  </ng-container>
+
+                  <!-- am-step abnormality card -->
+                  <ng-container
+                    class="abnormality-card am-step"
+                    *ngIf="workorder.abnormalityCard.status"
+                  >
+                    <mat-form-field>
+                      <mat-label>AM Step</mat-label>
+                      <input
+                        type="text"
+                        readonly
+                        matInput
+                        formControlName="amStep"
+                      />
+                    </mat-form-field>
+                  </ng-container>
+
+                  <!-- tool change -->
+                  <ng-container
+                    class="tool-change"
+                    *ngIf="workorder.toolChange.from && workorder.toolChange.to"
+                  >
+                    <mat-form-field>
+                      <mat-label>Tool Change From</mat-label>
+                      <input
+                        type="text"
+                        readonly
+                        matInput
+                        class=""
+                        formControlName="toolChangeFrom"
+                      />
+                    </mat-form-field>
+                    <mat-form-field>
+                      <mat-label>Tool Change To</mat-label>
+
+                      <input
+                        type="text"
+                        readonly
+                        matInput
+                        class=""
+                        formControlName="toolChangeTo"
+                      />
+                    </mat-form-field>
+                  </ng-container>
+
+                  <!-- mold service -->
+                  <ng-container
+                    class="mold-number"
+                    *ngIf="workorder.moldService.number"
+                  >
+                    <mat-form-field>
+                      <mat-label>Mold Number</mat-label>
+
+                      <input
+                        type="text"
+                        readonly
+                        matInput
+                        class=""
+                        formControlName="moldNumber"
+                      />
+                    </mat-form-field>
+                  </ng-container>
+
+                  <!-- workorder description -->
+                  <ng-container class="workorderDescription">
+                    <mat-form-field>
+                      <mat-label>Problem Description</mat-label>
+
+                      <textarea
+                        formControlName="workorderDescription"
+                        class="text-capitalize"
+                        type="text"
+                        matInput
+                        readonly
+                        cdkTextareaAutosize
+                        cdkAutosizeMinRows="4"
+                        cdkAutosizeMaxRows="30"
+                      >
+                      </textarea>
+                    </mat-form-field>
+                  </ng-container>
+
+                  <!-- spares issued -->
+                  <ng-container
+                    *ngIf="userType === 'engineering' || userType === 'stores'"
+                  >
+                    <ng-container
+                      *ngIf="workorder.sparesUsed.status"
+                      formArrayName="sparesUsedArray"
+                    >
+                      <mat-label class="fw-bold mx-auto"
+                        >Issued Spares</mat-label
+                      >
+                      <!-- spare fields labels -->
+                      <ng-container *ngIf="sparesUsedArray?.length !== 0">
+                        <div class="spare-form-header-row">
+                          <div class="code-label">
+                            <span>code</span>
+                          </div>
+                          <div class="quantity-label">
+                            <span>qty</span>
+                          </div>
+                          <div class="total-cost-label">
+                            <span>total cost</span>
+                          </div>
+                        </div>
+
+                        <!-- issued spares -->
+                        <ng-container
+                          *ngFor="let spareForm of sparesUsedArray.controls"
+                        >
+                          <div class="spare-form-row" [formGroup]="spareForm">
+                            <mat-form-field class="code">
+                              <input
+                                type="text"
+                                matInput
+                                readonly
+                                formControlName="code"
+                              />
+                            </mat-form-field>
+                            <mat-form-field class="quantity">
+                              <input
+                                type="text"
+                                matInput
+                                readonly
+                                formControlName="quantity"
+                              />
+                            </mat-form-field>
+                            <mat-form-field class="total-cost">
+                              <input
+                                type="text"
+                                matInput
+                                readonly
+                                formControlName="totalCost"
+                              />
+                            </mat-form-field>
+                          </div>
+                        </ng-container>
+
+                        <!-- spares cost -->
+                        <div class="total-spares-cost-row">
+                          <div class="spares-cost-tag">
+                            <div>
+                              <span><strong>Total Spares Cost</strong></span>
+                            </div>
+                          </div>
+                          <div class="spares-cost-value">
+                            <div>
+                              <span
+                                ><strong>{{ getTotalSparesCost }}</strong></span
+                              >
+                            </div>
+                          </div>
+                        </div>
+                      </ng-container>
+                    </ng-container>
+                  </ng-container>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </mat-sidenav-content>
+</mat-sidenav-container>
+
+<!-- help modal -->
+<div
+  class="modal fade"
+  id="guidelinesModal"
+  tabindex="-1"
+  aria-labelledby="actionButtonsGuidelines"
+  aria-hiden="true"
+  data-bs-backdrop="static"
+>
+  <div
+    class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-sm"
+  >
+    <div class="modal-content">
+      <div class="modal-header text-dark">
+        <h3 class="modal-title m-0" id="actionButtonsGuidelines">
+          <strong>Actions Explained</strong>
+        </h3>
+        <button
+          class="btn-close border border-success border-2"
+          type="button"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+
+      <div class="modal-body">
+        <!-- SUPERVISORS ACTIONS -->
+        <div *ngIf="userType === 'supervisor'">
+          <p class="">
+            <strong>Approve:- </strong> The workorder looks okay and you want to
+            notify the one who raised and the technician named that they can
+            proceed to resolve the issue.
+          </p>
+
+          <p class="mt-2">
+            <strong>Reject:- </strong> The workorder is either unnecessary or
+            was not raised properly. You will be required to provide a reason
+            for rejecting it. The raiser will then be notified of this reason.
+          </p>
+
+          <p class="mt-2">
+            <strong>Delegate:- </strong> You are unavailable to oversee the
+            resolution of the issue raised or there is another supervisor better
+            suited to follow up on the workorder. The raiser and the new
+            supervisor will be notified. The new supervisor will then be
+            responsible for approving or rejecting the workorder.
+          </p>
+
+          <p class="mt-2">
+            <strong>Change Technicians:- </strong> You want to change either one
+            or both the engineering and stores technicians named in the
+            workorder. You can select the same technician if you do not want to
+            change him. This will automatically treat the workorder as approved.
+            The raiser and the new technicians will then be notified.
+          </p>
+
+          <p class="mt-2" *ngIf="workorder?.abnormalityCard?.status">
+            <strong>Assign Technicians:- </strong> You want to assign
+            engineering and stores technicians to handle the abnormality raised.
+            This will automatically treat the workorder as approved. The raiser
+            and technicians will then be notified.
+          </p>
+        </div>
+
+        <!-- TECHNICIANS ACTIONS -->
+        <!-- engineering -->
+        <div *ngIf="userType === 'engineering'">
+          <p class="">
+            <strong>Acknowledge:- </strong> Notify the supervisor and workorder
+            raiser that you have seen the workorder and will work on the issue
+            raised. Once you acknowledge, you cannot handover the workorder to
+            another technician.
+          </p>
+          <p class="mt-2">
+            <strong>Mark Done:- </strong> You have attended to the issue raised,
+            the m/c has been tested and is working okay. Time taken on the
+            workorder stops counting when you mark workorder done. You can then
+            close the workorder within 12 hours from the time it was approved.
+            You can only mark w/o as done after it has been acknowledged. The
+            supervisor and the one who raised the workoder will be updated.
+          </p>
+          <p class="mt-2">
+            <strong>Close:- </strong> You are ready to close the workorder off,
+            giving a brief or detailed analysis of the issue faced, and the
+            corrective actions taken to resolve.
+          </p>
+          <p class="mt-2">
+            <strong>Handover:- </strong> Delegate the workorder to another
+            technician who is either on duty and/or can attend to the issue
+            raised. This should be done before acknowledging the workorder or
+            marking it as done. The supervisor who approved and the one who
+            raised the workorder will be notified of the handover.
+          </p>
+        </div>
+
+        <!-- stores -->
+        <div *ngIf="userType === 'stores'">
+          <p class="">
+            <strong>Issue Spares:- </strong> The issue raised in the workorder
+            requires spares from the engineering store for it to be resolved.
+            Clicking this will allow you to specify the names/codes and
+            quantities of the spares that you issued. Issuing spares will only
+            update the spares used on the workorder, and the
+            electrical/mechanical technician named will be responsible for
+            closing the workorder.
+          </p>
+
+          <p class="mt-2">
+            <strong>Handover:- </strong> Delegate the workorder to another
+            stores technician who is on duty and can follow up on the issuance
+            of spares.
+          </p>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-success" data-bs-dismiss="modal">
+          Understood
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SUPERVISORS -->
+<!-- reject workorder -->
+<div
+  class="modal fade"
+  id="rejectWorkorderModal"
+  tabindex="-1"
+  aria-labelledby="rejectWorkorderModalLabel"
+  aria-hiden="true"
+  data-bs-backdrop="static"
+>
+  <div
+    class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-sm"
+  >
+    <div class="modal-content bg-light">
+      <div class="modal-header text-dark">
+        <h3 class="modal-title m-0" id="rejectWorkorderModalLabel">
+          <strong>W/o No. {{ workorder?.workorder?.number }}</strong>
+        </h3>
+        <button
+          #closeRejectWorkorderModal
+          class="btn-close border border-success border-2"
+          type="button"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+          (click)="resetForms()"
+        ></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-container mat-elevation-z5">
+          <div class="form-header-container">
+            <h2>Reject Workorder</h2>
+          </div>
+          <form
+            [formGroup]="rejectWorkorderForm"
+            (ngSubmit)="reject()"
+            id="rejectWorkorder"
+            #rejectWorkorderFormReference
+          >
+            <ng-container class="reason-for-rejecting">
+              <mat-form-field>
+                <mat-label>Reason To Reject</mat-label>
+                <textarea
+                  matInput
+                  appValidateSentenceFormat
+                  type="text"
+                  formControlName="reason"
+                  class="text-capitalize"
+                  maxlength="500"
+                  cdkTextareaAutosize
+                  cdkAutosizeMinRows="1"
+                  cdkAutosizeMaxRows="7"
+                >
+                </textarea>
+
+                <mat-error
+                  *ngIf="rejectWorkorderForm.controls['reason']?.errors?.['required']"
+                  >This field is required.
+                </mat-error>
+                <mat-error
+                  *ngIf="rejectWorkorderForm.controls['reason']?.errors
+                      ?.['invalidSentenceFormat']
+                  "
+                >
+                  {{
+                    rejectWorkorderForm.controls['reason']?.errors
+                      ?.['invalidSentenceFormat']?.value
+                  }}
+                </mat-error>
+              </mat-form-field>
+            </ng-container>
+          </form>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <div *ngIf="!rejectWorkorderLoading">
+          <button
+            type="submit"
+            class="btn btn-primary"
+            form="rejectWorkorder"
+            (click)="rejectWorkorderFormReference?.['ngSubmit']?.emit()"
+          >
+            Reject
+          </button>
+        </div>
+        <div *ngIf="rejectWorkorderLoading">
+          <button type="button" class="btn btn-success" disabled>
+            <span
+              #rejectWorkorderButtonSpinner
+              class="spinner-border spinner-border-sm"
+              role="status"
+              aria-hidden="true"
+            ></span>
+            Rejecting...
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- superisor handover -->
+<div
+  class="modal fade"
+  id="supervisorHandoverModal"
+  tabindex="-1"
+  aria-labelledby="supervisorHandoverModalLabel"
+  aria-hiden="true"
+  data-bs-backdrop="static"
+>
+  <div
+    class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-sm"
+  >
+    <div class="modal-content bg-light">
+      <div class="modal-header text-dark">
+        <h3 class="modal-title m-0" id="supervisorHandoverModalLabel">
+          <strong>W/o No. {{ workorder?.workorder?.number }}</strong>
+        </h3>
+        <button
+          #closeSupervisorHandoverModal
+          class="btn-close border border-success border-2"
+          type="button"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+          (click)="resetForms()"
+        ></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-container mat-elevation-z5">
+          <div class="form-header-container">
+            <h2>Workorder Handover</h2>
+          </div>
+          <form
+            [formGroup]="supervisorsHandoverForm"
+            (ngSubmit)="supervisorsHandover()"
+            id="supervisorsHandover"
+            #supervisorsHandoverFormReference
+          >
+            <ng-container class="current-supervisor">
+              <mat-form-field>
+                <mat-label>Current Supervisor</mat-label>
+                <input
+                  readonly
+                  matInput
+                  class="text-capitalize"
+                  formControlName="currentSupervisor"
+                />
+              </mat-form-field>
+            </ng-container>
+
+            <ng-container class="select-new-supervisor">
+              <mat-form-field>
+                <mat-label>New Supervisor</mat-label>
+                <mat-select
+                  formControlName="newSupervisor"
+                  class="text-capitalize"
+                >
+                  <mat-option value="" selected
+                    >-- select new supervisor --</mat-option
+                  >
+
+                  <mat-option
+                    *ngFor="let supervisor of supervisors"
+                    [value]="supervisor"
+                    class="text-capitalize"
+                    >{{ supervisor.fullName }}</mat-option
+                  >
+                </mat-select>
+                <mat-error
+                  *ngIf="
+                    supervisorsHandoverForm.controls['newSupervisor']?.errors
+                      ?.['required']
+                  "
+                >
+                  A new supervisor is required.
+                </mat-error>
+              </mat-form-field>
+            </ng-container>
+          </form>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <div *ngIf="!supervisorHandoverLoading">
+          <button
+            type="submit"
+            class="btn btn-primary"
+            form="supervisorsHandover"
+            (click)="supervisorsHandoverFormReference?.['ngSubmit']?.emit()"
+          >
+            Delegate
+          </button>
+        </div>
+
+        <div *ngIf="supervisorHandoverLoading">
+          <button type="button" class="btn btn-success" disabled>
+            <span
+              #delegateSupervisorButtonSpinner
+              class="spinner-border spinner-border-sm"
+              role="status"
+              aria-hidden="true"
+            ></span>
+            Delegating...
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- change technicians -->
+<div
+  class="modal fade"
+  id="changeTechniciansModal"
+  tabindex="-1"
+  aria-labelledby="changeTechniciansModalLabel"
+  aria-hiden="true"
+  data-bs-backdrop="static"
+>
+  <div
+    class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-sm"
+  >
+    <div class="modal-content bg-light">
+      <div class="modal-header text-dark">
+        <h3 class="modal-title m-0" id="changeTechniciansModalLabel">
+          <strong>W/o No. {{ workorder?.workorder?.number }}</strong>
+        </h3>
+        <button
+          #closeChangeTechniciansModal
+          class="btn-close border border-success border-2"
+          type="button"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+          (click)="resetForms()"
+        ></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-container mat-elevation-z5">
+          <div class="form-header-container">
+            <h2>Change Technicians</h2>
+          </div>
+
+          <!-- no technicians set -->
+          <!-- workorder is an abnormality card -->
+          <div
+            class="no-technicians-set"
+            *ngIf="
+              workorder?.workorder?.type === 'Abnormality Card' &&
+              !workorder?.technician?.fullName &&
+              !workorder?.storesTechnician?.fullName
+            "
+          >
+            <div class="d-flex justify-content-center align-items-center">
+              <span class="text-center fst-italic">
+                <p>This is an abnormality card.</p>
+                <p>
+                  No technicians have been assigned to this abnormality yet.
+                </p>
+                <p>You cannot change technicians if none have been assigned.</p>
+                <p>
+                  Please refer to the Help? section in the workorder actions
+                  pane (right hand side) to better understand what each of the
+                  available actions does.
+                </p>
+              </span>
+            </div>
+          </div>
+
+          <!-- workorder is not an abnormality card
+           -->
+          <!-- technicians set -->
+          <div
+            class="no-technicians-set"
+            [hidden]="
+              workorder?.workorder?.type === 'Abnormality Card' &&
+              !workorder?.technician?.fullName &&
+              !workorder?.storesTechnician?.fullName
+            "
+          >
+            <form
+              [formGroup]="changeTechniciansForm"
+              (ngSubmit)="changeTechnicians()"
+              id="changeTechnicians"
+              #changeTechniciansFormReference
+            >
+              <ng-container class="current-eng-technician">
+                <mat-form-field>
+                  <mat-label>Current Eng. Technician</mat-label>
+                  <input
+                    readonly
+                    matInput
+                    formControlName="currentEngTechnician"
+                    class="text-capitalize"
+                  />
+                </mat-form-field>
+              </ng-container>
+
+              <ng-container class="current-store-technician">
+                <mat-form-field>
+                  <mat-label>Current Store Technician</mat-label>
+                  <input
+                    readonly
+                    matInput
+                    class="text-capitalize"
+                    formControlName="currentStoreTechnician"
+                  />
+                </mat-form-field>
+              </ng-container>
+
+              <ng-container class="select-new-eng-technician">
+                <mat-form-field>
+                  <mat-label>New Eng. Technician</mat-label>
+                  <mat-select
+                    class="text-capitalize"
+                    formControlName="newEngTechnician"
+                  >
+                    <mat-option selected value=""
+                      >--select eng. technician</mat-option
+                    >
+
+                    <mat-optgroup label="Electrical Technicians">
+                      <mat-option
+                        class="text-capitalize"
+                        *ngFor="let technician of electricalTechnicians"
+                        [value]="technician"
+                        >{{ technician.fullName }}</mat-option
+                      >
+                    </mat-optgroup>
+                    <mat-optgroup label="Mechanical Technicians">
+                      <mat-option
+                        class="text-capitalize"
+                        *ngFor="let technician of mechanicalTechnicians"
+                        [value]="technician"
+                        >{{ technician.fullName }}</mat-option
+                      >
+                    </mat-optgroup>
+                  </mat-select>
+                  <mat-error
+                    *ngIf="
+                      changeTechniciansForm.get('newEngTechnician')?.errors
+                        ?.['required']
+                    "
+                  >
+                    Eng technician is required.
+                  </mat-error>
+                </mat-form-field>
+              </ng-container>
+
+              <ng-container class="select-new-store-technician">
+                <mat-form-field>
+                  <mat-label>New Store Technician</mat-label>
+                  <mat-select
+                    class="text-capitalize"
+                    formControlName="newStoreTechnician"
+                  >
+                    <mat-option selected value=""
+                      >--select store technician</mat-option
+                    >
+                    <mat-option
+                      class="text-capitalize"
+                      *ngFor="let technician of storeTechnicians"
+                      [value]="technician"
+                    >
+                      {{ technician.fullName }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-error
+                    *ngIf="
+                      changeTechniciansForm.get('newStoreTechnician')?.errors
+                        ?.['required']
+                    "
+                  >
+                    Stores technician is required.
+                  </mat-error>
+                </mat-form-field>
+              </ng-container>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <!-- no technicians set -->
+        <!-- workorder is an abnormality card -->
+        <div
+          *ngIf="
+            workorder?.workorder?.type === 'Abnormality Card' &&
+            !workorder?.technician?.fullName &&
+            !workorder?.storesTechnician?.fullName
+          "
+        >
+          <button
+            type="button"
+            class="btn btn-success"
+            data-bs-dismiss="modal"
+            (click)="resetForms()"
+          >
+            Understood
+          </button>
+        </div>
+
+        <!-- technicians set -->
+        <!-- w/o not abnormality card -->
+        <div
+          [hidden]="
+            workorder?.workorder?.type === 'Abnormality Card' &&
+            !workorder?.technician?.fullName &&
+            !workorder?.storesTechnician?.fullName
+          "
+        >
+          <div *ngIf="!changeTechniciansLoading">
+            <button
+              type="submit"
+              class="btn btn-primary"
+              form="changeTechnicians"
+              (click)="changeTechniciansFormReference?.['ngSubmit']?.emit()"
+            >
+              Change Technicians
+            </button>
+          </div>
+
+          <div *ngIf="changeTechniciansLoading">
+            <button type="button" class="btn btn-success" disabled>
+              <span
+                #changeTechniciansButtonSpinner
+                class="spinner-border spinner-border-sm"
+                role="status"
+                aria-hidden="true"
+              >
+              </span>
+              Changing Technicians...
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- assign technicians -->
+<div
+  class="modal fade"
+  id="assignTechniciansModal"
+  tabindex="-1"
+  aria-labelledby="assignTechniciansModalLabel"
+  aria-hiden="true"
+  data-bs-backdrop="static"
+>
+  <div
+    class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-sm"
+  >
+    <div class="modal-content bg-light">
+      <div class="modal-header text-dark">
+        <h3 class="modal-title m-0" id="assignTechniciansModalLabel">
+          <strong>W/o No. {{ workorder?.workorder?.number }}</strong>
+        </h3>
+        <button
+          #closeAssignTechniciansModal
+          class="btn-close border border-success border-2"
+          type="button"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+          (click)="resetForms()"
+        ></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-header-container">
+          <h2>Assign Technicians</h2>
+        </div>
+
+        <!-- w/o not abnormality card -->
+        <div *ngIf="workorder?.workorder?.type !== 'Abnormality Card'">
+          <div class="d-flex justify-content-center align-items-center">
+            <span class="text-center fst-italic">
+              <p>This workorder is not an abnormality card.</p>
+              <p>Technicians have already been assigned to this workorder.</p>
+              <p>
+                You cannot assign technicians when they have already been
+                assigned.
+              </p>
+              <p>
+                Please refer to the Help? section in the workorder actions pane
+                (right hand side) to better understand what each of the
+                available actions does.
+              </p>
+            </span>
+          </div>
+        </div>
+
+        <!-- workorder is an abnormality -->
+        <div [hidden]="workorder?.workorder?.type !== 'Abnormality Card'">
+          <div class="form-container mat-elevation-z5">
+            <form
+              [formGroup]="assignTechniciansForm"
+              (ngSubmit)="assignTechnicians()"
+              id="assignTechnicians"
+              #assignTechniciansFormReference
+            >
+              <ng-container class="eng-technician">
+                <mat-form-field>
+                  <mat-label>Eng. Technician</mat-label>
+                  <mat-select
+                    class="text-capitalize"
+                    formControlName="engTechnician"
+                  >
+                    <mat-option selected value=""
+                      >--select eng. technician</mat-option
+                    >
+                    <mat-optgroup label="Electrical Technicians">
+                      <mat-option
+                        class="text-capitalize"
+                        *ngFor="let technician of electricalTechnicians"
+                        [value]="technician"
+                        >{{ technician.fullName }}</mat-option
+                      >
+                    </mat-optgroup>
+                    <mat-optgroup label="Mechanical Technicians">
+                      <mat-option
+                        class="text-capitalize"
+                        *ngFor="let technician of mechanicalTechnicians"
+                        [value]="technician"
+                        >{{ technician.fullName }}</mat-option
+                      >
+                    </mat-optgroup>
+                  </mat-select>
+                  <mat-error
+                    *ngIf="
+                      assignTechniciansForm.controls['engTechnician']?.errors
+                        ?.['required']
+                    "
+                    >Eng. technician is required</mat-error
+                  >
+                </mat-form-field>
+              </ng-container>
+
+              <ng-container class="select-store-technician">
+                <mat-form-field>
+                  <mat-label>Store Technician</mat-label>
+                  <mat-select
+                    class="text-capitalize"
+                    formControlName="storeTechnician"
+                  >
+                    <mat-option selected value=""
+                      >--select store technician</mat-option
+                    >
+                    <mat-option
+                      class="text-capitalize"
+                      *ngFor="let technician of storeTechnicians"
+                      [value]="technician"
+                    >
+                      {{ technician.fullName }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-error
+                    *ngIf="
+                      assignTechniciansForm.controls['storeTechnician']?.errors
+                        ?.['required']
+                    "
+                    >Stores technician is required</mat-error
+                  >
+                </mat-form-field>
+              </ng-container>
+            </form>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <!-- w/o not abnormality -->
+        <div *ngIf="workorder?.workorder?.type !== 'Abnormality Card'">
+          <button
+            type="button"
+            class="btn btn-success"
+            data-bs-dismiss="modal"
+            (click)="resetForms()"
+          >
+            Understood
+          </button>
+        </div>
+
+        <!-- w/o is an abnormality card -->
+        <div [hidden]="workorder?.workorder?.type !== 'Abnormality Card'">
+          <div *ngIf="!assignTechniciansLoading">
+            <button
+              type="submit"
+              class="btn btn-primary"
+              form="assignTechnicians"
+              (click)="assignTechniciansFormReference?.['ngSubmit']?.emit()"
+            >
+              Assign Technicians
+            </button>
+          </div>
+
+          <div *ngIf="assignTechniciansLoading">
+            <button type="button" class="btn btn-success" disabled>
+              <span
+                #assignTechniciansButtonSpinner
+                class="spinner-border spinner-border-sm"
+                role="status"
+                aria-hidden="true"
+              >
+              </span>
+              Assigning Technicians...
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TECHNICIANS -->
+<!-- eng handover -->
+<div
+  class="modal fade"
+  id="engineeringTechnicianHandoverModal"
+  tabindex="-1"
+  aria-labelledby="engineeringTechniciansHandoverModalLabel"
+  aria-hiden="true"
+  data-bs-backdrop="static"
+>
+  <div
+    class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-sm"
+  >
+    <div class="modal-content bg-light">
+      <div class="modal-header text-dark">
+        <h3
+          class="modal-title m-0"
+          id="engineeringTechniciansHandoverModalLabel"
+        >
+          <strong>W/o No. {{ workorder?.workorder?.number }}</strong>
+        </h3>
+        <button
+          #closeEngineeringTechniciansHandoverModal
+          class="btn-close border border-success border-2"
+          type="button"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+          (click)="resetForms()"
+        ></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-container mat-elevation-z5">
+          <div class="form-header-container">
+            <h2>Handover</h2>
+          </div>
+
+          <form
+            [formGroup]="engTechniciansHandoverForm"
+            (ngSubmit)="engTechnicianHandover()"
+            id="engTechniciansHandover"
+            #engTechniciansHandoverFormReference
+          >
+            <ng-container class="current-technician">
+              <mat-form-field>
+                <mat-label>Current Technician</mat-label>
+                <input
+                  readonly
+                  matInput
+                  formControlName="currentTechnician"
+                  class="text-capitalize"
+                />
+              </mat-form-field>
+            </ng-container>
+
+            <ng-container class="select-new-technician">
+              <mat-form-field>
+                <mat-label>New Technician</mat-label>
+                <mat-select
+                  class="text-capitalize"
+                  formControlName="newTechnician"
+                >
+                  <mat-option selected value=""
+                    >--select new technician</mat-option
+                  >
+
+                  <mat-optgroup label="Electrical Technicians">
+                    <mat-option
+                      class="text-capitalize"
+                      *ngFor="let technician of electricalTechnicians"
+                      [value]="technician"
+                      >{{ technician.fullName }}</mat-option
+                    >
+                  </mat-optgroup>
+                  <mat-optgroup label="Mechanical Technicians">
+                    <mat-option
+                      class="text-capitalize"
+                      *ngFor="let technician of mechanicalTechnicians"
+                      [value]="technician"
+                      >{{ technician.fullName }}</mat-option
+                    >
+                  </mat-optgroup>
+                </mat-select>
+                <mat-error
+                  *ngIf="
+                    engTechniciansHandoverForm.controls['newTechnician']?.errors
+                      ?.['required']
+                  "
+                >
+                  A new technician is required.
+                </mat-error>
+              </mat-form-field>
+            </ng-container>
+          </form>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <div *ngIf="!engTechnicianHandoverLoading">
+          <button
+            type="button"
+            class="btn btn-secondary me-2"
+            data-bs-dismiss="modal"
+            (click)="resetForms()"
+          >
+            Cancel
+          </button>
+
+          <button
+            type="submit"
+            class="btn btn-primary"
+            form="engTechniciansHandover"
+            (click)="engTechniciansHandoverFormReference?.['ngSubmit']?.emit()"
+          >
+            Handover
+          </button>
+        </div>
+
+        <div *ngIf="engTechnicianHandoverLoading">
+          <button type="button" class="btn btn-success" disabled>
+            <span
+              #updateEngineeringTechniciansButtonSpinner
+              class="spinner-border spinner-border-sm"
+              role="status"
+              aria-hidden="true"
+            >
+            </span>
+            Handing Over...
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- stores handover -->
+<div
+  class="modal fade"
+  id="storesTechnicianHandoverModal"
+  tabindex="-1"
+  aria-labelledby="storesTechniciansHandoverModalLabel"
+  aria-hiden="true"
+  data-bs-backdrop="static"
+>
+  <div
+    class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-sm"
+  >
+    <div class="modal-content bg-light">
+      <div class="modal-header text-dark">
+        <h3 class="modal-title m-0" id="storesTechniciansHandoverModalLabel">
+          <strong>W/o No. {{ workorder?.workorder?.number }}</strong>
+        </h3>
+        <button
+          #closeStoresTechniciansHandoverModal
+          class="btn-close border border-success border-2"
+          type="button"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+          (click)="resetForms()"
+        ></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-container mat-elevation-z5">
+          <div class="form-header-container">
+            <h2>Handover</h2>
+          </div>
+
+          <form
+            [formGroup]="storesTechniciansHandoverForm"
+            (ngSubmit)="storesTechnicianHandover()"
+            id="storesTechniciansHandover"
+            #storesTechniciansHandoverFormReference
+          >
+            <ng-container class="current-technician">
+              <mat-form-field>
+                <mat-label>Current Technician</mat-label>
+                <input
+                  readonly
+                  matInput
+                  formControlName="currentTechnician"
+                  class="text-capitalize"
+                />
+              </mat-form-field>
+            </ng-container>
+
+            <ng-container class="select-new-technician">
+              <mat-form-field>
+                <mat-label>New Technician</mat-label>
+                <mat-select
+                  class="text-capitalize"
+                  formControlName="newTechnician"
+                >
+                  <mat-option selected value=""
+                    >--select store technician</mat-option
+                  >
+                  <mat-option
+                    class="text-capitalize"
+                    *ngFor="let technician of storeTechnicians"
+                    [value]="technician"
+                  >
+                    {{ technician.fullName }}
+                  </mat-option>
+                </mat-select>
+                <mat-error
+                  *ngIf="
+                    storesTechniciansHandoverForm.controls['newTechnician']?.errors
+                      ?.['required']
+                  "
+                >
+                  New stores technician is required.
+                </mat-error>
+              </mat-form-field>
+            </ng-container>
+          </form>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <div *ngIf="!storesTechnicianHandoverLoading">
+          <button
+            type="button"
+            class="btn btn-secondary me-2"
+            data-bs-dismiss="modal"
+            (click)="resetForms()"
+          >
+            Cancel
+          </button>
+
+          <button
+            type="submit"
+            class="btn btn-primary"
+            form="storesTechniciansHandover"
+            (click)="storesTechniciansHandoverFormReference?.['ngSubmit']?.emit()"
+          >
+            Handover
+          </button>
+        </div>
+
+        <div *ngIf="storesTechnicianHandoverLoading">
+          <button type="button" class="btn btn-success" disabled>
+            <span
+              #updateStoresTechniciansButtonSpinner
+              class="spinner-border spinner-border-sm"
+              role="status"
+              aria-hidden="true"
+            >
+            </span>
+            Handing Over...
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

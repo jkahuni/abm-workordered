@@ -1,0 +1,34 @@
+<ngx-spinner type="ball-newton-cradle" name="app-verify-email-spinner">
+  <p style="font-size: 20px; color: white">Resending your verification code...</p>
+</ngx-spinner>
+
+<mat-card class="verify-email-card">
+  <ng-container *ngIf="user$ | async as user; else noUserFound">
+    <mat-card-header class="text-center">
+      <mat-card-title>ABM Workordered Email Verification</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <p>Hello {{ user.displayName | titlecase }},</p>
+      <p>
+        An email verification code has been sent to
+        <span class="emailAddress">{{ user.email }}</span>
+      </p>
+      <p>Please verify your email to proceed, <span class="fw-bold fst-italic">then reload this page.</span></p>
+      <p>Remember to check your spam and junk mail folders,</p>
+      <p>where automated messages sometimes filter.</p>
+    </mat-card-content>
+  </ng-container>
+
+  <ng-template #noUserFound>
+    <mat-card-header>
+      <mat-card-title class="text-center">
+        Verify Your Email Address
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <p>An email has been sent to your registered email address.</p>
+      <p>Verify your email to proceed.</p>
+    </mat-card-content>
+  </ng-template>
+</mat-card>

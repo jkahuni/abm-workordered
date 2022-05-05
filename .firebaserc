@@ -1,0 +1,14 @@
+{
+  "targets": {
+    "abm-workordered": {
+      "hosting": {
+        "workordered": [
+          "abm-workordered"
+        ]
+      }
+    }
+  },
+  "projects": {
+    "default": "abm-workordered"
+  }
+}

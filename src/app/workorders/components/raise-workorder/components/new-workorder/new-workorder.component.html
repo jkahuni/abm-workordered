@@ -1,0 +1,108 @@
+<div class="raise-workorders-links-container mat-elevation-z5">
+  <h2 class="text-center fw-bold title-element">Choose Workorder Type</h2>
+  <div class="raise-workorders-links">
+    <div class="corrective-maintenance">
+      <a
+        type="button"
+        class="btn btn-link"
+        [routerLink]="['/raise-workorder/corrective-maintenance', userUid]"
+      >
+        Corrective Maintenance
+      </a>
+      <!-- router-link mt-2 mb-1 text-start btn -->
+    </div>
+
+    <div class="breakdown">
+      <a
+        type="button"
+        class="btn btn-link"
+        [routerLink]="['/raise-workorder/breakdown/', userUid]"
+      >
+        Breakdown
+      </a>
+    </div>
+
+    <div class="tool-change">
+      <a
+        type="button"
+        class="btn btn-link"
+        [routerLink]="['/raise-workorder/tool-change/', userUid]"
+      >
+        Tool Change
+      </a>
+    </div>
+
+    <div class="am">
+      <a
+        type="button"
+        class="btn btn-link"
+        [routerLink]="['/raise-workorder/am/', userUid]"
+      >
+        AM
+      </a>
+    </div>
+
+    <div class="pm">
+      <a
+        type="button"
+        class="btn btn-link"
+        [routerLink]="['/raise-workorder/pm/', userUid]"
+      >
+        PM
+      </a>
+    </div>
+
+    <div class="mold-service">
+      <a
+        type="button"
+        class="btn btn-link"
+        [routerLink]="['/raise-workorder/mold-service/', userUid]"
+      >
+        Mold Service
+      </a>
+    </div>
+
+    <div class="abnormality-card">
+      <a
+        type="button"
+        class="btn btn-link"
+        [routerLink]="['/raise-workorder/abnormality-card/', userUid]"
+      >
+        Abnormality Card
+      </a>
+    </div>
+
+    <div class="kaizen-card">
+      <a
+        type="button"
+        class="btn btn-link disabled"
+        [routerLink]="['/raise-workorder/kaizen-card/', userUid]"
+        aria-disabled="true"
+      >
+        Kaizen Card
+      </a>
+    </div>
+
+    <div class="service">
+      <a
+        type="button"
+        class="btn btn-link disabled"
+        [routerLink]="['/raise-workorder/service/', userUid]"
+        aria-disabled="true"
+      >
+        Service
+      </a>
+    </div>
+
+    <div class="project">
+      <a
+        type="button"
+        class="btn btn-link disabled"
+        [routerLink]="['/raise-workorder/project/', userUid]"
+        aria-disabled="true"
+      >
+        Project
+      </a>
+    </div>
+  </div>
+</div>

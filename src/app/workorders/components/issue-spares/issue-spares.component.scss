@@ -1,0 +1,152 @@
+.bootstrap-spinner-container {
+    margin: auto;
+    width: 350px;
+    height: 350px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.bootstrap-spinner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: auto;
+}
+
+.toggle-spares-used-button-group {
+    display: flex;
+    align-items: flex-start;
+    margin: 10px 0px 15px;
+}
+
+.toggle-spares-used-button {
+    margin: 5px;
+}
+
+// screens larger than 300px
+@media (min-width: 301px) {
+    .bootstrap-spinner {
+        flex-flow: row wrap;
+    }
+    .loading-tag {
+        margin-left: 16px;
+    }
+
+    .toggle-spares-used-button-group {
+        flex-direction: row;
+    }
+
+    .mat-radio-button ~ .mat-radio-button {
+        margin-left: 16px;
+    }
+}
+
+// screens smaller than 301px;
+@media (max-width: 300px) {
+    .bootstrap-spinner {
+        flex-flow: column wrap;
+    }
+    .loading-tag {
+        margin: 16px auto;
+    }
+
+    .toggle-spares-used-button-group p {
+        flex-direction: column;
+    }
+}
+
+.no-spares-selected-label {
+    margin: 0px 0px 16px;
+}
+
+.spare-form-header-row {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    margin: 16px 0px 5px;
+
+    .code-label {
+        width: 30%;
+        color: green;
+    }
+
+    .quantity-label {
+        width: 15%;
+        color: green;
+    }
+
+    .total-cost-label {
+        width: 45%;
+        color: green;
+    }
+
+    .delete-btn-label {
+        width: 10%;
+        color: green;
+    }
+}
+
+.spare-form-row {
+    width: 100%;
+
+    mat-form-field.code {
+        width: 30%;
+    }
+
+    mat-form-field.quantity {
+        width: 15%;
+    }
+
+    mat-form-field.total-cost {
+        width: 45%;
+    }
+
+    mat-form-field.delete-btn {
+        width: 10%;
+        cursor: pointer;
+    }
+}
+
+.total-spares-cost-row {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    margin: 0px 0px 16px;
+
+    .spares-cost-tag,
+    .spares-cost-value {
+        width: 50%;
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-start;
+        align-items: center;
+    }
+}
+
+.invalid-spares-label {
+    color: red;
+}
+
+.spares-used-array-errors {
+    width: 100%;
+    margin: 16px 0px;
+
+    .spares-required-error,
+    .invalid-spare-quantity-error {
+        width: 100%;
+    }
+}
+
+.action-buttons {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    width: 100%;
+
+    .action-button {
+        width: 50%;
+    }
+}

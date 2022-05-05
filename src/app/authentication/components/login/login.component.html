@@ -1,0 +1,55 @@
+<ngx-spinner type="ball-newton-cradle" name="app-sign-in-spinner">
+  <p style="font-size: 20px; color: white">Verifying...</p>
+</ngx-spinner>
+
+<div class="form-container mat-elevation-z5">
+  <h2>Login Form</h2>
+  <form [formGroup]="form" (ngSubmit)="login()">
+    <mat-form-field id="email" appearance="outline">
+      <mat-label>Your Email</mat-label>
+      <input matInput formControlName="email" placeholder="john@example.com" />
+      <mat-error *ngIf="form.get('email')?.hasError('required')"
+        >Email is required.</mat-error
+      >
+      <mat-error *ngIf="form.get('email')?.hasError('email')">Invalid format.</mat-error>
+    </mat-form-field>
+
+    <mat-form-field id="password" appearance="outline">
+      <mat-label>Your Password</mat-label>
+      <input
+        matInput
+        formControlName="password"
+        [type]="hide ? 'password' : 'text'"
+      />
+      <button
+        mat-icon-button
+        matSuffix
+        (click)="hide = !hide"
+        [attr.aria-label]="'Hide password'"
+        [attr.aria-pressed]="hide"
+        type="button"
+        tabindex="-1"
+      >
+        <mat-icon>{{ hide ? "visibility_off" : "visibility" }}</mat-icon>
+      </button>
+      <mat-error *ngIf="form.get('password')?.hasError('required')"
+        >Password required.</mat-error
+      >
+    </mat-form-field>
+
+    <div class="mx-auto">
+      <button mat-raised-button color="primary" type="submit" class="my-4 btn btn-success">
+        Log In
+      </button>
+    </div>
+    <div class="mx-auto">
+      <div>
+        <a class="btn btn-link link-button" type="button" routerLink="../forgot-password"
+          >Forgot Password?</a
+        >
+      </div>
+    </div>
+  </form>
+</div>
+<!-- ../sign-up === /authentication/sign-up -->
+<!-- the above is because the root route is /authentication -->

@@ -1,0 +1,78 @@
+<div class="toolbar-container">
+  <!-- color="primary" REMOVED BELOW .bg-success ADDED IN ITS PLACE-->
+  <mat-toolbar layout-fill class="wrapped-mat-toolbar bg-success">
+    <ng-container class="brand-name">
+      <div fxHide fxShow.gt-xs class="company-name">
+        <a class="router-link text-white" routerLink="/">ABM Workordered</a>
+      </div>
+      <div fxHide fxShow.lt-sm class="company-name">
+        <button mat-button class="text-white" routerLink="/">
+          Workordered
+        </button>
+      </div>
+    </ng-container>
+
+    <div
+      fxFlex
+      fxLayout="row"
+      fxLayoutAlign="flex-end center"
+      class="toolbar-items"
+    >
+      <ng-container *ngIf="user$ | async as userObj; else loggedOut">
+        <ng-container *ngIf="userObj.emailVerified; else loggedOut">
+          <button
+            mat-button
+            routerLink="/"
+            class="text-white"
+          >
+            <mat-icon>home</mat-icon>
+          </button>
+          <mat-divider [vertical]="true" [inset]="true"></mat-divider>
+          <button mat-button [matMenuTriggerFor]="userMenu" class="text-white">
+            <mat-icon>account_circle</mat-icon>
+            <span class="text-white ps-2">{{
+              userObj.displayName | titlecase
+            }}</span>
+            <mat-icon>expand_more</mat-icon>
+          </button>
+        </ng-container>
+      </ng-container>
+    </div>
+    <ng-template #loggedOut>
+      <button
+        mat-button
+        routerLink="/authentication/sign-up"
+        class="register-button text-white"
+      >
+        <mat-icon>app_registration</mat-icon>
+        <span class="text-white ps-2">Register</span>
+      </button>
+      <mat-divider
+        [vertical]="true"
+        [inset]="true"
+        id="register-login-divider"
+      ></mat-divider>
+      <button
+        mat-button
+        routerLink="/authentication/sign-in"
+        class="text-white"
+      >
+        <mat-icon>login</mat-icon>
+        <span class="text-white ps-2">Login</span>
+      </button>
+    </ng-template>
+  </mat-toolbar>
+</div>
+<ng-container class="logged-in-drop-down-menu">
+  <mat-menu #userMenu="matMenu" class="bg-success">
+    <button mat-menu-item routerLink="/" color="" class="home-button">
+      <mat-icon class="text-white">home</mat-icon>
+      <span class="text-white">Home</span>
+    </button>
+    <mat-divider class="menu-items-divider"></mat-divider>
+    <button mat-menu-item (click)="logout()">
+      <mat-icon class="text-white">logout</mat-icon>
+      <span class="text-white">Logout</span>
+    </button>
+  </mat-menu>
+</ng-container>

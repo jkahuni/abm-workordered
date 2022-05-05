@@ -1,0 +1,263 @@
+<ngx-spinner type="ball-newton-cradle" name="app-home-spinner">
+  <p class="my-3" style="font-size: 20px; color: white">Loading...</p>
+</ngx-spinner>
+
+<div class="home-page">
+  <ng-container *ngIf="user; else noUserObject">
+    <ng-container *ngIf="user.emailVerified; else unverifiedUser">
+      <!-- user is an operator or opertor like -->
+      <ng-container
+        class="raise-and-raised workorders"
+        *ngIf="isOperatorOrOperatorLike"
+      >
+        <mat-card class="home-page-card">
+          <mat-card-header>
+            <mat-card-title class="text-center">
+              Welcome to ABM Workordered
+            </mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <p class="raise-workorder-router">
+              <a
+                mat-raised-button
+                color="primary"
+                class="router-link"
+                routerLink="/new-workorder"
+              >
+                Raise New Workorder
+              </a>
+            </p>
+
+            <p class="raised-workorders">
+              <a
+                mat-raised-button
+                color="primary"
+                class="router-link"
+                [routerLink]="[
+                  '/workorders/other/raised',
+                  userUid
+                ]"
+              >
+                Raised Workorders - ( {{ raisedWorkorders?.length }} )
+              </a>
+            </p>
+          </mat-card-content>
+        </mat-card>
+      </ng-container>
+
+      <!-- user is a supervisor -->
+      <ng-container class="supervisors" *ngIf="isSupervisor">
+        <mat-card class="home-page-card">
+          <mat-card-header>
+            <mat-card-title class="text-center">
+              Welcome to ABM Workordered
+            </mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <p class="raise-workorder-router">
+              <a
+                mat-raised-button
+                color="primary"
+                class="router-link"
+                routerLink="/new-workorder"
+              >
+                Raise New Workorder
+              </a>
+            </p>
+
+            <p class="raised-workorders">
+              <a
+                mat-raised-button
+                color="primary"
+                class="router-link"
+                [routerLink]="[
+                  '/workorders/supervisor/raised',
+                  userUid
+                ]"
+              >
+                Raised Workorders - ( {{ raisedWorkorders?.length }} )
+              </a>
+            </p>
+
+            <p class="unverified-workorders">
+              <a
+                mat-raised-button
+                color="primary"
+                class="router-link"
+                [routerLink]="[
+                  '/workorders/supervisor/unverified',
+                  userUid
+                ]"
+                >Unverified Workorders - (
+                {{ unverifiedWorkorders?.length }} )</a
+              >
+            </p>
+
+            <p class="approved-workorders">
+              <a
+                mat-raised-button
+                color="primary"
+                class="router-link"
+                [routerLink]="[
+                  '/workorders/supervisor/approved',
+                  userUid
+                ]"
+                >Approved Workorders - ( {{ approvedWorkorders?.length }} )
+              </a>
+            </p>
+
+            <p class="rejected-workorders">
+              <a
+                mat-raised-button
+                color="warn"
+                class="router-link"
+                [routerLink]="[
+                  '/workorders/supervisor/rejected',
+                  userUid
+                ]"
+                >Rejected Workorders - ( {{ rejectedWorkorders?.length }} )
+              </a>
+            </p>
+          </mat-card-content>
+        </mat-card>
+      </ng-container>
+
+      <!-- user is an eng technician -->
+      <ng-container class="technicians" *ngIf="isEngineeringTechnician">
+        <mat-card class="home-page-card">
+          <mat-card-header>
+            <mat-card-title class="text-center">
+              Welcome to ABM Workordered
+            </mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <p class="open-workorders">
+              <a
+                mat-raised-button
+                color="primary"
+                class="router-link"
+                [routerLink]="[
+                  '/workorders/engineering/open',
+                  userUid
+                ]"
+                >Open Workorders - ( {{ engTechnicianOpenWorkorders?.length }} )
+              </a>
+            </p>
+            <p class="closed-workorders">
+              <a
+                mat-raised-button
+                color="primary"
+                class="router-link"
+                [routerLink]="[
+                  '/workorders/engineering/closed',
+                  userUid
+                ]"
+                >Closed Workorders - (
+                {{ engTechnicianClosedWorkorders?.length }} )
+              </a>
+            </p>
+          </mat-card-content>
+        </mat-card>
+      </ng-container>
+
+      <!-- user is a stores technician -->
+      <ng-container class="technicians" *ngIf="isStoresTechnician">
+        <mat-card class="home-page-card">
+          <mat-card-header>
+            <mat-card-title class="text-center">
+              Welcome to ABM Workordered
+            </mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <p class="open-workorders">
+              <a
+                mat-raised-button
+                color="primary"
+                class="router-link"
+                [routerLink]="[
+                  '/workorders/stores/open',
+                  userUid
+                ]"
+                >Open Workorders - (
+                {{ storesTechnicianOpenWorkorders?.length }} )
+              </a>
+            </p>
+            <p class="closed-workorders">
+              <a
+                mat-raised-button
+                color="primary"
+                class="router-link"
+                [routerLink]="[
+                  '/workorders/stores/closed',
+                  userUid
+                ]"
+                >Closed Workorders - (
+                {{ storesTechnicianClosedWorkorders?.length }} )
+              </a>
+            </p>
+          </mat-card-content>
+        </mat-card>
+      </ng-container>
+    </ng-container>
+
+    <ng-template #unverifiedUser>
+      <mat-card class="home-page-card">
+        <mat-card-header>
+          <mat-card-title class="text-center">
+            Welcome to ABM Workordered
+          </mat-card-title>
+        </mat-card-header>
+
+        <mat-card-content>
+          <p>Hello {{ user.displayName | titlecase }},</p>
+          <p>
+            A verification email has been sent to
+            <span class="emailAddress">{{ user.email }}</span>
+          </p>
+          <p>
+            To access all services, complete the verification
+            <span class="fw-bold fst-italic">then reload this page.</span>
+          </p>
+          <p>Remember to check your spam and junk mail folders,</p>
+          <p>where automated messages sometimes filter.</p>
+
+          <p>If 15 minutes have passed and you still did not get the email,</p>
+          <p>
+            Try,
+            <a class="btn btn-link link-button" type="button" (click)="resendVerificationCode()">
+              Resend Verification Code
+            </a>
+          </p>
+        </mat-card-content>
+      </mat-card>
+    </ng-template>
+  </ng-container>
+</div>
+
+<ng-template #noUserObject>
+  <mat-card class="home-page-card">
+    <mat-card-header>
+      <mat-card-title class="text-center">
+        Welcome to ABM Workordered
+      </mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <div class="new-user-welcome-message">
+        <p>Hello there!</p>
+        <p>
+          It is great to have you on board the ABM Workordered family, where
+          your world of paper-less workorders awaits.
+        </p>
+        <p>
+          You are joining other individuals driven by our GREAT culture, to
+          easily raise and track workorders in their daily operations.
+        </p>
+        <p>
+          For whatever reason you are joining us, we have something for you.
+        </p>
+        <p>To get started, register or log in above...</p>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</ng-template>

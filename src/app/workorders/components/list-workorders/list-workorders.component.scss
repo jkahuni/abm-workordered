@@ -1,0 +1,318 @@
+mat-sidenav-container.sidenav-container {
+    height: 90vh;
+    width: 90vw;
+    border: 1px solid rgba(0, 0, 0, 0.5);
+    margin: 10px auto;
+
+    mat-sidenav.sidenav {
+        width: 130px;
+        display: flex;
+        flex-flow: row wrap;
+
+        .sidenav-heading-container,
+        .mat-subheader.workorders-subheader,
+        .workorders-sidenav-text-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sidenav-heading {
+            margin: 16px 0 0;
+        }
+
+        .workorders-sidenav-text {
+            text-align: center;
+            padding: 45% 20px;
+        }
+
+        mat-divider.mat-divider {
+            border-top-width: 2px;
+            border-top-color: black;
+        }
+
+        ::ng-deep {
+            span.mat-list-item-content {
+                padding: 0px;
+            }
+
+            h2 {
+                margin: 0px 0px 8px;
+            }
+
+            .mat-list-base .mat-subheader {
+                color: green;
+                padding: 0px;
+                margin: 0px;
+                height: 24px;
+                line-height: 1.6;
+            }
+        }
+
+        .action-button {
+            text-decoration: none;
+        }
+
+        .display-workorder-actions {
+            display: flex;
+            flex-direction: column;
+
+            mat-list-item {
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            mat-list-item.long-button-text {
+                height: 60px;
+            }
+
+            ::ng-deep {
+                span.mat-list-item-content {
+                    width: 100%;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                    align-items: center;
+                }
+            }
+        }
+    }
+
+    mat-sidenav-content.sidenav-content-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        flex-flow: row wrap;
+
+        .loading-workorders-bootstrap-spinner {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+
+            .loading-workorders-spinner-text {
+                margin-top: 16px;
+                text-align: center;
+            }
+        }
+
+        .no-workorders-to-display {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            padding: 0px 16px;
+
+            p {
+                text-align: center;
+            }
+        }
+
+        .workorder-selected-container {
+            display: flex;
+            flex-direction: column;
+
+            .toggle-sidenavs-status {
+                position: -webkit-sticky; /* Safari */
+                position: sticky;
+                top: 0;
+                z-index: 2;
+
+                .workorder-has-actions,
+                .workorder-has-no-actions {
+                    display: flex;
+                    align-items: center;
+                }
+
+                @media (min-width: 372px) {
+                    .workorder-has-actions {
+                        justify-content: space-between;
+                    }
+
+                    .workorder-has-no-actions {
+                        justify-content: flex-start;
+                    }
+                }
+
+                @media (max-width: 371px) {
+                    .workorder-has-actions {
+                        justify-content: center;
+                    }
+
+                    .workorder-has-no-actions {
+                        justify-content: center;
+                    }
+                }
+
+                ::ng-deep {
+                    .mat-button-wrapper {
+                        .mat-icon {
+                            background: black;
+                            color: white;
+                        }
+                    }
+                }
+            }
+
+            .display-workorder {
+                z-index: 1;
+            }
+        }
+    }
+
+    .spare-form-header-row {
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+        margin: 16px 0px 5px;
+
+        .code-label,
+        .quantity-label,
+        .total-cost-label {
+            color: green;
+        }
+
+        .code-label {
+            width: 30%;
+        }
+
+        .quantity-label {
+            width: 20%;
+        }
+
+        .total-cost-label {
+            width: 50%;
+        }
+    }
+
+    .spare-form-row {
+        width: 100%;
+
+        mat-form-field.code {
+            width: 35%;
+        }
+
+        mat-form-field.quantity {
+            width: 15%;
+        }
+
+        mat-form-field.total-cost {
+            width: 50%;
+        }
+    }
+
+    .total-spares-cost-row {
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        margin: 0px 0px 16px;
+
+        .spares-cost-tag,
+        .spares-cost-value {
+            width: 50%;
+            display: flex;
+            flex-direction: row;
+            justify-content: flex-start;
+            align-items: center;
+        }
+    }
+
+    // mat-sidenav-content.main-sidenav-content-wrapper {
+    //     display: flex;
+    //     align-items: center;
+    //     width: 100%;
+    //     flex-flow: row wrap;
+
+    //     .loading-workorders-bootstrap-spinner {
+    //         display: flex;
+    //         justify-content: center;
+    //         align-items: center;
+    //         flex-direction: column;
+
+    //         .loading-workorders-spinner-text {
+    //             margin-top: 16px;
+    //             text-align: center;
+    //         }
+    //     }
+
+    //     .workorders-main-content-text {
+    //         display: flex;
+    //         align-items: center;
+    //         justify-content: center;
+    //         flex-direction: column;
+    //         flex-wrap: wrap;
+    //         padding: 0px 16px;
+
+    //         p {
+    //             text-align: center;
+    //         }
+    //     }
+
+    //     .main-content-workorder-selected {
+    //         display: flex;
+    //         flex-direction: row;
+    //         align-items: center;
+    //         justify-content: center;
+    //         flex-wrap: wrap;
+    //         width: 100%;
+    //     }
+
+    //     .toggle-sidenavs-status {
+    //
+    //         position: sticky;
+    //         top: 0;
+    //
+    //         width: 100%;
+
+    //         // testing
+    //         display: flex;
+    //         flex-direction: row;
+    //         align-items: center;
+    //         justify-content: space-between;
+
+    //         // justify-content: flex-start;
+
+    //         .workorder-has-actions,
+    //         .workorder-has-no-actions {
+    //             display: flex;
+    //             // flex-direction: column;
+    //         }
+
+    //         .workorder-has-actions {
+    //             justify-content: space-between;
+    //         }
+
+    //         .workorder-has-no-actions {
+    //             justify-content: flex-start;
+    //         }
+
+    //         ::ng-deep {
+    //             .mat-button-wrapper {
+    //                 .mat-icon {
+    //                     background: black;
+    //                     color: white;
+    //                 }
+    //             }
+    //         }
+    //     }
+
+    //     .display-workorder {
+    //         z-index: 1;
+    //     }
+
+    // }
+}
+
+// for modals select fields behavior
+::ng-deep {
+    .cdk-global-overlay-wrapper,
+    .cdk-overlay-container {
+        z-index: 99999 !important;
+    }
+}

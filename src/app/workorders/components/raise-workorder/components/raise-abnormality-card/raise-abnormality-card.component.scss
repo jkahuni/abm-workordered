@@ -1,0 +1,32 @@
+// mat-radio-group
+// for screens larger than 301px
+@media (min-width: 301px) {
+    .am-step-button-group {
+        display: flex;
+        flex-flow: row wrap;
+        margin: 15px 0;
+        align-items: flex-start;
+    }
+
+    .mat-radio-button ~ .mat-radio-button {
+        margin-left: 16px;
+    }
+}
+
+// for screens smaller than 301px
+@media (max-width: 300px) {
+    .am-step-button-group {
+        display: flex;
+        flex-flow: column wrap;
+        margin: 15px 0;
+        align-items: flex-start;
+    }
+
+    .am-step-button {
+        margin: 5px;
+    }
+}
+
+.invalidAmStep {
+    color: red;
+}
