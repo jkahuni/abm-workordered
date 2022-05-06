@@ -1349,7 +1349,11 @@
 
                   <!-- spares issued -->
                   <ng-container
-                    *ngIf="userType === 'engineering' || userType === 'stores'"
+                    *ngIf="
+                      userType === 'engineering' ||
+                      userType === 'stores' ||
+                      userType === 'supervisor'
+                    "
                   >
                     <ng-container
                       *ngIf="workorder.sparesUsed.status"
@@ -1594,6 +1598,7 @@
             (ngSubmit)="reject()"
             id="rejectWorkorder"
             #rejectWorkorderFormReference
+            autocomplete="off"
           >
             <ng-container class="reason-for-rejecting">
               <mat-form-field>
@@ -1695,6 +1700,7 @@
             (ngSubmit)="supervisorsHandover()"
             id="supervisorsHandover"
             #supervisorsHandoverFormReference
+            autocomplete="off"
           >
             <ng-container class="current-supervisor">
               <mat-form-field>
@@ -1719,12 +1725,22 @@
                     >-- select new supervisor --</mat-option
                   >
 
-                  <mat-option
-                    *ngFor="let supervisor of supervisors"
-                    [value]="supervisor"
-                    class="text-capitalize"
-                    >{{ supervisor.fullName }}</mat-option
-                  >
+                  <mat-optgroup label="Production Supervisors">
+                    <mat-option
+                      class="text-capitalize"
+                      *ngFor="let supervisor of productionSupervisors"
+                      [value]="supervisor"
+                      >{{ supervisor.fullName }}</mat-option
+                    >
+                  </mat-optgroup>
+                  <mat-optgroup label="Engineering Supervisors">
+                    <mat-option
+                      class="text-capitalize"
+                      *ngFor="let supervisor of engineeringSupervisors"
+                      [value]="supervisor"
+                      >{{ supervisor.fullName }}</mat-option
+                    >
+                  </mat-optgroup>
                 </mat-select>
                 <mat-error
                   *ngIf="
@@ -1842,6 +1858,7 @@
               (ngSubmit)="changeTechnicians()"
               id="changeTechnicians"
               #changeTechniciansFormReference
+              autocomplete="off"
             >
               <ng-container class="current-eng-technician">
                 <mat-form-field>
@@ -2056,6 +2073,7 @@
               (ngSubmit)="assignTechnicians()"
               id="assignTechnicians"
               #assignTechniciansFormReference
+              autocomplete="off"
             >
               <ng-container class="eng-technician">
                 <mat-form-field>
@@ -2211,6 +2229,7 @@
             (ngSubmit)="engTechnicianHandover()"
             id="engTechniciansHandover"
             #engTechniciansHandoverFormReference
+            autocomplete="off"
           >
             <ng-container class="current-technician">
               <mat-form-field>
@@ -2342,6 +2361,7 @@
             (ngSubmit)="storesTechnicianHandover()"
             id="storesTechniciansHandover"
             #storesTechniciansHandoverFormReference
+            autocomplete="off"
           >
             <ng-container class="current-technician">
               <mat-form-field>

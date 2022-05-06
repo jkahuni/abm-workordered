@@ -2,7 +2,7 @@
   <p class="my-3" style="font-size: 20px; color: white">Loading...</p>
 </ngx-spinner>
 
-<div class="home-page">
+<div class="home-page" *ngIf="!showErrorMessage">
   <ng-container *ngIf="user; else noUserObject">
     <ng-container *ngIf="user.emailVerified; else unverifiedUser">
       <!-- user is an operator or opertor like -->
@@ -244,3 +244,18 @@
     </mat-card-content>
   </mat-card>
 </ng-template>
+
+<div *ngIf="showErrorMessage">
+  <div *ngIf="indexingError">
+    <div class="form-container mat-elevation-z5">
+      <p>Configuring your data failed with error code IDH-01.</p>
+      <p>Please report this error code to support to have it fixed.</p>
+    </div>
+  </div>
+  <div *ngIf="unknownError">
+    <div class="form-container mat-elevation-z5">
+      <p>Configuring your data failed with error code EH-01.</p>
+      <p>Please report this error code to support to have it fixed.</p>
+    </div>
+  </div>
+</div>

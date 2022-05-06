@@ -1,7 +1,7 @@
 <!-- !loading -->
 <div *ngIf="!loading">
   <!-- form -->
-  <div *ngIf="!showErrorMessage">
+  <div *ngIf="!loadingFailed">
     <div class="form-container mat-elevation-z5">
       <div class="form-header">
         <h2 class="text-center" style="margin: 0px auto">Abnormality Card</h2>
@@ -10,7 +10,7 @@
         </h3>
       </div>
 
-      <form [formGroup]="form" (ngSubmit)="raiseWorkorder()">
+      <form [formGroup]="form" (ngSubmit)="raiseWorkorder()" autocomplete="off">
         <ng-container class="tag-number">
           <mat-form-field>
             <mat-label>Tag Number</mat-label>
@@ -25,7 +25,10 @@
 
         <ng-container class="am-step">
           <div>
-            <mat-label [ngClass]="{invalidAmStep: form.controls['amStep']?.errors?.['required']}">AM Step</mat-label>
+            <mat-label
+              [ngClass]="{invalidAmStep: form.controls['amStep']?.errors?.['required']}"
+              >AM Step</mat-label
+            >
             <mat-radio-group
               class="am-step-button-group"
               aria-labelledby="toggle am step"
@@ -168,12 +171,22 @@
             <mat-label>Supervisor</mat-label>
             <mat-select formControlName="supervisor" class="text-capitalize">
               <mat-option value="" selected>-- select supervisor --</mat-option>
-              <mat-option
-                *ngFor="let supervisor of supervisors"
-                [value]="supervisor"
-                class="text-capitalize"
-                >{{ supervisor.fullName }}</mat-option
-              >
+              <mat-optgroup label="Production Supervisors">
+                <mat-option
+                  class="text-capitalize"
+                  *ngFor="let supervisor of productionSupervisors"
+                  [value]="supervisor"
+                  >{{ supervisor.fullName }}</mat-option
+                >
+              </mat-optgroup>
+              <mat-optgroup label="Engineering Supervisors">
+                <mat-option
+                  class="text-capitalize"
+                  *ngFor="let supervisor of engineeringSupervisors"
+                  [value]="supervisor"
+                  >{{ supervisor.fullName }}</mat-option
+                >
+              </mat-optgroup>
             </mat-select>
             <mat-error
               *ngIf="form.controls['supervisor']?.errors?.['required']"
@@ -193,13 +206,19 @@
   </div>
 
   <!-- error -->
-  <div *ngIf="showErrorMessage">
+  <div *ngIf="loadingFailed">
     <div class="form-container mat-elevation-z5">
-      <p>
-        Preparing your new workorder failed with <strong>code AB-01.</strong>
-      </p>
-      <p>Try reloading the page or,</p>
-      <p>Report this error code to support for assistance</p>
+      {{
+        getUserError
+          ? getUserError
+          : getUsersError
+          ? getUsersError
+          : getSectionsError
+          ? getSectionsError
+          : getMachinesError
+          ? getMachinesError
+          : defaultErrorMessage
+      }}
     </div>
   </div>
 </div>

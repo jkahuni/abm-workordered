@@ -32,15 +32,21 @@ export class RaiseAbnormalityCardComponent implements OnInit {
 
   form!: FormGroup;
   raiser!: IntUser;
-  supervisors!: IntUser[];
+  productionSupervisors!: IntUser[];
+  engineeringSupervisors!: IntUser[];
   sections!: IntSection[];
   machines!: IntMachine[];
   now!: string;
   userUid!: string | null;
 
   loading = false;
-  showErrorMessage = false;
-
+  loadingFailed = false;
+  getUserError!: string;
+  getUsersError!: string;
+  getSectionsError!: string;
+  getMachinesError!: string;
+  defaultErrorMessage = `Error UAC-01 occured while configuring your workorder. 
+  Please reload the page or report the error code to support for assistance.`
 
   ngOnInit(): void {
     this.showSpinner();
@@ -50,43 +56,6 @@ export class RaiseAbnormalityCardComponent implements OnInit {
     this.now = dayjs().format();
 
     this.newWorkorderSetup();
-  }
-
-  private newWorkorderSetup(): void {
-    if (this.userUid) {
-      this.workordersService.getCurrentUser(this.userUid)
-        .then((firestoreUser: IntUser) => {
-          this.raiser = firestoreUser;
-          this.hideSpinnerOnSuccess();
-        })
-        .then(() => {
-          this.workordersService.getAllUsers()
-            .then(
-              (firestoreUsers: IntUser[]) => {
-                this.supervisors = firestoreUsers.filter((FirestoreUser: IntUser) => FirestoreUser.role === 'Supervisor');
-              }
-            );
-        })
-        .then(() => {
-          this.workordersService.getSections()
-            .then((sections: IntSection[]) => {
-              this.sections = sections;
-
-            });
-        })
-        .then(() => {
-          this.workordersService.getMachines()
-            .then((machines: IntMachine[]) => {
-              this.machines = machines;
-
-            });
-        })
-        .catch((err: any) => {
-          this.hideSpinnerOnError();
-          console.log('RAISE ABC ERR', err);
-        });
-    }
-
   }
 
   private showSpinner(): void {
@@ -100,15 +69,104 @@ export class RaiseAbnormalityCardComponent implements OnInit {
   }
 
   private hideSpinnerOnSuccess(): void {
-    if (this.raiser) {
+    if (
+      this.raiser &&
+      this.productionSupervisors &&
+      this.engineeringSupervisors && 
+      this.machines &&
+      this.sections
+    ) {
       this.createForm();
       this.hideSpinner();
+
     }
+
   }
 
   private hideSpinnerOnError(): void {
+    this.loadingFailed = true;
     this.hideSpinner();
-    this.showErrorMessage = true;
+
+
+  }
+
+  private newWorkorderSetup(): void {
+    if (this.userUid) {
+      this.getUser(this.userUid);
+      this.getUsers();
+      this.getSections();
+      this.getMachines();
+    }
+  }
+
+  private getUser(userUid: string): void {
+    this.workordersService.getUser(userUid)
+      .then((user: IntUser) => {
+        this.raiser = user;
+        this.hideSpinnerOnSuccess();
+      })
+      .catch((err: any) => {
+        this.hideSpinnerOnError();
+        if (err.code === 'failed-precondition') {
+          this.getUserError = `Configuring your new workorder failed with error code IND-AC-01. Please report this error code to support to have it resolved.`;
+        } else {
+          this.getUserError = `Configuring your new workorder failed with error code AC-01. Please report this error code to support to have it resolved.`;
+        }
+      });
+  }
+
+  private getUsers(): void {
+    this.workordersService.getUsers()
+      .then(
+        (firestoreUsers: IntUser[]) => {
+          this.productionSupervisors = firestoreUsers.filter((firestoreUser: IntUser) => firestoreUser.group === 'Supervisor' && firestoreUser.supervisorGroup === 'Production');
+          this.engineeringSupervisors = firestoreUsers.filter((firestoreUser: IntUser) => firestoreUser.group === 'Supervisor' && firestoreUser.supervisorGroup === 'Engineering');
+          this.hideSpinnerOnSuccess();
+
+        })
+      .catch((err: any) => {
+        this.hideSpinnerOnError();
+        if (err.code === 'failed-precondition') {
+          this.getUsersError = `Configuring your new workorder failed with error code IND-AC-02. Please report this error code to support to have it resolved.`;
+        } else {
+          this.getUsersError = `Configuring your new workorder failed with error code AC-02. Please report this error code to support to have it resolved.`;
+        }
+      });
+  }
+
+  private getSections(): void {
+    this.workordersService.getSections()
+      .then((sections: IntSection[]) => {
+        this.sections = sections;
+        this.hideSpinnerOnSuccess();
+      })
+      .catch((err: any) => {
+        this.hideSpinnerOnError();
+        if (err.code === 'failed-precondition') {
+          this.getSectionsError = `Configuring your new workorder failed with error code IND-AC-03. Please report this error code to support to have it resolved.`;
+
+        } else {
+          this.getSectionsError = `Configuring your new workorder failed with error code AC-03. Please report this error code to support to have it resolved.`;
+
+        }
+      });
+  }
+
+  private getMachines(): void {
+    this.workordersService.getMachines()
+      .then((machines: IntMachine[]) => {
+        this.machines = machines;
+        this.hideSpinnerOnSuccess();
+      })
+      .catch((err: any) => {
+        this.hideSpinnerOnError();
+        if (err.code === 'failed-precondition') {
+          this.getMachinesError = `Configuring your new workorder failed with error code IND-AC-04. Please report this error code to support to have it resolved.`;
+
+        } else {
+          this.getMachinesError = `Configuring your new workorder failed with error code AC-04. Please report this error code to support to have it resolved.`;
+        }
+      });
   }
 
   private createForm(): FormGroup {
@@ -246,14 +304,16 @@ export class RaiseAbnormalityCardComponent implements OnInit {
         technician: {
           fullName: '',
           uid: '',
-          role: '',
-          technicianRole: ''
+          group: '',
+          technicianGroup: '',
+          supervisorGroup: ''
         },
         storesTechnician: {
           fullName: '',
           uid: '',
-          role: '',
-          technicianRole: ''
+          group: '',
+          technicianGroup: '',
+          supervisorGroup: ''
         },
         supervisor,
         toolChange: {

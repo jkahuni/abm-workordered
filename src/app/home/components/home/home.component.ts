@@ -66,6 +66,11 @@ export class HomeComponent implements OnInit {
   isEngineeringTechnician = false;
   isStoresTechnician = false;
 
+  // for errors
+  showErrorMessage = false;
+  indexingError = false;
+  unknownError = false;
+
   // for controlling the spinner
   raisedWorkordersSet = false;
   unverifiedWorkordersSet = false;
@@ -89,10 +94,10 @@ export class HomeComponent implements OnInit {
             this.hideSpinnerOnError();
 
           } else {
-            this.workordersService.getCurrentUser(this.userUid)
+            this.workordersService.getUser(this.userUid)
               .then((firestoreUser: IntUser) => {
                 //  user is a supervisor
-                if (firestoreUser.role === 'Supervisor') {
+                if (firestoreUser.group === 'Supervisor') {
                   this.getRaisedWorkorders();
                   this.getUnverifiedWorkorders();
                   this.getApprovedWorkorders();
@@ -100,11 +105,11 @@ export class HomeComponent implements OnInit {
                   this.isSupervisor = true;
                 }
                 // user is a technician
-                else if (firestoreUser.role === 'Technician') {
+                else if (firestoreUser.group === 'Technician') {
                   // eng technician
-                  if (firestoreUser.technicianRole === 'Electrical'
+                  if (firestoreUser.technicianGroup === 'Electrical'
                     ||
-                    firestoreUser.technicianRole === 'Mechanical') {
+                    firestoreUser.technicianGroup === 'Mechanical') {
 
                     this.getEngTechnicianOpenWorkorders();
                     this.getEngTechnicianClosedWorkorders();
@@ -114,9 +119,9 @@ export class HomeComponent implements OnInit {
 
                   // stores technician
                   else if (
-                    firestoreUser.technicianRole === 'Eng. Store'
+                    firestoreUser.technicianGroup === 'Eng. Store'
                     ||
-                    firestoreUser.technicianRole === 'PM Planning'
+                    firestoreUser.technicianGroup === 'PM Planning'
                   ) {
                     this.getStoresTechnicianOpenWorkorders();
                     this.getStoresTechnicianClosedWorkorders();
@@ -137,8 +142,20 @@ export class HomeComponent implements OnInit {
               })
               .catch((err: any) => {
                 this.spinner.hide('app-home-spinner');
-                console.log('HOME INIT METHOD', err);
-                this.toast.error(`An unknownn error occured. Please reload the page.`);
+                this.showErrorMessage = true;
+
+                if (err.code === 'failed-precondition') {
+                  console.log('HOME INIT METHOD', err);
+                  this.toast.error(`An fatal error with code IDH-01 occured. Please report this error code to support for assistance.`);
+                  this.indexingError = true;
+
+
+                } else {
+                  console.log('HOME INIT METHOD', err);
+                  this.unknownError = true;
+                  this.toast.error(`An unknownn error occured. Please reload the page.`);
+
+                }
 
               });
           }

@@ -4,7 +4,7 @@
 
 <div class="form-container mat-elevation-z5">
   <h2 color="primary">Registration Form</h2>
-  <form [formGroup]="form" (ngSubmit)="register()">
+  <form [formGroup]="form" (ngSubmit)="register()" autocomplete="off">
     <mat-form-field id="firstName" appearance="outline">
       <mat-label>First Name</mat-label>
       <input

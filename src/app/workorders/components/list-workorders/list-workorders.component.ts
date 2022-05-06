@@ -88,7 +88,11 @@ export class ListWorkordersComponent implements OnInit {
   electricalTechnicians!: IntUser[];
   mechanicalTechnicians!: IntUser[];
   storeTechnicians!: IntUser[];
-  supervisors!: IntUser[];
+  productionSupervisors!: IntUser[];
+  engineeringSupervisors!: IntUser[];
+
+  // showing spares to engineering supervisors
+  isEngineeringSupervisor = false;
 
   // when to show right-sidenav
   workorderHasActions = false;
@@ -264,7 +268,7 @@ export class ListWorkordersComponent implements OnInit {
 
           return raisedWorkordersQuery;
         }
-        
+
         else if (this.workordersType === 'approved') {
           const approvedWorkordersQuery = query(
             workordersColRef,
@@ -340,23 +344,33 @@ export class ListWorkordersComponent implements OnInit {
 
   // get all users
   private getUsers(): void {
-    this.workordersService.getAllUsers()
+    this.workordersService.getUsers()
       .then((users: IntUser[]) => {
-        this.supervisors = users.filter(
+        this.productionSupervisors = users.filter(
           (user: IntUser) =>
-            user.role === 'Supervisor'
+            user.group === 'Supervisor' && user.supervisorGroup === 'Production'
+        );
+        this.engineeringSupervisors = users.filter(
+          (user: IntUser) =>
+            user.group === 'Supervisor' && user.supervisorGroup === 'Engineering'
         );
 
         this.electricalTechnicians = users.filter(
           (user: IntUser) =>
-            user.role === 'Technician' && user.technicianRole === 'Electrical');
+            user.group === 'Technician' && user.technicianGroup === 'Electrical');
         this.mechanicalTechnicians = users.filter(
           (user: IntUser) =>
-            user.role === 'Technician' && user.technicianRole === 'Mechanical');
+            user.group === 'Technician' && user.technicianGroup === 'Mechanical');
         this.storeTechnicians = users.filter(
-          (user: IntUser) => user.role === 'Technician' && user.technicianRole === 'Eng. Store'
-            || user.technicianRole === 'PM Planning'
+          (user: IntUser) => user.group === 'Technician' && user.technicianGroup === 'Eng. Store'
+            || user.technicianGroup === 'PM Planning'
         );
+
+        const engineeringSupervisor = this.engineeringSupervisors.find((user: IntUser) => user.uid === this.userUid);
+
+        if (engineeringSupervisor !== undefined) {
+          this.isEngineeringSupervisor = true;
+        }
 
       })
       .catch((err: any) => {
@@ -678,7 +692,8 @@ export class ListWorkordersComponent implements OnInit {
         !this.electricalTechnicians ||
         !this.mechanicalTechnicians ||
         !this.storeTechnicians ||
-        !this.supervisors
+        !this.productionSupervisors ||
+        !this.engineeringSupervisors
       ) {
         this.getUsers();
       }

@@ -19,36 +19,31 @@ export class WorkordersService {
   }
 
   // get current user name and uid
-  async getCurrentUser(userUid: string | null): Promise<IntUser> {
-    if (userUid) {
-      const userDocRef = doc(this.firestore, 'users', userUid);
+  async getUser(userUid: string): Promise<IntUser> {
+    const userDocRef = doc(this.firestore, 'users', userUid);
 
-      const user = await getDoc(userDocRef);
+    const user = await getDoc(userDocRef);
 
-      const { fullName, uid, role, technicianRole
-      } = user?.data() as IntUser;
+    const { fullName, uid, group, technicianGroup, supervisorGroup
+    } = user?.data() as IntUser;
 
-      return { fullName, uid, role, technicianRole };
-    } else {
-      return Promise.resolve({ fullName: '', uid: '', role: '', technicianRole: '' });
-    }
-
+    return { fullName, uid, group, technicianGroup, supervisorGroup };
 
   }
 
-  // get all users role, technicianRole, name, uid
-  async getAllUsers(): Promise<IntUser[]> {
+  // get all users group, technicianGroup, name, uid
+  async getUsers(): Promise<IntUser[]> {
     const usersColRef = collection(this.firestore, 'users');
     const usersQuery = query(usersColRef, orderBy('fullName'),
-      where('role', 'in', ['Technician', 'Supervisor']));
+      where('group', 'in', ['Technician', 'Supervisor']));
 
     const allUsersQuerySnapshot = await getDocs(usersQuery);
 
     const usersArray = allUsersQuerySnapshot?.docs.map(
       (user: DocumentData) => {
-        const { fullName, uid, role, technicianRole } = user['data']() as IntUser;
+        const { fullName, uid, group, technicianGroup, supervisorGroup } = user['data']() as IntUser;
 
-        return { fullName, uid, role, technicianRole };
+        return { fullName, uid, group, technicianGroup, supervisorGroup };
       }
     ) as IntUser[];
 

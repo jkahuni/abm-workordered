@@ -15,8 +15,9 @@ export interface IntMachine {
 export interface IntUser {
     fullName: string;
     uid: string;
-    role: string;
-    technicianRole: string;
+    group: string;
+    technicianGroup: string;
+    supervisorGroup: string;
 }
 
 export interface IntAbnormalityCard {
@@ -44,7 +45,7 @@ export interface IntToolChange {
     to: string;
 }
 
-export interface IntWorkorderParticulars {
+export interface IntWorkorderSummary {
     number: string;
     uid: string;
     type: string;
@@ -83,7 +84,7 @@ export interface IntWorkorder {
     technician: IntUser;
     timeTaken: IntTimeTakenByWorkorder;
     toolChange: IntToolChange;
-    workorder: IntWorkorderParticulars;
+    workorder: IntWorkorderSummary;
 
 }
 

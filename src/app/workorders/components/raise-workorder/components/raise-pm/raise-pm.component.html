@@ -1,11 +1,11 @@
 <div *ngIf="!loading">
-  <div *ngIf="!showErrorMessage">
+  <div *ngIf="!loadingFailed">
     <div class="form-container mat-elevation-z5">
       <div class="form-header">
         <h2 class="text-center">Mold Service Workorder</h2>
       </div>
 
-      <form [formGroup]="form" (ngSubmit)="raiseWorkorder()">
+      <form [formGroup]="form" (ngSubmit)="raiseWorkorder()" autocomplete="off">
         <ng-container class="workorder-number">
           <mat-form-field>
             <mat-label>Workorder Number</mat-label>
@@ -129,12 +129,22 @@
             <mat-label>Supervisor</mat-label>
             <mat-select formControlName="supervisor" class="text-capitalize">
               <mat-option value="" selected>-- select supervisor --</mat-option>
-              <mat-option
-                *ngFor="let supervisor of supervisors"
-                [value]="supervisor"
-                class="text-capitalize"
-                >{{ supervisor.fullName }}</mat-option
-              >
+              <mat-optgroup label="Production Supervisors">
+                <mat-option
+                  class="text-capitalize"
+                  *ngFor="let supervisor of productionSupervisors"
+                  [value]="supervisor"
+                  >{{ supervisor.fullName }}</mat-option
+                >
+              </mat-optgroup>
+              <mat-optgroup label="Engineering Supervisors">
+                <mat-option
+                  class="text-capitalize"
+                  *ngFor="let supervisor of engineeringSupervisors"
+                  [value]="supervisor"
+                  >{{ supervisor.fullName }}</mat-option
+                >
+              </mat-optgroup>
             </mat-select>
             <mat-error *ngIf="form.controls['supervisor']?.errors?.['required']" >
               A supervisor is required.
@@ -205,13 +215,19 @@
     </div>
   </div>
   
-  <div *ngIf="showErrorMessage">
+  <div *ngIf="loadingFailed">
     <div class="form-container mat-elevation-z5">
-      <p>
-        Preparing your new workorder failed with <strong>code PM-01.</strong>
-      </p>
-      <p>Try reloading the page or,</p>
-      <p>Report this error code to support for assistance</p>
+      {{
+        getUserError
+          ? getUserError
+          : getUsersError
+          ? getUsersError
+          : getSectionsError
+          ? getSectionsError
+          : getMachinesError
+          ? getMachinesError
+          : defaultErrorMessage
+      }}
     </div>
   </div>
 </div>

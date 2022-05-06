@@ -32,7 +32,8 @@ export class RaiseAmComponent implements OnInit {
 
   form!: FormGroup;
   raiser!: IntUser;
-  supervisors!: IntUser[];
+  productionSupervisors!: IntUser[];
+  engineeringSupervisors!: IntUser[];
   electricalTechnicians!: IntUser[];
   mechanicalTechnicians!: IntUser[];
   storesTechnicians!: IntUser[];
@@ -42,7 +43,13 @@ export class RaiseAmComponent implements OnInit {
   userUid!: string | null;
 
   loading = false;
-  showErrorMessage = false;
+  loadingFailed = false;
+  getUserError!: string;
+  getUsersError!: string;
+  getSectionsError!: string;
+  getMachinesError!: string;
+  defaultErrorMessage = `Error UAM-01 occured while configuring your workorder. 
+  Please reload the page or report the error code to support for assistance.`;
 
   ngOnInit(): void {
     this.showSpinner();
@@ -65,63 +72,110 @@ export class RaiseAmComponent implements OnInit {
   }
 
   private hideSpinnerOnSuccess(): void {
-    if (this.raiser) {
+    if (
+      this.raiser &&
+      this.storesTechnicians &&
+      this.engineeringSupervisors &&
+      this.machines
+    ) {
       this.createForm();
       this.hideSpinner();
     }
   }
 
   private hideSpinnerOnError(): void {
-    this.showErrorMessage = true;
+    this.loadingFailed = true;
     this.hideSpinner();
   }
 
   private newWorkorderSetup(): void {
     if (this.userUid) {
-      this.workordersService.getCurrentUser(this.userUid)
-        .then((firestoreUserObject: IntUser) => {
-          // get current user - raiser
-          this.raiser = firestoreUserObject;
-          this.hideSpinnerOnSuccess();
-        })
-        .then(() => {
-          this.workordersService.getAllUsers().then(
-            (firestoreUsers: IntUser[]) => {
-              this.electricalTechnicians = firestoreUsers.filter(
-                (firestoreUser: IntUser) =>
-                  firestoreUser.role === 'Technician' && firestoreUser.technicianRole === 'Electrical');
-              this.mechanicalTechnicians = firestoreUsers.filter(
-                (firestoreUser: IntUser) =>
-                  firestoreUser.role === 'Technician' && firestoreUser.technicianRole === 'Mechanical');
-              this.storesTechnicians = firestoreUsers.filter(
-                (firestoreUser: IntUser) => firestoreUser.role === 'Technician' && firestoreUser.technicianRole === 'Eng. Store'
-                  || firestoreUser.technicianRole === 'PM Planning'
-              );
-              this.supervisors = firestoreUsers.filter((firestoreUser: IntUser) => firestoreUser.role === 'Supervisor');
-
-            }
-          );
-        })
-        .then(() => {
-          this.workordersService.getSections()
-            .then((sections: IntSection[]) => {
-              this.sections = sections;
-            });
-        })
-        .then(() => {
-          this.workordersService.getMachines()
-            .then((machines: IntMachine[]) => {
-              this.machines = machines;
-            });
-        })
-        .catch((err: any) => {
-          this.hideSpinnerOnError();
-
-          console.log('RAISE AM ERROR', err)
-
-        });
+      this.getUser(this.userUid);
+      this.getUsers();
+      this.getSections();
+      this.getMachines();
     }
   }
+
+  private getUser(userUid: string): void {
+    this.workordersService.getUser(userUid)
+      .then((user: IntUser) => {
+        this.raiser = user;
+        this.hideSpinnerOnSuccess();
+      })
+      .catch((err: any) => {
+        this.hideSpinnerOnError();
+        if (err.code === 'failed-precondition') {
+          this.getUserError = `Configuring your new workorder failed with error code IND-AM-01. Please report this error code to support to have it resolved.`;
+        } else {
+          this.getUserError = `Configuring your new workorder failed with error code AM-01. Please report this error code to support to have it resolved.`;
+        }
+      });
+  }
+
+  private getUsers(): void {
+    this.workordersService.getUsers()
+      .then(
+        (firestoreUsers: IntUser[]) => {
+          this.electricalTechnicians = firestoreUsers.filter(
+            (firestoreUser: IntUser) =>
+              firestoreUser.group === 'Technician' && firestoreUser.technicianGroup === 'Electrical');
+          this.mechanicalTechnicians = firestoreUsers.filter(
+            (firestoreUser: IntUser) =>
+              firestoreUser.group === 'Technician' && firestoreUser.technicianGroup === 'Mechanical');
+          this.storesTechnicians = firestoreUsers.filter(
+            (firestoreUser: IntUser) => firestoreUser.group === 'Technician' && firestoreUser.technicianGroup === 'Eng. Store'
+              || firestoreUser.technicianGroup === 'PM Planning'
+          );
+          this.productionSupervisors = firestoreUsers.filter((firestoreUser: IntUser) => firestoreUser.group === 'Supervisor' && firestoreUser.supervisorGroup === 'Production');
+          this.engineeringSupervisors = firestoreUsers.filter((firestoreUser: IntUser) => firestoreUser.group === 'Supervisor' && firestoreUser.supervisorGroup === 'Engineering');
+          this.hideSpinnerOnSuccess();
+
+        })
+      .catch((err: any) => {
+        this.hideSpinnerOnError();
+        if (err.code === 'failed-precondition') {
+          this.getUsersError = `Configuring your new workorder failed with error code IND-AM-02. Please report this error code to support to have it resolved.`;
+        } else {
+          this.getUsersError = `Configuring your new workorder failed with error code AM-02. Please report this error code to support to have it resolved.`;
+        }
+      });
+  }
+
+  private getSections(): void {
+    this.workordersService.getSections()
+      .then((sections: IntSection[]) => {
+        this.sections = sections;
+        this.hideSpinnerOnSuccess();
+      })
+      .catch((err: any) => {
+        this.hideSpinnerOnError();
+        if (err.code === 'failed-precondition') {
+          this.getSectionsError = `Configuring your new workorder failed with error code IND-AM-03. Please report this error code to support to have it resolved.`;
+
+        } else {
+          this.getSectionsError = `Configuring your new workorder failed with error code AM-03. Please report this error code to support to have it resolved.`;
+
+        }
+      });
+  }
+
+  private getMachines(): void {
+    this.workordersService.getMachines()
+      .then((machines: IntMachine[]) => {
+        this.machines = machines;
+        this.hideSpinnerOnSuccess();
+      })
+      .catch((err: any) => {
+        this.hideSpinnerOnError();
+        if (err.code === 'failed-precondition') {
+          this.getMachinesError = `Configuring your new workorder failed with error code IND-AM-04. Please report this error code to support to have it resolved.`;
+        } else {
+          this.getMachinesError = `Configuring your new workorder failed with error code AM-04. Please report this error code to support to have it resolved.`;
+        }
+      });
+  }
+
 
   private createForm(): FormGroup {
     const form = this.fb.group({
