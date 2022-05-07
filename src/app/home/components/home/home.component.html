@@ -1,23 +1,31 @@
-<ngx-spinner type="ball-newton-cradle" name="app-home-spinner">
-  <p class="my-3" style="font-size: 20px; color: white">Loading...</p>
-</ngx-spinner>
+<mat-card class="home-page-card">
+  <mat-card-header class="mx-auto">
+    <mat-card-title class="text-center"> ABM Workordered Home </mat-card-title>
+  </mat-card-header>
 
-<div class="home-page" *ngIf="!showErrorMessage">
-  <ng-container *ngIf="user; else noUserObject">
-    <ng-container *ngIf="user.emailVerified; else unverifiedUser">
-      <!-- user is an operator or opertor like -->
-      <ng-container
-        class="raise-and-raised workorders"
-        *ngIf="isOperatorOrOperatorLike"
-      >
-        <mat-card class="home-page-card-links">
-          <mat-card-header>
-            <mat-card-title class="text-center">
-              Welcome to ABM Workordered
-            </mat-card-title>
-          </mat-card-header>
-          <mat-card-content class="home-navigation-links-container">
-            <div class="raise-workorder-router">
+  <mat-card-content>
+    <div *ngIf="loading">
+      <div class="bootstrap-spinner-container">
+        <div class="bootstrap-spinner">
+          <div
+            #workorderLoadingSpinner
+            class="spinner-border"
+            style="width: 2rem; height: 2rem"
+            role="status"
+          ></div>
+          <span class="loading-tag"><strong>Loading...</strong></span>
+        </div>
+      </div>
+    </div>
+    <!-- user logged in -->
+    <div *ngIf="!loading && !loadingFailed">
+      <div *ngIf="user">
+        <!-- user email verified -->
+        <div *ngIf="user.emailVerified">
+          <!-- operators -->
+          <div *ngIf="isOperatorOrOperatorLike" class="navigation-links">
+            <!-- raise new workorder -->
+            <div>
               <a
                 type="button"
                 class="btn btn-link home-nav-button shadow-none"
@@ -27,46 +35,45 @@
               </a>
             </div>
 
-            <div class="raised-workorders">
+            <!-- raised workorders -->
+            <div>
               <a
                 type="button"
                 class="btn btn-link home-nav-button shadow-none"
                 [routerLink]="['/workorders/other/raised', userUid]"
               >
-                Raised Workorders - ( {{ raisedWorkorders ? raisedWorkorders.length  : 0 }} )
+                Raised Workorders - (
+                {{ raisedWorkorders ? raisedWorkorders.length : 0 }} )
               </a>
             </div>
-            <div class="approved-workorders">
+
+            <!-- approved workorders -->
+            <div>
               <a
                 type="button"
                 class="btn btn-outline-success home-nav-button shadow-none"
                 [routerLink]="['/workorders/other/approved', userUid]"
-                >Approved Workorders - ( {{ approvedWorkorders ? approvedWorkorders.length : 0 }} )
+                >Approved Workorders - (
+                {{ approvedWorkorders ? approvedWorkorders.length : 0 }} )
               </a>
             </div>
 
-            <div class="rejected-workorders">
+            <!-- rejected workorders -->
+            <div>
               <a
                 type="button"
                 class="btn btn-outline-warning home-nav-button shadow-none"
                 [routerLink]="['/workorders/other/rejected', userUid]"
-                >Rejected Workorders - ( {{ rejectedWorkorders ? rejectedWorkorders.length : 0 }} )
+                >Rejected Workorders - (
+                {{ rejectedWorkorders ? rejectedWorkorders.length : 0 }} )
               </a>
             </div>
-          </mat-card-content>
-        </mat-card>
-      </ng-container>
+          </div>
 
-      <!-- user is a supervisor -->
-      <ng-container class="supervisors" *ngIf="isSupervisor">
-        <mat-card class="home-page-card-links">
-          <mat-card-header>
-            <mat-card-title class="text-center">
-              Welcome to ABM Workordered
-            </mat-card-title>
-          </mat-card-header>
-          <mat-card-content class="home-navigation-links-container">
-            <div class="raise-workorder-router">
+          <!-- supervisors -->
+          <div *ngIf="isSupervisor" class="navigation-links">
+            <!-- raise workorders-->
+            <div>
               <a
                 type="button"
                 class="btn btn-link home-nav-button shadow-none"
@@ -76,133 +83,145 @@
               </a>
             </div>
 
-            <div class="raised-workorders">
+            <!-- raised workorders -->
+            <div>
               <a
                 type="button"
                 class="btn btn-link home-nav-button shadow-none"
                 [routerLink]="['/workorders/supervisor/raised', userUid]"
               >
-                Raised Workorders - ( {{ raisedWorkorders ? raisedWorkorders.length  : 0 }} )
+                Raised Workorders - (
+                {{ raisedWorkorders ? raisedWorkorders.length : 0 }} )
               </a>
             </div>
 
-            <div class="unverified-workorders">
+            <!-- unverified workorders -->
+            <div>
               <a
                 type="button"
                 class="btn btn-link home-nav-button shadow-none"
                 [routerLink]="['/workorders/supervisor/unverified', userUid]"
                 >Unverified Workorders - (
-                {{ unverifiedWorkorders ? unverifiedWorkorders.length : 0 }} )</a
+                {{ unverifiedWorkorders ? unverifiedWorkorders.length : 0 }}
+                )</a
               >
             </div>
 
-            <div class="approved-workorders">
+            <!-- approved workorders -->
+            <div>
               <a
                 type="button"
                 class="btn btn-outline-success home-nav-button shadow-none"
                 [routerLink]="['/workorders/supervisor/approved', userUid]"
-                >Approved Workorders - ( {{ approvedWorkorders ? approvedWorkorders.length : 0 }} )
+                >Approved Workorders - (
+                {{ approvedWorkorders ? approvedWorkorders.length : 0 }} )
               </a>
             </div>
 
-            <div class="rejected-workorders">
+            <!-- rejected workorders -->
+            <div>
               <a
                 type="button"
                 class="btn btn-outline-warning home-nav-button shadow-none"
                 [routerLink]="['/workorders/supervisor/rejected', userUid]"
-                >Rejected Workorders - ( {{ rejectedWorkorders ? rejectedWorkorders.length : 0 }} )
+                >Rejected Workorders - (
+                {{ rejectedWorkorders ? rejectedWorkorders.length : 0 }} )
               </a>
             </div>
-          </mat-card-content>
-        </mat-card>
-      </ng-container>
+          </div>
 
-      <!-- user is an eng technician -->
-      <ng-container class="technicians" *ngIf="isEngineeringTechnician">
-        <mat-card class="home-page-card-links">
-          <mat-card-header>
-            <mat-card-title class="text-center">
-              Welcome to ABM Workordered
-            </mat-card-title>
-          </mat-card-header>
-          <mat-card-content class="home-navigation-links-container">
-            <div class="open-workorders">
+          <!-- eng technicians -->
+          <div *ngIf="isEngineeringTechnician" class="navigation-links">
+            <!-- open workorders -->
+            <div>
               <a
                 type="button"
                 class="btn btn-link home-nav-button shadow-none"
                 [routerLink]="['/workorders/engineering/open', userUid]"
-                >Open Workorders - ( {{ engTechnicianOpenWorkorders ? engTechnicianOpenWorkorders.length : 0 }} )
+                >Open Workorders - (
+                {{
+                  engTechnicianOpenWorkorders
+                    ? engTechnicianOpenWorkorders.length
+                    : 0
+                }}
+                )
               </a>
             </div>
-            <div class="closed-workorders">
+
+            <!-- closed workorders -->
+            <div>
               <a
                 type="button"
                 class="btn btn-link home-nav-button shadow-none"
                 [routerLink]="['/workorders/engineering/closed', userUid]"
                 >Closed Workorders - (
-                {{ engTechnicianClosedWorkorders ? engTechnicianClosedWorkorders.length : 0 }} )
+                {{
+                  engTechnicianClosedWorkorders
+                    ? engTechnicianClosedWorkorders.length
+                    : 0
+                }}
+                )
               </a>
             </div>
-          </mat-card-content>
-        </mat-card>
-      </ng-container>
+          </div>
 
-      <!-- user is a stores technician -->
-      <ng-container class="technicians" *ngIf="isStoresTechnician">
-        <mat-card class="home-page-card-links">
-          <mat-card-header>
-            <mat-card-title class="text-center">
-              Welcome to ABM Workordered
-            </mat-card-title>
-          </mat-card-header>
-          <mat-card-content class="home-navigation-links-container">
-            <div class="open-workorders">
+          <!-- stores technicians -->
+          <div *ngIf="isStoresTechnician" class="navigation-links">
+            <!-- open workorders -->
+            <div>
               <a
                 type="button"
                 class="btn btn-link home-nav-button shadow-none"
                 [routerLink]="['/workorders/stores/open', userUid]"
                 >Open Workorders - (
-                {{ storesTechnicianOpenWorkorders ? storesTechnicianOpenWorkorders.length : 0 }} )
+                {{
+                  storesTechnicianOpenWorkorders
+                    ? storesTechnicianOpenWorkorders.length
+                    : 0
+                }}
+                )
               </a>
             </div>
-            <div class="closed-workorders">
+
+            <!-- closed-workorders -->
+            <div>
               <a
                 type="button"
                 class="btn btn-link home-nav-button shadow-none"
                 [routerLink]="['/workorders/stores/closed', userUid]"
                 >Closed Workorders - (
-                {{ storesTechnicianClosedWorkorders ? storesTechnicianClosedWorkorders.length : 0 }} )
+                {{
+                  storesTechnicianClosedWorkorders
+                    ? storesTechnicianClosedWorkorders.length
+                    : 0
+                }}
+                )
               </a>
             </div>
-          </mat-card-content>
-        </mat-card>
-      </ng-container>
-    </ng-container>
+          </div>
+        </div>
 
-    <ng-template #unverifiedUser>
-      <mat-card class="home-page-card">
-        <mat-card-header>
-          <mat-card-title class="text-center">
-            Welcome to ABM Workordered
-          </mat-card-title>
-        </mat-card-header>
-
-        <mat-card-content>
+        <!-- unverified email -->
+        <div *ngIf="!user.emailVerified">
           <p>Hello {{ user.displayName | titlecase }},</p>
+
           <p>
-            A verification email has been sent to
+            Verification email sent to
             <span class="emailAddress">{{ user.email }}</span>
           </p>
+
           <p>
-            To access all services, complete the verification
+            Complete the verification
             <span class="fw-bold fst-italic">then reload this page.</span>
           </p>
-          <p>Remember to check your spam and junk mail folders,</p>
-          <p>where automated messages sometimes filter.</p>
 
-          <p>If 15 minutes have passed and you still did not get the email,</p>
           <p>
-            Try,
+            Remember to check your spam and junk mail folders, where automated
+            messages sometimes filter.
+          </p>
+
+          <p>
+            Didn't get the email?
             <a
               class="btn btn-link link-button"
               type="button"
@@ -211,23 +230,12 @@
               Resend Verification Code
             </a>
           </p>
-        </mat-card-content>
-      </mat-card>
-    </ng-template>
-  </ng-container>
-</div>
+        </div>
+      </div>
 
-<ng-template #noUserObject>
-  <mat-card class="home-page-card">
-    <mat-card-header>
-      <mat-card-title class="text-center">
-        Welcome to ABM Workordered
-      </mat-card-title>
-    </mat-card-header>
-
-    <mat-card-content>
-      <div class="new-user-welcome-message">
-        <p>Hello there!</p>
+      <!-- no user-logged in -->
+      <div *ngIf="!user">
+        <p>Hello there,</p>
         <p>
           It is great to have you on board the ABM Workordered family, where
           your world of paper-less workorders awaits.
@@ -241,21 +249,15 @@
         </p>
         <p>To get started, register or log in above...</p>
       </div>
-    </mat-card-content>
-  </mat-card>
-</ng-template>
+    </div>
 
-<div *ngIf="showErrorMessage">
-  <div *ngIf="indexingError">
-    <div class="form-container mat-elevation-z5">
-      <p>Configuring your data failed with error code IDH-01.</p>
-      <p>Please report this error code to support to have it fixed.</p>
+    <!-- error loading workorders -->
+    <div *ngIf="!loading && loadingFailed">
+      <p>
+        {{
+          indexingError ? indexingError : otherError ? otherError : defaultError
+        }}
+      </p>
     </div>
-  </div>
-  <div *ngIf="unknownError">
-    <div class="form-container mat-elevation-z5">
-      <p>Configuring your data failed with error code EH-01.</p>
-      <p>Please report this error code to support to have it fixed.</p>
-    </div>
-  </div>
-</div>
+  </mat-card-content>
+</mat-card>

@@ -10,8 +10,7 @@ span.emailAddress:hover {
     border: 2px solid #73ad21;
 }
 
-mat-card.home-page-card,
-.home-page-card-links {
+mat-card.home-page-card {
     display: flex;
     justify-content: flex-start;
     align-items: center;
@@ -20,30 +19,49 @@ mat-card.home-page-card,
     padding: 15px;
     border-radius: 20px;
     margin: 16px auto;
-}
+    background: #e9eef3;
 
-mat-card.home-page-card {
-    background: #c5c6c7;
-}
-
-.home-navigation-links-container {
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    flex-flow: row wrap;
-
-    div {
+    mat-card-content {
         width: 100%;
-        margin-top: 10px;
 
-        a.btn {
-            text-decoration: none;
+        .bootstrap-spinner-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            .bootstrap-spinner {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                flex-direction: column;
+                margin: 32px 0 8px;
+
+                .loading-tag {
+                    margin: 16px 0;
+                }
+            }
         }
 
-        a.btn.btn-link:hover,
-        a.btn.btn-link:focus {
-            background: #002ead;
-            color: white;
+        .navigation-links {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            flex-flow: row wrap;
+
+            div {
+                width: 100%;
+                margin-top: 10px;
+
+                a.btn {
+                    text-decoration: none;
+                }
+
+                a.btn.btn-link:hover,
+                a.btn.btn-link:focus {
+                    background: #002ead;
+                    color: white;
+                }
+            }
         }
     }
 }

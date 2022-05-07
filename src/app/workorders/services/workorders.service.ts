@@ -120,7 +120,7 @@ export class WorkordersService {
     return workordersArray;
   }
 
-  // persist new workorder to db
+  // CREATE new workorder
   async raiseWorkorder(workorderData: IntWorkorder): Promise<any> {
     const uid = workorderData.workorder.uid;
     const docRef = doc(this.firestore, `workorders/${uid}`);
@@ -130,7 +130,7 @@ export class WorkordersService {
     return newWorkorder;
   }
 
-  // UPDATE workorder > approve, reject, acknowledge, done, closed
+  // UPDATE workorder > approve, reject, acknowledge, done, close
   async updateWorkorder(workorderUid: string, workorderUpdateData: any): Promise<any> {
     const workorderRef = doc(this.firestore, `workorders/${workorderUid}`);
     const updatedWorkorder = await updateDoc(workorderRef, workorderUpdateData);

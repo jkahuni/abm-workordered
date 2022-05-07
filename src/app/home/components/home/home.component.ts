@@ -67,9 +67,11 @@ export class HomeComponent implements OnInit {
   isStoresTechnician = false;
 
   // for errors
-  showErrorMessage = false;
-  indexingError = false;
-  unknownError = false;
+  loading = true;
+  loadingFailed = false;
+  indexingError!: string;
+  otherError!: string;
+  defaultError = `Error UHE-01 occured. Please report this error to support to have if fixed.`;
 
   // for controlling the spinner
   raisedWorkordersSet = false;
@@ -82,85 +84,19 @@ export class HomeComponent implements OnInit {
   storesTechnicianClosedWorkordersSet = false;
 
   ngOnInit(): void {
-    this.spinner.show('app-home-spinner');
-
     onAuthStateChanged(this.auth,
       (user: User | null) => {
         this.user = user;
         if (user !== null) {
-
           this.userUid = user.uid;
           if (!user.emailVerified) {
             this.hideSpinnerOnError();
 
           } else {
-            this.workordersService.getUser(this.userUid)
-              .then((firestoreUser: IntUser) => {
-                //  user is a supervisor
-                if (firestoreUser.group === 'Supervisor') {
-                  this.getRaisedWorkorders();
-                  this.getUnverifiedWorkorders();
-                  this.getApprovedWorkorders();
-                  this.getRejectedWorkorders();
-                  this.isSupervisor = true;
-                }
-                // user is a technician
-                else if (firestoreUser.group === 'Technician') {
-                  // eng technician
-                  if (firestoreUser.technicianGroup === 'Electrical'
-                    ||
-                    firestoreUser.technicianGroup === 'Mechanical') {
-
-                    this.getEngTechnicianOpenWorkorders();
-                    this.getEngTechnicianClosedWorkorders();
-                    this.isEngineeringTechnician = true;
-                    this.technicianType = 'engineering';
-                  }
-
-                  // stores technician
-                  else if (
-                    firestoreUser.technicianGroup === 'Eng. Store'
-                    ||
-                    firestoreUser.technicianGroup === 'PM Planning'
-                  ) {
-                    this.getStoresTechnicianOpenWorkorders();
-                    this.getStoresTechnicianClosedWorkorders();
-                    this.isStoresTechnician = true;
-                    this.technicianType = 'stores';
-                  }
-
-                }
-
-                // user is not technician/supervisor
-                else {
-                  this.getRaisedWorkorders();
-                  this.getOtherApprovedWorkorders();
-                  this.getOtherRejectedWorkorders();
-                  this.isOperatorOrOperatorLike = true;
-
-                }
-              })
-              .catch((err: any) => {
-                this.spinner.hide('app-home-spinner');
-                this.showErrorMessage = true;
-
-                if (err.code === 'failed-precondition') {
-                  console.log('HOME INIT METHOD', err);
-                  this.toast.error(`An fatal error with code IDH-01 occured. Please report this error code to support for assistance.`);
-                  this.indexingError = true;
-
-
-                } else {
-                  console.log('HOME INIT METHOD', err);
-                  this.unknownError = true;
-                  this.toast.error(`An unknownn error occured. Please reload the page.`);
-
-                }
-
-              });
+            this.getUser(this.userUid);
           }
         } else {
-          this.hideSpinnerOnError();
+          this.loading = false;
 
         }
       },
@@ -175,34 +111,94 @@ export class HomeComponent implements OnInit {
   // hiding the spinner
   private hideSpinnerOnSuccess(): void {
     if (this.isOperatorOrOperatorLike && this.raisedWorkordersSet) {
-      this.spinner.hide('app-home-spinner');
+      this.loading = false;
+
     } else if (
       this.isSupervisor &&
       this.unverifiedWorkordersSet &&
       this.approvedWorkordersSet &&
       this.rejectedWorkordersSet) {
-      this.spinner.hide('app-home-spinner');
+      this.loading = false;
+
 
     } else if (
       this.isEngineeringTechnician &&
       this.engTechnicianOpenWorkordersSet &&
       this.engTechnicianClosedWorkordersSet
     ) {
-      this.spinner.hide('app-home-spinner');
+      this.loading = false;
+
 
     } else if (
       this.isStoresTechnician &&
       this.storesTechnicianClosedWorkordersSet &&
       this.storesTechnicianOpenWorkordersSet
     ) {
-      this.spinner.hide('app-home-spinner');
+      this.loading = false;
+
 
     }
   }
 
   private hideSpinnerOnError(): void {
-    this.spinner.hide('app-home-spinner');
+    this.loading = false;
+    this.loadingFailed = true;
 
+  }
+
+  // get user
+  private getUser(userUid: string): void {
+    this.workordersService.getUser(userUid)
+      .then((firestoreUser: IntUser) => {
+        if (firestoreUser.group === 'Supervisor') {
+          this.isSupervisor = true;
+          this.getRaisedWorkorders();
+          this.getUnverifiedWorkorders();
+          this.getApprovedWorkorders();
+          this.getRejectedWorkorders();
+        }
+
+        else if (firestoreUser.group === 'Technician') {
+          // eng technician
+          if (firestoreUser.technicianGroup === 'Electrical'
+            ||
+            firestoreUser.technicianGroup === 'Mechanical') {
+            this.isEngineeringTechnician = true;
+            this.getEngTechnicianOpenWorkorders();
+            this.getEngTechnicianClosedWorkorders();
+            this.technicianType = 'engineering';
+          }
+
+          // stores technician
+          else if (
+            firestoreUser.technicianGroup === 'Eng. Store'
+            ||
+            firestoreUser.technicianGroup === 'PM Planning'
+          ) {
+            this.isStoresTechnician = true;
+            this.getStoresTechnicianOpenWorkorders();
+            this.getStoresTechnicianClosedWorkorders();
+            this.technicianType = 'stores';
+          }
+        }
+
+        else {
+          this.isOperatorOrOperatorLike = true;
+          this.getRaisedWorkorders();
+          this.getOtherApprovedWorkorders();
+          this.getOtherRejectedWorkorders();
+        }
+      })
+      .catch(
+        (err: any) => {
+          this.hideSpinnerOnError();
+          if (err.code === 'failed-precondition') {
+            this.indexingError = `Error IND-H-11 occured. Please report this error to support to have it fixed.`;
+          } else {
+            this.otherError = `Error H-11 occured. Please report this error to support to have it fixed.`;
+          }
+        }
+      );
   }
 
   // getting workorders by type
@@ -220,10 +216,12 @@ export class HomeComponent implements OnInit {
         this.hideSpinnerOnSuccess();
       })
       .catch((err: any) => {
-        console.log('ERROR H01', err);
         this.hideSpinnerOnError();
-
-        this.toast.error('Error Code H01: An error occured. Please report this code to support to have it fixed.', { duration: 8000 });
+        if (err.code === 'failed-precondition') {
+          this.indexingError = `Error IND-H-01 occured. Please report this error to support to have it fixed.`;
+        } else {
+          this.otherError = `Error H-01 occured. Please report this error to support to have it fixed.`;
+        }
       });
   }
 
@@ -244,8 +242,11 @@ export class HomeComponent implements OnInit {
 
       }).catch((err: any) => {
         this.hideSpinnerOnError();
-        console.log('ERROR H02', err);
-        this.toast.error('Error Code H02: An error occured. Please report this code to support to have it fixed.', { duration: 8000 });
+        if (err.code === 'failed-precondition') {
+          this.indexingError = `Error IND-H-02 occured. Please report this error to support to have it fixed.`;
+        } else {
+          this.otherError = `Error H-02 occured. Please report this error to support to have it fixed.`;
+        }
       });
   }
 
@@ -266,8 +267,11 @@ export class HomeComponent implements OnInit {
 
       }).catch((err: any) => {
         this.hideSpinnerOnError();
-        console.log('ERROR H03', err);
-        this.toast.error('Error Code H03: An error occured. Please report this code to support to have it fixed.', { duration: 8000 });
+        if (err.code === 'failed-precondition') {
+          this.indexingError = `Error IND-H-03 occured. Please report this error to support to have it fixed.`;
+        } else {
+          this.otherError = `Error H-03 occured. Please report this error to support to have it fixed.`;
+        }
       });
   }
 
@@ -288,8 +292,11 @@ export class HomeComponent implements OnInit {
 
       }).catch((err: any) => {
         this.hideSpinnerOnError();
-        console.log('ERROR H04', err);
-        this.toast.error('Error Code H04: An error occured. Please report this code to support to have it fixed.', { duration: 8000 });
+        if (err.code === 'failed-precondition') {
+          this.indexingError = `Error IND-H-04 occured. Please report this error to support to have it fixed.`;
+        } else {
+          this.otherError = `Error H-04 occured. Please report this error to support to have it fixed.`;
+        }
       });
   }
 
@@ -312,9 +319,9 @@ export class HomeComponent implements OnInit {
         this.hideSpinnerOnError();
         console.log('ERROR H09', err);
         if (err.code === 'failed-precondition') {
-          this.toast.error(`An indexing error of error code H-09 occured. Report this error code to support for its resolution.`, { duration: 8000, id: 'error-h-09' });
+          this.indexingError = `Error IND-H-05 occured. Please report this error to support to have it fixed.`;
         } else {
-          this.toast.error('Error Code H09: An error occured. Please report this code to support to have it fixed.', { duration: 8000, id: 'error-h-09' });
+          this.otherError = `Error H-05 occured. Please report this error to support to have it fixed.`;
         }
       });
   }
@@ -336,11 +343,10 @@ export class HomeComponent implements OnInit {
 
       }).catch((err: any) => {
         this.hideSpinnerOnError();
-        console.log('ERROR H10', err);
         if (err.code === 'failed-precondition') {
-          this.toast.error(`An indexing error of error code H-10 occured. Report this error code to support for its resolution.`, { duration: 8000, id: 'error-h-10' });
+          this.indexingError = `Error IND-H-06 occured. Please report this error to support to have it fixed.`;
         } else {
-          this.toast.error('Error Code H10: An error occured. Please report this code to support to have it fixed.', { duration: 8000, id: 'error-h-10' });
+          this.otherError = `Error H-06 occured. Please report this error to support to have it fixed.`;
         }
       });
   }
@@ -365,8 +371,11 @@ export class HomeComponent implements OnInit {
         }
       ).catch((err: any) => {
         this.hideSpinnerOnError();
-        console.log('ERROR H05', err);
-        this.toast.error('Error Code H05: An error occured. Please report this code to support to have it fixed.', { duration: 8000 });
+        if (err.code === 'failed-precondition') {
+          this.indexingError = `Error IND-H-07 occured. Please report this error to support to have it fixed.`;
+        } else {
+          this.otherError = `Error H-07 occured. Please report this error to support to have it fixed.`;
+        }
       });
   }
 
@@ -388,8 +397,11 @@ export class HomeComponent implements OnInit {
 
       }).catch((err: any) => {
         this.hideSpinnerOnError();
-        console.log('ERROR H06', err);
-        this.toast.error('Error Code H06: An error occured. Please report this code to support to have it fixed.', { duration: 8000 });
+        if (err.code === 'failed-precondition') {
+          this.indexingError = `Error IND-H-08 occured. Please report this error to support to have it fixed.`;
+        } else {
+          this.otherError = `Error H-08 occured. Please report this error to support to have it fixed.`;
+        }
       });
   }
 
@@ -413,8 +425,11 @@ export class HomeComponent implements OnInit {
         }
       ).catch((err: any) => {
         this.hideSpinnerOnError();
-        console.log('ERROR H07', err);
-        this.toast.error('Error Code H07: An error occured. Please report this code to support to have it fixed.', { duration: 8000 });
+        if (err.code === 'failed-precondition') {
+          this.indexingError = `Error IND-H-09 occured. Please report this error to support to have it fixed.`;
+        } else {
+          this.otherError = `Error H-09 occured. Please report this error to support to have it fixed.`;
+        }
       });
   }
 
@@ -436,11 +451,13 @@ export class HomeComponent implements OnInit {
 
       }).catch((err: any) => {
         this.hideSpinnerOnError();
-        console.log('ERROR H08', err);
-        this.toast.error('Error Code H08: An error occured. Please report this code to support to have it fixed.', { duration: 8000 });
+        if (err.code === 'failed-precondition') {
+          this.indexingError = `Error IND-H-10 occured. Please report this error to support to have it fixed.`;
+        } else {
+          this.otherError = `Error H-10 occured. Please report this error to support to have it fixed.`;
+        }
       });
   }
-
 
   resendVerificationCode(): any {
     console.log('THE USER before, ', this.user);
@@ -451,7 +468,6 @@ export class HomeComponent implements OnInit {
       this.authenticationService
         .sendVerificationEmail(this.user)
         .then(() => {
-          console.log('THE then block, ', this.user);
 
           this.router.navigate([`authentication/verify-email`]);
           this.spinner.hide('app-verify-email-spinner');
@@ -474,5 +490,4 @@ export class HomeComponent implements OnInit {
       this.router.navigate(['/']);
     }
   }
-
 }
