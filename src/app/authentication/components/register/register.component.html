@@ -105,7 +105,7 @@
     </mat-form-field>
 
     <mat-form-field *ngIf="form.controls['group']?.value === 'Supervisor'" appearance="outline">
-      <mat-label>Supervisor Group</mat-label>
+      <mat-label>Department</mat-label>
       <mat-select #supervisorGroupSelect formControlName="supervisorGroup">
         <mat-option
           *ngFor="let supervisorGroup of supervisorGroups"
@@ -114,7 +114,21 @@
         >
       </mat-select>
       <mat-error *ngIf="form.controls['supervisorGroup']?.errors?.['required']">
-        Specific supervisor group required.
+        Supervisor department required.
+      </mat-error>
+    </mat-form-field>
+
+     <mat-form-field *ngIf="form.controls['group']?.value === 'Manager'" appearance="outline">
+      <mat-label>Department</mat-label>
+      <mat-select #managerGroupSelect formControlName="managerGroup">
+        <mat-option
+          *ngFor="let managerGroup of managerGroups"
+          value="{{ managerGroup }}"
+          >{{ managerGroup }}</mat-option
+        >
+      </mat-select>
+      <mat-error *ngIf="form.controls['managerGroup']?.errors?.['required']">
+        Please specify your department.
       </mat-error>
     </mat-form-field>
 

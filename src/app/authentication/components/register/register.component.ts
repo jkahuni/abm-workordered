@@ -25,6 +25,7 @@ export class RegisterComponent implements OnInit {
 
   @ViewChild('technicianGroupSelect') technicianGroupSelect!: MatSelect;
   @ViewChild('supervisorGroupSelect') supervisorGroupSelect!: MatSelect;
+  @ViewChild('managerGroupSelect') managerGroupSelect!: MatSelect;
 
   hidePassword = true;
   hideConfirmPassword = true;
@@ -33,12 +34,11 @@ export class RegisterComponent implements OnInit {
     'Distribution'];
   technicianGroups: string[] = ['Electrical', 'Mechanical', 'Eng. Store', 'PM Planning'];
   supervisorGroups: string[] = ['Production', 'Engineering'];
+  managerGroups: string[] = ['Engineering', 'Production', 'QA', 'Finance', 'IT', 'Distribution'];
 
   ngOnInit(): void {
     this.form = this.createForm();
-
   }
-
 
   createForm = () => {
     const form = this.fb.group({
@@ -58,6 +58,7 @@ export class RegisterComponent implements OnInit {
       }],
       technicianGroup: [''],
       supervisorGroup: [''],
+      managerGroup: [''],
       password: ['', Validators.required],
       confirmPassword: ['', Validators.required]
     });
@@ -70,7 +71,6 @@ export class RegisterComponent implements OnInit {
   private trackGroupChanges(form: FormGroup): any {
     form.get('group')?.valueChanges
       .subscribe((groupValue: string) => {
-        console.log(groupValue);
         if (groupValue === 'Technician') {
           setTimeout(() => {
             if (this.technicianGroupSelect) {
@@ -86,6 +86,12 @@ export class RegisterComponent implements OnInit {
             }
           });
 
+        } else if (groupValue === 'Manager') {
+          setTimeout(() => {
+            if (this.managerGroupSelect) {
+              this.managerGroupSelect.open();
+            }
+          });
         }
       });
   }
@@ -118,6 +124,7 @@ export class RegisterComponent implements OnInit {
       group,
       technicianGroup,
       supervisorGroup,
+      managerGroup,
       password,
     } = this.form?.value;
     if (group === 'Technician' && technicianGroup === '') {
@@ -126,6 +133,10 @@ export class RegisterComponent implements OnInit {
     else if (group === 'Supervisor' && supervisorGroup === '') {
       this.form?.get('supervisorGroup')?.setErrors({ required: true });
 
+    } else if (group === 'Manager' && managerGroup === '') {
+      this.form?.get('managerGroup')?.setErrors({
+        required: true
+      });
     }
     else if (this.form.invalid) {
       this.toast.error(`Error. Ensure required fields are not blank or invalid.`,
@@ -157,6 +168,7 @@ export class RegisterComponent implements OnInit {
             group,
             technicianGroup,
             supervisorGroup,
+            managerGroup,
             canEditWorkorder: this.assignPrivileges(email),
             canDeleteWorkorder: this.assignPrivileges(email),
             isAdmin: this.assignPrivileges(email),

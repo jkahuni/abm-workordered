@@ -18,6 +18,7 @@ export interface IntUser {
     group: string;
     technicianGroup: string;
     supervisorGroup: string;
+    managerGroup?: string;
 }
 
 export interface IntAbnormalityCard {

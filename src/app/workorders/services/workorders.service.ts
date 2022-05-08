@@ -24,10 +24,10 @@ export class WorkordersService {
 
     const user = await getDoc(userDocRef);
 
-    const { fullName, uid, group, technicianGroup, supervisorGroup
+    const { fullName, uid, group, technicianGroup, supervisorGroup, managerGroup
     } = user?.data() as IntUser;
 
-    return { fullName, uid, group, technicianGroup, supervisorGroup };
+    return { fullName, uid, group, technicianGroup, supervisorGroup, managerGroup };
 
   }
 
@@ -41,9 +41,9 @@ export class WorkordersService {
 
     const usersArray = allUsersQuerySnapshot?.docs.map(
       (user: DocumentData) => {
-        const { fullName, uid, group, technicianGroup, supervisorGroup } = user['data']() as IntUser;
+        const { fullName, uid, group, technicianGroup, supervisorGroup, managerGroup } = user['data']() as IntUser;
 
-        return { fullName, uid, group, technicianGroup, supervisorGroup };
+        return { fullName, uid, group, technicianGroup, supervisorGroup, managerGroup };
       }
     ) as IntUser[];
 

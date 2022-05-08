@@ -16,7 +16,7 @@ import { IntUser, IntWorkorder } from '@workorders/models/workorders.models';
 //  firebase and firestore
 import { User, Auth, onAuthStateChanged } from '@angular/fire/auth';
 import {
-  Firestore, collection, where, query, orderBy
+  Firestore, collection, where, query, orderBy, limit
 } from '@angular/fire/firestore';
 
 @Component({
@@ -58,6 +58,7 @@ export class HomeComponent implements OnInit {
   engTechnicianClosedWorkorders!: IntWorkorder[];
   storesTechnicianOpenWorkorders!: IntWorkorder[];
   storesTechnicianClosedWorkorders!: IntWorkorder[];
+  allWorkorders!: IntWorkorder[];
 
 
   // for controlling access to the various views in home page
@@ -65,6 +66,7 @@ export class HomeComponent implements OnInit {
   isSupervisor = false;
   isEngineeringTechnician = false;
   isStoresTechnician = false;
+  isEngineeringManager = false;
 
   // for errors
   loading = true;
@@ -82,6 +84,7 @@ export class HomeComponent implements OnInit {
   engTechnicianClosedWorkordersSet = false;
   storesTechnicianOpenWorkordersSet = false;
   storesTechnicianClosedWorkordersSet = false;
+  allWorkordersSet = false;
 
   ngOnInit(): void {
     onAuthStateChanged(this.auth,
@@ -90,8 +93,7 @@ export class HomeComponent implements OnInit {
         if (user !== null) {
           this.userUid = user.uid;
           if (!user.emailVerified) {
-            this.hideSpinnerOnError();
-
+            this.loading = false;
           } else {
             this.getUser(this.userUid);
           }
@@ -135,8 +137,11 @@ export class HomeComponent implements OnInit {
       this.storesTechnicianOpenWorkordersSet
     ) {
       this.loading = false;
-
-
+    } else if (
+      this.isEngineeringManager && 
+      this.allWorkordersSet
+    ) {
+      this.loading = false;
     }
   }
 
@@ -180,6 +185,11 @@ export class HomeComponent implements OnInit {
             this.getStoresTechnicianClosedWorkorders();
             this.technicianType = 'stores';
           }
+        }
+
+        else if (firestoreUser.group === 'Manager' && firestoreUser.managerGroup === 'Engineering') {
+          this.isEngineeringManager = true;
+          this.getFirst200Workorders();
         }
 
         else {
@@ -458,6 +468,57 @@ export class HomeComponent implements OnInit {
         }
       });
   }
+
+  // for eng manager
+  private getFirst200Workorders(): void {
+    const workordersQuery = query(
+      this.workordersCollectionReference,
+      orderBy('workorder.number'),
+      limit(200)
+    );
+
+    this.workordersService.getWorkorders(workordersQuery)
+      .then((workorders: IntWorkorder[]) => {
+        this.allWorkorders = workorders;
+        this.allWorkordersSet = true;
+        this.hideSpinnerOnSuccess();
+      })
+      .catch((err: any) => {
+        this.hideSpinnerOnError();
+        if (err.code === 'failed-precondition') {
+          this.indexingError = `Error IND-H-12 occured. Please report this error to support to have it fixed.`;
+        } else {
+          this.otherError = `Error H-12 occured. Please report this error to support to have it fixed.`;
+        }
+      });
+
+
+  }
+
+  private getAllWorkorders(): void {
+    const workordersQuery = query(this.workordersCollectionReference,
+      orderBy('workorder.number')
+    );
+
+    this.workordersService.getWorkorders(workordersQuery)
+      .then((workorders: IntWorkorder[]) => {
+        this.allWorkorders = workorders;
+        this.allWorkordersSet = true;
+        this.hideSpinnerOnSuccess();
+      })
+      .catch((err: any) => {
+        this.hideSpinnerOnError();
+        if (err.code === 'failed-precondition') {
+          this.indexingError = `Error IND-H-13 occured. Please report this error to support to have it fixed.`;
+        } else {
+          this.otherError = `Error H-13 occured. Please report this error to support to have it fixed.`;
+        }
+      });
+
+
+
+  }
+
 
   resendVerificationCode(): any {
     console.log('THE USER before, ', this.user);

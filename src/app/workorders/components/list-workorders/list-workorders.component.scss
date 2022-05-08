@@ -9,6 +9,19 @@ mat-sidenav-container.sidenav-container {
         display: flex;
         flex-flow: row wrap;
 
+        .sidenav-heading-container,
+        .mat-subheader.workorders-subheader,
+        .workorders-sidenav-text-container,
+        .filter-workorders-text-and-icon,
+        .filter-workorders-options,
+        .filter-workorders-text,
+        .filter-workorders-icon,
+        .filter-field-value {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
         .filter-workorders {
             margin: 8px 0 0;
             display: flex;
@@ -34,20 +47,13 @@ mat-sidenav-container.sidenav-container {
             }
         }
 
-        .sidenav-heading-container,
-        .mat-subheader.workorders-subheader,
-        .workorders-sidenav-text-container,
-        .filter-workorders-text-and-icon,
-        .filter-workorders-options,
-        .filter-workorders-text,
-        .filter-workorders-icon {
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .sidenav-heading,
+        .filter-value {
+            margin: 16px 0 0;
         }
 
-        .sidenav-heading {
-            margin: 16px 0 0;
+        .filter-value {
+            color: green;
         }
 
         .workorders-sidenav-text {
@@ -180,7 +186,7 @@ mat-sidenav-container.sidenav-container {
                 ::ng-deep {
                     .mat-button-wrapper {
                         .mat-icon {
-                            background: black;
+                            background: rgb(60, 54, 54);
                             color: white;
                         }
                     }

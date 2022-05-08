@@ -1,4 +1,4 @@
-import { Component, OnInit, ElementRef, ViewChild } from '@angular/core';
+import { Component, OnInit, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormGroup, FormBuilder, Validators, AbstractControl, FormArray } from '@angular/forms';
 import { MatSelect } from '@angular/material/select';
@@ -8,7 +8,8 @@ import {
   Query, DocumentData,
   query, orderBy, where,
   Firestore, collection,
-  CollectionReference
+  CollectionReference,
+  limit
 } from '@angular/fire/firestore';
 
 // services
@@ -40,7 +41,7 @@ dayjs.extend(isBetween);
   templateUrl: './list-workorders.component.html',
   styleUrls: ['./list-workorders.component.scss']
 })
-export class ListWorkordersComponent implements OnInit {
+export class ListWorkordersComponent implements OnInit, AfterViewInit {
 
   constructor(
     private route: ActivatedRoute,
@@ -50,6 +51,9 @@ export class ListWorkordersComponent implements OnInit {
     private toast: HotToastService,
     private fb: FormBuilder
   ) { }
+  ngAfterViewInit(): void {
+    console.log('IN AFTER VIEW', this.filterWorkordersOptionsField?.value);
+  }
 
   // template refs
   @ViewChild('loadingWorkordersSpinner') loadingWorkordersSpinner!: ElementRef;
@@ -96,7 +100,6 @@ export class ListWorkordersComponent implements OnInit {
   engTechniciansHandoverForm!: FormGroup;
   storesTechniciansHandoverForm!: FormGroup;
 
-
   // for handover templates
   electricalTechnicians!: IntUser[];
   mechanicalTechnicians!: IntUser[];
@@ -132,6 +135,10 @@ export class ListWorkordersComponent implements OnInit {
   storesTechnicianHandoverLoading = false;
 
 
+  // for showing the filter option
+  filterOption!: string;
+
+
   ngOnInit(): void {
     this.userType = this.route.snapshot.paramMap.get('userType');
     this.workordersType = this.route.snapshot.paramMap.get('workordersType');
@@ -151,8 +158,21 @@ export class ListWorkordersComponent implements OnInit {
       this.workordersType &&
       this.userUid
     ) {
+      // manager
+      if (this.userType === 'manager') {
+        if (this.workordersType === 'all') {
+          const first200WorkordersQuery = query(
+            workordersColRef,
+            orderBy('workorder.number'),
+            limit(200)
+          );
+          this.workorderHasActions = true;
+          return first200WorkordersQuery;
+        }
+      }
+
       // supervisor
-      if (this.userType === 'supervisor') {
+      else if (this.userType === 'supervisor') {
         // unverified workorders
         if (this.workordersType === 'unverified') {
           const unverifiedWorkordersQuery = query(
@@ -739,31 +759,32 @@ export class ListWorkordersComponent implements OnInit {
 
   filterWorkordersByDateRaised(filterOption: string): IntWorkorder[] {
     if (filterOption) {
+      this.filterOption = filterOption;
       this.workordersToDisplay = this.workorders
         .filter((workorder: IntWorkorder) => {
           const date = workorder.raised.dateTime;
           // today
-          if (filterOption === 'today') {
+          if (filterOption === 'Today') {
             return this.filterTodaysWorkorders(date) ? workorder : null;
-          } else if (filterOption === 'yesterday') {
+          } else if (filterOption === 'Yesterday') {
             return this.filterYesterdaysWorkorders(date) ? workorder : null;
           }
-          else if (filterOption === 'thisWeek') {
+          else if (filterOption === 'This Week') {
             return this.filterThisWeeksWorkorders(date) ? workorder : null;
           }
-          else if (filterOption === 'lastWeek') {
+          else if (filterOption === 'Last Week') {
             return this.filterLastWeeksWorkorders(date) ? workorder : null;
           }
-          else if (filterOption === 'thisMonth') {
+          else if (filterOption === 'This Month') {
             return this.filterThisMonthsWorkorders(date) ? workorder : null;
           }
           else if (filterOption === 'lastMonth') {
             return this.filterLastMonthsWorkorders(date) ? workorder : null;
           }
-          else if (filterOption === 'thisYear') {
+          else if (filterOption === 'This Year') {
             return this.filterThisYearsWorkorders(date) ? workorder : null;
           }
-          else if (filterOption === 'lastYear') {
+          else if (filterOption === 'Last Year') {
             return this.filterLastYearsWorkorders(date) ? workorder : null;
           }
           else {
@@ -1287,5 +1308,18 @@ export class ListWorkordersComponent implements OnInit {
           });
       }
     }
+  }
+
+  // ENG MANAGER ACTIONS
+  reviewWorkorder(): void {
+    console.log('THIS IS WHERE ACCEPTING THE WORKORDER WILL HAPPEN');
+  }
+
+  reviewAllWorkorders(): void {
+    console.log('REVIEW ALL WILL HAPPEN HERE');
+  }
+  
+  raiseConcern(): void {
+    console.log('CONCERNS ARE WHAT WE DO BEST');
   }
 }

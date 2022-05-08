@@ -15,6 +15,7 @@ export interface IntFirestoreUser {
     group: string;
     technicianGroup: string;
     supervisorGroup: string;
+    managerGroup: string;
     canEditWorkorder: boolean;
     canDeleteWorkorder: boolean;
     isAdmin: boolean;

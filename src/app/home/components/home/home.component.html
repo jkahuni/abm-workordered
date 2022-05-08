@@ -17,6 +17,7 @@
         </div>
       </div>
     </div>
+
     <!-- user logged in -->
     <div *ngIf="!loading && !loadingFailed">
       <div *ngIf="user">
@@ -196,6 +197,21 @@
                     : 0
                 }}
                 )
+              </a>
+            </div>
+          </div>
+
+          <!-- eng manager -->
+          <div *ngIf="isEngineeringManager" class="navigation-links">
+            <!-- all raised workorders -->
+            <div>
+              <a
+                type="button"
+                class="btn btn-link home-nav-button shadow-none"
+                [routerLink]="['/workorders/manager/all', userUid]"
+              >
+                Review Workorders - (
+                {{ allWorkorders ? allWorkorders.length : 0 }} )
               </a>
             </div>
           </div>

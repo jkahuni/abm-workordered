@@ -20,7 +20,8 @@
       <div class="filter-workorders-text-and-icon">
         <div class="filter-workorders-text fw-bold">Filter</div>
         <div class="filter-workorders-icon">
-          <mat-icon (click)="showWorkordersFilterOptions = !showWorkordersFilterOptions"
+          <mat-icon
+            (click)="showWorkordersFilterOptions = !showWorkordersFilterOptions"
             >filter_list</mat-icon
           >
         </div>
@@ -37,17 +38,22 @@
               filterWorkordersByDateRaised(filterWorkordersOptionsField.value)
             "
           >
-            <mat-option value="today">Today</mat-option>
-            <mat-option value="yesterday">Yesterday</mat-option>
-            <mat-option value="thisWeek">This Week</mat-option>
-            <mat-option value="lastWeek">Last Week</mat-option>
-            <mat-option value="thisMonth">This Month</mat-option>
-            <mat-option value="lastMonth">Last Month</mat-option>
-            <mat-option value="thisYear">This Year</mat-option>
-            <mat-option value="lastYear">Last Year</mat-option>
+            <mat-option value="Today">Today</mat-option>
+            <mat-option value="Yesterday">Yesterday</mat-option>
+            <mat-option value="This Week">This Week</mat-option>
+            <mat-option value="Last Week">Last Week</mat-option>
+            <mat-option value="This Month">This Month</mat-option>
+            <mat-option value="Last Month">Last Month</mat-option>
+            <mat-option value="This Year">This Year</mat-option>
+            <mat-option value="Last Year">Last Year</mat-option>
           </mat-select>
         </mat-form-field>
       </div>
+    </div>
+
+    <!-- filter value -->
+    <div *ngIf="filterOption" class="filter-field-value">
+      <div class="filter-value">Filter: {{ filterOption }}'s </div>
     </div>
 
     <!-- sidenav header -->
@@ -742,6 +748,42 @@
                 Handover
               </button>
               <mat-divider></mat-divider>
+            </mat-list-item>
+          </div>
+
+          <!-- ENG MANAGERS ACTIONS -->
+          <div *ngIf="userType === 'manager'">
+            <!-- accept current workorder -->
+            <mat-list-item>
+              <button
+                type="button"
+                class="action-button btn btn-link shadow-none"
+                (click)="reviewWorkorder()"
+              >
+                Accept
+              </button>
+            </mat-list-item>
+
+            <!-- accept all workorders -->
+            <mat-list-item>
+              <button
+                type="button"
+                class="action-button btn btn-link shadow-none"
+                (click)="reviewAllWorkorders()"
+              >
+                Accept All
+              </button>
+            </mat-list-item>
+
+            <!-- raise-concerns -->
+            <mat-list-item>
+              <button
+                type="button"
+                class="action-button btn btn-link shadow-none"
+                (click)="raiseConcern()"
+              >
+                Raise Concerns
+              </button>
             </mat-list-item>
           </div>
 
@@ -2492,3 +2534,5 @@
     </div>
   </div>
 </div>
+
+<!-- MANAGERS - ENG -->
