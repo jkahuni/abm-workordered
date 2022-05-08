@@ -1,3 +1,10 @@
+<!-- sidenav container title -->
+<div class="sidenav-container-header">
+  <div class="sidenav-header">
+    {{ createWorkordersHeader() | titlecase }}
+  </div>
+</div>
+
 <mat-sidenav-container [hasBackdrop]="false" class="sidenav-container">
   <!-- left sidenav -->
   <mat-sidenav
@@ -8,6 +15,39 @@
     [(opened)]="showLeftSidenav"
     (opened)="closeRightSidenav()"
   >
+    <!-- filter workorders -->
+    <div class="filter-workorders">
+      <div class="filter-workorders-text-and-icon">
+        <div class="filter-workorders-text fw-bold">Filter</div>
+        <div class="filter-workorders-icon">
+          <mat-icon (click)="showFilterWorkordersOptions()"
+            >filter_list</mat-icon
+          >
+        </div>
+      </div>
+      <div
+        *ngIf="showWorkordersFilterOptions"
+        class="filter-workorders-options"
+      >
+        <mat-form-field>
+          <mat-label>Filter Options</mat-label>
+          <mat-select
+            #filterWorkordersOptionsField
+            (selectionChange)="
+              filterWorkordersByDateRaised(filterWorkordersOptionsField.value)
+            "
+          >
+            <mat-option value="today">Today</mat-option>
+            <mat-option value="yesterday">Yesterday</mat-option>
+            <mat-option value="thisWeek">This Week</mat-option>
+            <mat-option value="lastWeek">Last Week</mat-option>
+            <mat-option value="thisMonth">This Month</mat-option>
+            <mat-option value="lastMonth">Last Month</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </div>
+
     <!-- sidenav header -->
     <div class="sidenav-heading-container left-sidenav-heading">
       <div class="sidenav-heading">
@@ -25,24 +65,22 @@
     </div>
 
     <!-- workorders loaded -->
-    <div *ngIf="!loadingWorkorders && workorders">
+    <div *ngIf="!loadingWorkorders && workordersToDisplay">
       <!-- no pending workorders -->
-      <div *ngIf="workorders.length === 0">
+      <div *ngIf="workordersToDisplay.length === 0">
         <div class="workorders-sidenav-text-container">
-          <div class="workorders-sidenav-text">
-            You have 0 pending workorders.
-          </div>
+          <div class="workorders-sidenav-text">No workorders to display.</div>
         </div>
       </div>
 
       <!-- pending workorders -->
-      <div *ngIf="workorders.length !== 0">
+      <div *ngIf="workordersToDisplay.length !== 0">
         <div class="display-workorder-numbers">
           <mat-action-list role="list">
             <!-- corrective maintenance workorders -->
             <div
               *ngIf="
-                filterWorkorders(
+                filterWorkordersByType(
                   'Corrective Maintenance'
                 ) as correctiveMaintenanceWorkorders
               "
@@ -80,7 +118,9 @@
             </div>
 
             <!-- breakdown workorders -->
-            <div *ngIf="filterWorkorders('Breakdown') as breakdownWorkorders">
+            <div
+              *ngIf="filterWorkordersByType('Breakdown') as breakdownWorkorders"
+            >
               <div *ngIf="breakdownWorkorders.length !== 0">
                 <div class="workorder-numbers">
                   <div mat-subheader class="workorders-subheader">
@@ -112,7 +152,9 @@
 
             <!-- tool change workorders -->
             <div
-              *ngIf="filterWorkorders('Tool Change') as toolChangeWorkorders"
+              *ngIf="
+                filterWorkordersByType('Tool Change') as toolChangeWorkorders
+              "
             >
               <div *ngIf="toolChangeWorkorders.length !== 0">
                 <div class="workorder-numbers">
@@ -147,7 +189,7 @@
             </div>
 
             <!-- am workorders -->
-            <div *ngIf="filterWorkorders('AM') as amWorkorders">
+            <div *ngIf="filterWorkordersByType('AM') as amWorkorders">
               <div *ngIf="amWorkorders.length !== 0">
                 <div class="workorder-numbers">
                   <div mat-subheader class="workorders-subheader">AM</div>
@@ -176,7 +218,7 @@
             </div>
 
             <!-- pm workorders -->
-            <div *ngIf="filterWorkorders('PM') as pmWorkorders">
+            <div *ngIf="filterWorkordersByType('PM') as pmWorkorders">
               <div *ngIf="pmWorkorders.length !== 0">
                 <div class="workorder-numbers">
                   <div mat-subheader class="workorders-subheader">PM</div>
@@ -207,7 +249,7 @@
             <!-- abnormality card workorders -->
             <div
               *ngIf="
-                filterWorkorders(
+                filterWorkordersByType(
                   'Abnormality Card'
                 ) as abnormalityCardWorkorders
               "
@@ -246,7 +288,9 @@
 
             <!-- mold service workorders -->
             <div
-              *ngIf="filterWorkorders('Mold Service') as moldServiceWorkorders"
+              *ngIf="
+                filterWorkordersByType('Mold Service') as moldServiceWorkorders
+              "
             >
               <div *ngIf="moldServiceWorkorders.length !== 0">
                 <div class="workorder-numbers">
@@ -281,7 +325,7 @@
             </div>
 
             <!-- service workorders -->
-            <div *ngIf="filterWorkorders('Service') as serviceWorkorders">
+            <div *ngIf="filterWorkordersByType('Service') as serviceWorkorders">
               <div *ngIf="serviceWorkorders.length !== 0">
                 <div class="workorder-numbers">
                   <div mat-subheader class="workorders-subheader">Service</div>
@@ -311,7 +355,9 @@
 
             <!-- kaizen card workorders -->
             <div
-              *ngIf="filterWorkorders('Kaizen Card') as kaizenCardWorkorders"
+              *ngIf="
+                filterWorkordersByType('Kaizen Card') as kaizenCardWorkorders
+              "
             >
               <div *ngIf="kaizenCardWorkorders.length !== 0">
                 <div class="workorder-numbers">
@@ -346,7 +392,7 @@
             </div>
 
             <!-- project workorders -->
-            <div *ngIf="filterWorkorders('Project') as projectWorkorders">
+            <div *ngIf="filterWorkordersByType('Project') as projectWorkorders">
               <div *ngIf="projectWorkorders.length !== 0">
                 <div class="workorder-numbers">
                   <div mat-subheader class="workorders-subheader">Project</div>
@@ -732,16 +778,16 @@
     </div>
 
     <!-- loading workorders done -->
-    <div *ngIf="!loadingWorkorders && workorders">
+    <div *ngIf="!loadingWorkorders && workordersToDisplay">
       <!-- no workorders -->
-      <div *ngIf="workorders.length === 0">
+      <div *ngIf="workordersToDisplay.length === 0">
         <div class="no-workorders-to-display">
           <p>There are no workorders to display.</p>
         </div>
       </div>
 
       <!-- workorders present -->
-      <div *ngIf="workorders.length !== 0">
+      <div *ngIf="workordersToDisplay.length !== 0">
         <!-- no workorder selected in left pane -->
         <div *ngIf="!workorder">
           <div class="no-workorders-to-display">

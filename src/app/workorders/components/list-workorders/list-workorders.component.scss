@@ -2,16 +2,45 @@ mat-sidenav-container.sidenav-container {
     height: 90vh;
     width: 90vw;
     border: 1px solid rgba(0, 0, 0, 0.5);
-    margin: 10px auto;
+    margin: 0 auto;
 
     mat-sidenav.sidenav {
         width: 130px;
         display: flex;
         flex-flow: row wrap;
 
+        .filter-workorders {
+            margin: 8px 0 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+
+            .filter-workorders-text,
+            .filter-workorders-icon {
+                width: 50%;
+            }
+
+            .filter-workorders-options {
+                width: 100%;
+
+                mat-form-field {
+                    width: 100%;
+                }
+            }
+
+            .filter-workorders-text-and-icon {
+                width: 100%;
+            }
+        }
+
         .sidenav-heading-container,
         .mat-subheader.workorders-subheader,
-        .workorders-sidenav-text-container {
+        .workorders-sidenav-text-container,
+        .filter-workorders-text-and-icon,
+        .filter-workorders-options,
+        .filter-workorders-text,
+        .filter-workorders-icon {
             display: flex;
             align-items: center;
             justify-content: center;

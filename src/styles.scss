@@ -49,5 +49,20 @@ a.router-link {
   padding: 0px;
 }
 
-
-
+.sidenav-container-header {
+  margin: 8px 0 2px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  
+  .sidenav-header {
+    font-weight: bold;
+    font-size: 16px;
+    text-align: center;
+    border: 2px solid black;
+    display: inline-block;
+    border-radius: 16px;
+    padding: 2px 15px;
+  }
+}

@@ -1,6 +1,7 @@
 import { Component, OnInit, ElementRef, ViewChild } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormGroup, FormBuilder, Validators, AbstractControl, FormArray } from '@angular/forms';
+import { MatSelect } from '@angular/material/select';
 
 // firestore imports
 import {
@@ -19,12 +20,20 @@ import { IntUser, IntWorkorder, IntSpareWithQuantities } from '@workorders/model
 
 // dayjs
 import * as dayjs from 'dayjs';
+import * as weekOfYear from 'dayjs/plugin/weekOfYear';
+import * as isToday from 'dayjs/plugin/isToday';
+import * as isYesterday from 'dayjs/plugin/isYesterday';
+import * as isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
+import * as isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
+import * as isBetween from 'dayjs/plugin/isBetween';
 
+dayjs.extend(weekOfYear);
+dayjs.extend(isToday);
+dayjs.extend(isYesterday);
+dayjs.extend(isSameOrAfter);
+dayjs.extend(isSameOrBefore);
+dayjs.extend(isBetween);
 
-const animationParams = {
-  menuWidth: '130px',
-  animationStyle: '500ms ease'
-};
 
 @Component({
   selector: 'app-list-workorders',
@@ -64,6 +73,9 @@ export class ListWorkordersComponent implements OnInit {
   @ViewChild('closeEngineeringTechniciansHandoverModal') closeEngineeringTechniciansHandoverModal!: ElementRef;
   @ViewChild('closeStoresTechniciansHandoverModal') closeStoresTechniciansHandoverModal!: ElementRef;
 
+  // filter workorders options
+  @ViewChild('filterWorkordersOptionsField') filterWorkordersOptionsField!: MatSelect;
+
 
   // route params
   userType!: string | null;
@@ -71,6 +83,7 @@ export class ListWorkordersComponent implements OnInit {
   userUid!: string | null;
 
   workorders!: IntWorkorder[];
+  workordersToDisplay!: IntWorkorder[];
   workorder!: IntWorkorder | undefined;
   workorderUid!: string;
 
@@ -100,6 +113,9 @@ export class ListWorkordersComponent implements OnInit {
   // toggle sidenavs
   showLeftSidenav = true;
   showRightSidenav = false;
+
+  // for filtering workorders
+  showWorkordersFilterOptions = false;
 
   // loading spinners
   loadingWorkorders = true;
@@ -306,6 +322,7 @@ export class ListWorkordersComponent implements OnInit {
       this.workordersService.getWorkorders(workordersQuery)
         .then((workorders: IntWorkorder[]) => {
           this.workorders = workorders;
+          this.workordersToDisplay = this.workorders;
           this.hideLoadingWorkordersSpinner();
 
         })
@@ -604,6 +621,77 @@ export class ListWorkordersComponent implements OnInit {
     return this.router.navigate([`close-workorder/${workorderType}/${this.userUid}/${this.workorderUid}`]);
   }
 
+  // filter workorder fns
+  private filterTodaysWorkorders(date: string): boolean {
+    const dateRaised = dayjs(date);
+    return dateRaised && dateRaised.isToday() ? true : false;
+  }
+
+  private filterYesterdaysWorkorders(date: string): boolean {
+    const dateRaised = dayjs(date);
+
+    return dateRaised && dateRaised.isYesterday() ? true : false;
+  }
+
+  private filterThisWeeksWorkorders(date: string): boolean {
+    const now = dayjs();
+    const dateRaised = dayjs(date);
+    const yearsDifference = dateRaised.year() - now.year();
+    const monthsDifference = dateRaised.month() - now.month();
+    const weeksDifference = dateRaised.week() - now.week();
+
+    return yearsDifference === 0 && monthsDifference === 0 && weeksDifference === 0 ? true : false;
+
+  }
+
+  private filterLastWeeksWorkorders(date: string): boolean {
+    const now = dayjs();
+    const dateRaised = dayjs(date);
+
+    const yearsDifference = dateRaised.year() - now.year();
+    const monthsDifference = dateRaised.month() - now.month();
+    const weeksDifference = dateRaised.week() - now.week();
+
+    return yearsDifference === 0 && monthsDifference === 0 && weeksDifference === -1 ? true : false;
+  }
+
+  private filterThisMonthsWorkorders(date: string): boolean {
+    const now = dayjs();
+    const dateRaised = dayjs(date);
+
+    const yearsDifference = dateRaised.year() - now.year();
+    const monthsDifference = dateRaised.month() - now.month();
+
+    return yearsDifference === 0 && monthsDifference === 0 ? true : false;
+  }
+
+  private filterLastMonthsWorkorders(date: string): boolean {
+    const now = dayjs();
+    const dateRaised = dayjs(date);
+
+    const yearsDifference = dateRaised.year() - now.year();
+    const monthsDifference = dateRaised.month() - now.month();
+
+    return yearsDifference === 0 && monthsDifference === -1 ? true : false;
+  }
+
+  private filterThisYearsWorkorders(date: string): boolean {
+    const now = dayjs();
+    const dateRaised = dayjs(date);
+
+    const yearsDifference = dateRaised.year() - now.year();
+
+    return yearsDifference === 0 ? true : false;
+  }
+
+  private filterLastYearsWorkorders(date: string): boolean {
+    const now = dayjs();
+    const dateRaised = dayjs(date);
+
+    const yearsDifference = dateRaised.year() - now.year();
+
+    return yearsDifference === -1 ? true : false;
+  }
 
   // form getters
   get f(): { [key: string]: AbstractControl } {
@@ -619,6 +707,10 @@ export class ListWorkordersComponent implements OnInit {
   }
 
   // public functions
+  createWorkordersHeader(): string {
+    return this.workordersType + ' workorders';
+  }
+
   // toggle sidenavs
   closeLeftSidenav(): boolean {
     return this.showLeftSidenav = false;
@@ -646,11 +738,82 @@ export class ListWorkordersComponent implements OnInit {
 
   }
 
+  // filter all workorders by date raised
+  showFilterWorkordersOptions(): void {
+    this.showWorkordersFilterOptions = true;
+    setTimeout(() => {
+      if (this.filterWorkordersOptionsField) {
+        this.filterWorkordersOptionsField.open();
+      }
+    });
+  }
+
+  filterWorkordersByDateRaised(filterOption: string): IntWorkorder[] {
+    if (filterOption) {
+      this.workordersToDisplay = this.workorders
+        .filter((workorder: IntWorkorder) => {
+          const date = workorder.raised.dateTime;
+          // today
+          if (filterOption === 'today') {
+            dayjs(date).isToday() ? true : false;
+            // this.filterTodaysWorkorders(date);
+          }
+
+          // yesterday
+          else if (filterOption === 'yesterday') {
+            this.filterYesterdaysWorkorders(date);
+          }
+
+          // this week
+          else if (filterOption === 'thisWeek') {
+            this.filterThisWeeksWorkorders(date);
+          }
+
+          // last week
+          else if (filterOption === 'latWeek') {
+            this.filterLastWeeksWorkorders(date);
+          }
+
+          // this month
+          else if (filterOption === 'thisMonth') {
+            this.filterThisMonthsWorkorders(date);
+          }
+
+          // last month 
+          else if (filterOption === 'lastMonth') {
+            this.filterLastMonthsWorkorders(date);
+          }
+
+          // this year
+          else if (filterOption === 'thisYear') {
+            this.filterThisYearsWorkorders(date);
+          }
+
+          // last year
+          else if (filterOption === 'lastYear') {
+            this.filterLastYearsWorkorders(date);
+          } else {
+            this.workordersToDisplay = this.workorders;
+
+          }
+        });
+
+      this.showWorkordersFilterOptions = false;
+      return this.workordersToDisplay;
+    } else {
+      this.workordersToDisplay = this.workorders;
+      this.showWorkordersFilterOptions = false;
+      return this.workordersToDisplay;
+    }
+
+
+  }
+
   // get workorders by type
-  filterWorkorders(type: string): IntWorkorder[] | null {
-    return this.workorders && type ?
-      this.workorders.filter((workorder: IntWorkorder) => workorder.workorder.type === type) ?
-        this.workorders.filter((workorder: IntWorkorder) => workorder.workorder.type === type)
+  filterWorkordersByType(type: string): IntWorkorder[] | null {
+    return type && this.workordersToDisplay ?
+      this.workordersToDisplay.filter((workorder: IntWorkorder) => workorder.workorder.type === type) ?
+        this.workordersToDisplay.filter((workorder: IntWorkorder) => workorder.workorder.type === type)
         : null
       : null;
   }
@@ -1071,7 +1234,6 @@ export class ListWorkordersComponent implements OnInit {
   close(workorder: IntWorkorder): void {
     this.closeWorkorderByType(workorder);
   }
-
 
   engTechnicianHandover(): void {
     const { newTechnician
