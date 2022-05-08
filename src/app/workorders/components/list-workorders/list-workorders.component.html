@@ -20,7 +20,7 @@
       <div class="filter-workorders-text-and-icon">
         <div class="filter-workorders-text fw-bold">Filter</div>
         <div class="filter-workorders-icon">
-          <mat-icon (click)="showFilterWorkordersOptions()"
+          <mat-icon (click)="showWorkordersFilterOptions = !showWorkordersFilterOptions"
             >filter_list</mat-icon
           >
         </div>
@@ -43,6 +43,8 @@
             <mat-option value="lastWeek">Last Week</mat-option>
             <mat-option value="thisMonth">This Month</mat-option>
             <mat-option value="lastMonth">Last Month</mat-option>
+            <mat-option value="thisYear">This Year</mat-option>
+            <mat-option value="lastYear">Last Year</mat-option>
           </mat-select>
         </mat-form-field>
       </div>

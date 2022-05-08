@@ -711,7 +711,6 @@ export class ListWorkordersComponent implements OnInit {
     return this.workordersType + ' workorders';
   }
 
-  // toggle sidenavs
   closeLeftSidenav(): boolean {
     return this.showLeftSidenav = false;
 
@@ -738,16 +737,6 @@ export class ListWorkordersComponent implements OnInit {
 
   }
 
-  // filter all workorders by date raised
-  showFilterWorkordersOptions(): void {
-    this.showWorkordersFilterOptions = true;
-    setTimeout(() => {
-      if (this.filterWorkordersOptionsField) {
-        this.filterWorkordersOptionsField.open();
-      }
-    });
-  }
-
   filterWorkordersByDateRaised(filterOption: string): IntWorkorder[] {
     if (filterOption) {
       this.workordersToDisplay = this.workorders
@@ -755,53 +744,38 @@ export class ListWorkordersComponent implements OnInit {
           const date = workorder.raised.dateTime;
           // today
           if (filterOption === 'today') {
-            dayjs(date).isToday() ? true : false;
-            // this.filterTodaysWorkorders(date);
+            return this.filterTodaysWorkorders(date) ? workorder : null;
+          } else if (filterOption === 'yesterday') {
+            return this.filterYesterdaysWorkorders(date) ? workorder : null;
           }
-
-          // yesterday
-          else if (filterOption === 'yesterday') {
-            this.filterYesterdaysWorkorders(date);
-          }
-
-          // this week
           else if (filterOption === 'thisWeek') {
-            this.filterThisWeeksWorkorders(date);
+            return this.filterThisWeeksWorkorders(date) ? workorder : null;
           }
-
-          // last week
-          else if (filterOption === 'latWeek') {
-            this.filterLastWeeksWorkorders(date);
+          else if (filterOption === 'lastWeek') {
+            return this.filterLastWeeksWorkorders(date) ? workorder : null;
           }
-
-          // this month
           else if (filterOption === 'thisMonth') {
-            this.filterThisMonthsWorkorders(date);
+            return this.filterThisMonthsWorkorders(date) ? workorder : null;
           }
-
-          // last month 
           else if (filterOption === 'lastMonth') {
-            this.filterLastMonthsWorkorders(date);
+            return this.filterLastMonthsWorkorders(date) ? workorder : null;
           }
-
-          // this year
           else if (filterOption === 'thisYear') {
-            this.filterThisYearsWorkorders(date);
+            return this.filterThisYearsWorkorders(date) ? workorder : null;
           }
-
-          // last year
           else if (filterOption === 'lastYear') {
-            this.filterLastYearsWorkorders(date);
-          } else {
+            return this.filterLastYearsWorkorders(date) ? workorder : null;
+          }
+          else {
             this.workordersToDisplay = this.workorders;
-
+            return this.workordersToDisplay;
           }
         });
-
+      this.workorder = undefined;
       this.showWorkordersFilterOptions = false;
       return this.workordersToDisplay;
     } else {
-      this.workordersToDisplay = this.workorders;
+      this.workorder = undefined;
       this.showWorkordersFilterOptions = false;
       return this.workordersToDisplay;
     }
@@ -809,7 +783,6 @@ export class ListWorkordersComponent implements OnInit {
 
   }
 
-  // get workorders by type
   filterWorkordersByType(type: string): IntWorkorder[] | null {
     return type && this.workordersToDisplay ?
       this.workordersToDisplay.filter((workorder: IntWorkorder) => workorder.workorder.type === type) ?
