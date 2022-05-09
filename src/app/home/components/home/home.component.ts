@@ -58,7 +58,9 @@ export class HomeComponent implements OnInit {
   engTechnicianClosedWorkorders!: IntWorkorder[];
   storesTechnicianOpenWorkorders!: IntWorkorder[];
   storesTechnicianClosedWorkorders!: IntWorkorder[];
-  allWorkorders!: IntWorkorder[];
+  workorders!: IntWorkorder[];
+  unReviewedWorkorders!: IntWorkorder[];
+  reviewedWorkorders!: IntWorkorder[];
 
 
   // for controlling access to the various views in home page
@@ -84,7 +86,7 @@ export class HomeComponent implements OnInit {
   engTechnicianClosedWorkordersSet = false;
   storesTechnicianOpenWorkordersSet = false;
   storesTechnicianClosedWorkordersSet = false;
-  allWorkordersSet = false;
+  workordersSet = false;
 
   ngOnInit(): void {
     onAuthStateChanged(this.auth,
@@ -95,16 +97,15 @@ export class HomeComponent implements OnInit {
           if (!user.emailVerified) {
             this.loading = false;
           } else {
-            this.getUser(this.userUid);
+            this.getWorkorders();
+            this.getUserAndWorkorders(this.userUid);
           }
         } else {
           this.loading = false;
-
         }
       },
       (err: any) => {
         this.hideSpinnerOnError();
-        console.log('ERR IN HOME INIT ON AUTH STATE', err);
         this.toast.error(`An unknownn error occured while redirecting you home. Please reload the page.`);
       }
     );
@@ -112,34 +113,39 @@ export class HomeComponent implements OnInit {
 
   // hiding the spinner
   private hideSpinnerOnSuccess(): void {
-    if (this.isOperatorOrOperatorLike && this.raisedWorkordersSet) {
+    if (this.isOperatorOrOperatorLike && this.raisedWorkorders) {
       this.loading = false;
+    }
 
-    } else if (
+    else if (
       this.isSupervisor &&
-      this.unverifiedWorkordersSet &&
-      this.approvedWorkordersSet &&
-      this.rejectedWorkordersSet) {
+      this.unverifiedWorkorders &&
+      this.approvedWorkorders &&
+      this.rejectedWorkorders) {
       this.loading = false;
+    }
 
-
-    } else if (
+    else if (
       this.isEngineeringTechnician &&
-      this.engTechnicianOpenWorkordersSet &&
-      this.engTechnicianClosedWorkordersSet
+      this.engTechnicianOpenWorkorders &&
+      this.engTechnicianClosedWorkorders
     ) {
       this.loading = false;
+    }
 
-
-    } else if (
+    else if (
       this.isStoresTechnician &&
-      this.storesTechnicianClosedWorkordersSet &&
-      this.storesTechnicianOpenWorkordersSet
+      this.storesTechnicianClosedWorkorders &&
+      this.storesTechnicianOpenWorkorders
     ) {
       this.loading = false;
-    } else if (
-      this.isEngineeringManager && 
-      this.allWorkordersSet
+    }
+
+    else if (
+      this.isEngineeringManager &&
+      this.workorders &&
+      this.unReviewedWorkorders &&
+      this.reviewedWorkorders
     ) {
       this.loading = false;
     }
@@ -148,19 +154,19 @@ export class HomeComponent implements OnInit {
   private hideSpinnerOnError(): void {
     this.loading = false;
     this.loadingFailed = true;
-
   }
 
   // get user
-  private getUser(userUid: string): void {
+  private getUserAndWorkorders(userUid: string): void {
     this.workordersService.getUser(userUid)
       .then((firestoreUser: IntUser) => {
         if (firestoreUser.group === 'Supervisor') {
+          this.filterRaisedWorkorders();
+          this.filterUnverifiedWorkorders();
+          this.filterApprovedWorkorders();
+          this.filterRejectedWorkorders();
           this.isSupervisor = true;
-          this.getRaisedWorkorders();
-          this.getUnverifiedWorkorders();
-          this.getApprovedWorkorders();
-          this.getRejectedWorkorders();
+          this.hideSpinnerOnSuccess();
         }
 
         else if (firestoreUser.group === 'Technician') {
@@ -168,10 +174,11 @@ export class HomeComponent implements OnInit {
           if (firestoreUser.technicianGroup === 'Electrical'
             ||
             firestoreUser.technicianGroup === 'Mechanical') {
+            this.filterEngTechnicianOpenWorkorders();
+            this.filterEngTechnicianClosedWorkorders();
             this.isEngineeringTechnician = true;
-            this.getEngTechnicianOpenWorkorders();
-            this.getEngTechnicianClosedWorkorders();
             this.technicianType = 'engineering';
+            this.hideSpinnerOnSuccess();
           }
 
           // stores technician
@@ -180,50 +187,49 @@ export class HomeComponent implements OnInit {
             ||
             firestoreUser.technicianGroup === 'PM Planning'
           ) {
+            this.filterStoreTechnicianOpenWorkorders();
+            this.filterStoreTechnicianClosedWorkorders();
             this.isStoresTechnician = true;
-            this.getStoresTechnicianOpenWorkorders();
-            this.getStoresTechnicianClosedWorkorders();
             this.technicianType = 'stores';
+            this.hideSpinnerOnSuccess();
           }
         }
 
         else if (firestoreUser.group === 'Manager' && firestoreUser.managerGroup === 'Engineering') {
+          this.filterUnReviewedWorkorders();
+          this.filterReviewedWorkorders();
           this.isEngineeringManager = true;
-          this.getFirst200Workorders();
+          this.hideSpinnerOnSuccess();
         }
 
         else {
+          this.filterRaisedWorkorders();
+          this.filterOtherApprovedWorkorders();
+          this.filterOtherRejectedWorkorders();
           this.isOperatorOrOperatorLike = true;
-          this.getRaisedWorkorders();
-          this.getOtherApprovedWorkorders();
-          this.getOtherRejectedWorkorders();
+          this.hideSpinnerOnSuccess();
         }
       })
       .catch(
         (err: any) => {
           this.hideSpinnerOnError();
           if (err.code === 'failed-precondition') {
-            this.indexingError = `Error IND-H-11 occured. Please report this error to support to have it fixed.`;
+            this.indexingError = `Error IND-H-02 occured. Please report this error to support to have it fixed.`;
           } else {
-            this.otherError = `Error H-11 occured. Please report this error to support to have it fixed.`;
+            this.otherError = `Error H-02 occured. Please report this error to support to have it fixed.`;
           }
         }
       );
   }
 
-  // getting workorders by type
-  private getRaisedWorkorders(): void {
-    const workordersQuery = query(
-      this.workordersCollectionReference,
-      orderBy('workorder.number'),
-      where('raiser.uid', '==', this.userUid)
+  // get all wokrorders first
+  private getWorkorders(): void {
+    const workordersQuery = query(this.workordersCollectionReference,
+      orderBy('workorder.number')
     );
-
     this.workordersService.getWorkorders(workordersQuery)
       .then((workorders: IntWorkorder[]) => {
-        this.raisedWorkordersSet = true;
-        this.raisedWorkorders = workorders;
-        this.hideSpinnerOnSuccess();
+        this.workorders = workorders;
       })
       .catch((err: any) => {
         this.hideSpinnerOnError();
@@ -233,295 +239,287 @@ export class HomeComponent implements OnInit {
           this.otherError = `Error H-01 occured. Please report this error to support to have it fixed.`;
         }
       });
-  }
-
-  private getUnverifiedWorkorders(): void {
-    const workordersQuery = query(
-      this.workordersCollectionReference,
-      orderBy('workorder.number'),
-      where('approved.status', '==', false),
-      where('rejected.status', '==', false),
-      where('supervisor.uid', '==', this.userUid)
-    );
-
-    this.workordersService.getWorkorders(workordersQuery)
-      .then((workorders: IntWorkorder[]) => {
-        this.unverifiedWorkordersSet = true;
-        this.unverifiedWorkorders = workorders;
-        this.hideSpinnerOnSuccess();
-
-      }).catch((err: any) => {
-        this.hideSpinnerOnError();
-        if (err.code === 'failed-precondition') {
-          this.indexingError = `Error IND-H-02 occured. Please report this error to support to have it fixed.`;
-        } else {
-          this.otherError = `Error H-02 occured. Please report this error to support to have it fixed.`;
-        }
-      });
-  }
-
-  private getApprovedWorkorders(): void {
-    const workordersQuery = query(
-      this.workordersCollectionReference,
-      orderBy('workorder.number'),
-      where('approved.status', '==', true),
-      where('rejected.status', '==', false),
-      where('supervisor.uid', '==', this.userUid)
-    );
-
-    this.workordersService.getWorkorders(workordersQuery)
-      .then((workorders: IntWorkorder[]) => {
-        this.approvedWorkordersSet = true;
-        this.approvedWorkorders = workorders;
-        this.hideSpinnerOnSuccess();
-
-      }).catch((err: any) => {
-        this.hideSpinnerOnError();
-        if (err.code === 'failed-precondition') {
-          this.indexingError = `Error IND-H-03 occured. Please report this error to support to have it fixed.`;
-        } else {
-          this.otherError = `Error H-03 occured. Please report this error to support to have it fixed.`;
-        }
-      });
-  }
-
-  private getRejectedWorkorders(): void {
-    const workordersQuery = query(
-      this.workordersCollectionReference,
-      orderBy('workorder.number'),
-      where('approved.status', '==', false),
-      where('rejected.status', '==', true),
-      where('supervisor.uid', '==', this.userUid)
-    );
-
-    this.workordersService.getWorkorders(workordersQuery)
-      .then((workorders: IntWorkorder[]) => {
-        this.rejectedWorkordersSet = true;
-        this.rejectedWorkorders = workorders;
-        this.hideSpinnerOnSuccess();
-
-      }).catch((err: any) => {
-        this.hideSpinnerOnError();
-        if (err.code === 'failed-precondition') {
-          this.indexingError = `Error IND-H-04 occured. Please report this error to support to have it fixed.`;
-        } else {
-          this.otherError = `Error H-04 occured. Please report this error to support to have it fixed.`;
-        }
-      });
-  }
-
-  private getOtherApprovedWorkorders(): void {
-    const workordersQuery = query(
-      this.workordersCollectionReference,
-      orderBy('workorder.number'),
-      where('approved.status', '==', true),
-      where('rejected.status', '==', false),
-      where('raiser.uid', '==', this.userUid)
-    );
-
-    this.workordersService.getWorkorders(workordersQuery)
-      .then((workorders: IntWorkorder[]) => {
-        this.approvedWorkordersSet = true;
-        this.approvedWorkorders = workorders;
-        this.hideSpinnerOnSuccess();
-
-      }).catch((err: any) => {
-        this.hideSpinnerOnError();
-        console.log('ERROR H09', err);
-        if (err.code === 'failed-precondition') {
-          this.indexingError = `Error IND-H-05 occured. Please report this error to support to have it fixed.`;
-        } else {
-          this.otherError = `Error H-05 occured. Please report this error to support to have it fixed.`;
-        }
-      });
-  }
-
-  private getOtherRejectedWorkorders(): void {
-    const workordersQuery = query(
-      this.workordersCollectionReference,
-      orderBy('workorder.number'),
-      where('approved.status', '==', false),
-      where('rejected.status', '==', true),
-      where('raiser.uid', '==', this.userUid)
-    );
-
-    this.workordersService.getWorkorders(workordersQuery)
-      .then((workorders: IntWorkorder[]) => {
-        this.rejectedWorkordersSet = true;
-        this.rejectedWorkorders = workorders;
-        this.hideSpinnerOnSuccess();
-
-      }).catch((err: any) => {
-        this.hideSpinnerOnError();
-        if (err.code === 'failed-precondition') {
-          this.indexingError = `Error IND-H-06 occured. Please report this error to support to have it fixed.`;
-        } else {
-          this.otherError = `Error H-06 occured. Please report this error to support to have it fixed.`;
-        }
-      });
-  }
-
-  private getEngTechnicianOpenWorkorders(): void {
-    const workordersQuery = query(
-      this.workordersCollectionReference,
-      orderBy('workorder.number'),
-      where('approved.status', '==', true),
-      where('rejected.status', '==', false),
-      where('closed.status', '==', false),
-      where('technician.uid', '==', this.userUid)
-    );
-
-    this.workordersService.getWorkorders(workordersQuery)
-      .then(
-        (workorders: IntWorkorder[]) => {
-          this.engTechnicianOpenWorkordersSet = true;
-          this.engTechnicianOpenWorkorders = workorders;
-          this.hideSpinnerOnSuccess();
-
-        }
-      ).catch((err: any) => {
-        this.hideSpinnerOnError();
-        if (err.code === 'failed-precondition') {
-          this.indexingError = `Error IND-H-07 occured. Please report this error to support to have it fixed.`;
-        } else {
-          this.otherError = `Error H-07 occured. Please report this error to support to have it fixed.`;
-        }
-      });
-  }
-
-  private getEngTechnicianClosedWorkorders(): void {
-    const workordersQuery = query(
-      this.workordersCollectionReference,
-      orderBy('workorder.number'),
-      where('closed.status', '==', true),
-      where('approved.status', '==', true),
-      where('rejected.status', '==', false),
-      where('technician.uid', '==', this.userUid)
-    );
-
-    this.workordersService.getWorkorders(workordersQuery)
-      .then((workorders: IntWorkorder[]) => {
-        this.engTechnicianClosedWorkordersSet = true;
-        this.engTechnicianClosedWorkorders = workorders;
-        this.hideSpinnerOnSuccess();
-
-      }).catch((err: any) => {
-        this.hideSpinnerOnError();
-        if (err.code === 'failed-precondition') {
-          this.indexingError = `Error IND-H-08 occured. Please report this error to support to have it fixed.`;
-        } else {
-          this.otherError = `Error H-08 occured. Please report this error to support to have it fixed.`;
-        }
-      });
-  }
-
-  private getStoresTechnicianOpenWorkorders(): void {
-    const workordersQuery = query(
-      this.workordersCollectionReference,
-      orderBy('workorder.number'),
-      where('approved.status', '==', true),
-      where('rejected.status', '==', false),
-      where('closed.status', '==', false),
-      where('storesTechnician.uid', '==', this.userUid)
-    );
-
-    this.workordersService.getWorkorders(workordersQuery)
-      .then(
-        (workorders: IntWorkorder[]) => {
-          this.storesTechnicianOpenWorkordersSet = true;
-          this.storesTechnicianOpenWorkorders = workorders;
-          this.hideSpinnerOnSuccess();
-
-        }
-      ).catch((err: any) => {
-        this.hideSpinnerOnError();
-        if (err.code === 'failed-precondition') {
-          this.indexingError = `Error IND-H-09 occured. Please report this error to support to have it fixed.`;
-        } else {
-          this.otherError = `Error H-09 occured. Please report this error to support to have it fixed.`;
-        }
-      });
-  }
-
-  private getStoresTechnicianClosedWorkorders(): void {
-    const workordersQuery = query(
-      this.workordersCollectionReference,
-      orderBy('workorder.number'),
-      where('closed.status', '==', true),
-      where('approved.status', '==', true),
-      where('rejected.status', '==', false),
-      where('storesTechnician.uid', '==', this.userUid)
-    );
-
-    this.workordersService.getWorkorders(workordersQuery)
-      .then((workorders: IntWorkorder[]) => {
-        this.storesTechnicianClosedWorkordersSet = true;
-        this.storesTechnicianClosedWorkorders = workorders;
-        this.hideSpinnerOnSuccess();
-
-      }).catch((err: any) => {
-        this.hideSpinnerOnError();
-        if (err.code === 'failed-precondition') {
-          this.indexingError = `Error IND-H-10 occured. Please report this error to support to have it fixed.`;
-        } else {
-          this.otherError = `Error H-10 occured. Please report this error to support to have it fixed.`;
-        }
-      });
-  }
-
-  // for eng manager
-  private getFirst200Workorders(): void {
-    const workordersQuery = query(
-      this.workordersCollectionReference,
-      orderBy('workorder.number'),
-      limit(200)
-    );
-
-    this.workordersService.getWorkorders(workordersQuery)
-      .then((workorders: IntWorkorder[]) => {
-        this.allWorkorders = workorders;
-        this.allWorkordersSet = true;
-        this.hideSpinnerOnSuccess();
-      })
-      .catch((err: any) => {
-        this.hideSpinnerOnError();
-        if (err.code === 'failed-precondition') {
-          this.indexingError = `Error IND-H-12 occured. Please report this error to support to have it fixed.`;
-        } else {
-          this.otherError = `Error H-12 occured. Please report this error to support to have it fixed.`;
-        }
-      });
-
-
-  }
-
-  private getAllWorkorders(): void {
-    const workordersQuery = query(this.workordersCollectionReference,
-      orderBy('workorder.number')
-    );
-
-    this.workordersService.getWorkorders(workordersQuery)
-      .then((workorders: IntWorkorder[]) => {
-        this.allWorkorders = workorders;
-        this.allWorkordersSet = true;
-        this.hideSpinnerOnSuccess();
-      })
-      .catch((err: any) => {
-        this.hideSpinnerOnError();
-        if (err.code === 'failed-precondition') {
-          this.indexingError = `Error IND-H-13 occured. Please report this error to support to have it fixed.`;
-        } else {
-          this.otherError = `Error H-13 occured. Please report this error to support to have it fixed.`;
-        }
-      });
 
 
 
   }
 
+  // SUPERVISORS WORKORDERS
+  private filterRaisedWorkorders(): IntWorkorder[] | null {
+    if (this.workorders) {
+      this.raisedWorkorders = this.workorders.filter(
+        (workorder: IntWorkorder) => {
+          if (workorder.raiser.uid === this.userUid) {
+            return workorder;
+          }
+          return null;
+
+        }
+      );
+
+      return this.raisedWorkorders;
+    }
+
+    return null;
+  }
+
+  private filterUnverifiedWorkorders(): IntWorkorder[] | null {
+    if (this.workorders) {
+      this.unverifiedWorkorders = this.workorders.filter(
+        (workorder: IntWorkorder) => {
+          const approved = workorder.approved.status;
+          const rejected = workorder.rejected.status;
+          const supervisor = workorder.supervisor.uid;
+
+          if (approved === rejected === false && supervisor === this.userUid) { return workorder; }
+
+          return null;
+        }
+      );
+
+
+      return this.unverifiedWorkorders;
+    }
+
+    return null;
+  }
+
+  private filterApprovedWorkorders(): IntWorkorder[] | null {
+    if (this.workorders) {
+      this.approvedWorkorders = this.workorders.filter(
+        (workorder: IntWorkorder) => {
+          const approved = workorder.approved.status;
+          const rejected = workorder.rejected.status;
+          const supervisor = workorder.supervisor.uid;
+
+          if (
+            approved === true &&
+            rejected === false &&
+            supervisor === this.userUid) {
+            return workorder;
+          } return null;
+        }
+      );
+
+      return this.approvedWorkorders;
+    }
+
+    return null;
+  }
+
+  private filterRejectedWorkorders(): IntWorkorder[] | null {
+    if (this.workorders) {
+      this.rejectedWorkorders = this.workorders.filter(
+        (workorder: IntWorkorder) => {
+          const approved = workorder.approved.status;
+          const rejected = workorder.rejected.status;
+          const supervisor = workorder.supervisor.uid;
+
+          if (
+            approved === false &&
+            rejected === true &&
+            supervisor === this.userUid) {
+            return workorder;
+          } return null;
+        }
+      );
+
+      return this.rejectedWorkorders;
+    }
+
+    return null;
+  }
+
+  // OPERATORS WORKORDERS
+  private filterOtherApprovedWorkorders(): IntWorkorder[] | null {
+    if (this.workorders) {
+      this.approvedWorkorders = this.workorders.filter(
+        (workorder: IntWorkorder) => {
+          const approved = workorder.approved.status;
+          const rejected = workorder.rejected.status;
+          const raiser = workorder.raiser.uid;
+
+          if (
+            approved === true &&
+            rejected === false &&
+            raiser === this.userUid
+          ) {
+            return workorder;
+          }
+          return null;
+        }
+      );
+      return this.approvedWorkorders;
+    }
+    return null;
+  }
+
+  private filterOtherRejectedWorkorders(): IntWorkorder[] | null {
+    if (this.workorders) {
+      this.rejectedWorkorders = this.workorders.filter(
+        (workorder: IntWorkorder) => {
+          const approved = workorder.approved.status;
+          const rejected = workorder.rejected.status;
+          const raiser = workorder.raiser.uid;
+
+          if (
+            approved === false &&
+            rejected === true &&
+            raiser === this.userUid
+          ) {
+            return workorder;
+          }
+          return null;
+        }
+      );
+      return this.rejectedWorkorders;
+    }
+    return null;
+  }
+
+  // ENG TECHNICIANS WORKORDERS
+  private filterEngTechnicianOpenWorkorders(): IntWorkorder[] | null {
+    if (this.workorders) {
+      this.engTechnicianOpenWorkorders = this.workorders.filter(
+        (workorder: IntWorkorder) => {
+          const approved = workorder.approved.status;
+          const rejected = workorder.rejected.status;
+          const closed = workorder.closed.status;
+          const technician = workorder.technician.uid;
+
+          if (
+            approved === true &&
+            rejected === false &&
+            closed === false &&
+            technician === this.userUid
+
+          ) { return workorder; }
+
+          return null;
+
+        }
+      );
+
+      return this.engTechnicianOpenWorkorders;
+    }
+
+    return null;
+  }
+
+  private filterEngTechnicianClosedWorkorders(): IntWorkorder[] | null {
+    if (this.workorders) {
+      this.engTechnicianClosedWorkorders = this.workorders.filter(
+        (workorder: IntWorkorder) => {
+          const approved = workorder.approved.status;
+          const rejected = workorder.rejected.status;
+          const closed = workorder.closed.status;
+          const technician = workorder.technician.uid;
+
+          if (
+            approved === true &&
+            rejected === false &&
+            closed === true &&
+            technician === this.userUid
+
+          ) { return workorder; }
+
+          return null;
+
+        }
+      );
+
+      return this.engTechnicianClosedWorkorders;
+    }
+
+    return null;
+  }
+
+  // STORES TECHNICIANS WORKORDERS
+  private filterStoreTechnicianOpenWorkorders(): IntWorkorder[] | null {
+    if (this.workorders) {
+      this.storesTechnicianOpenWorkorders = this.workorders.filter(
+        (workorder: IntWorkorder) => {
+          const approved = workorder.approved.status;
+          const rejected = workorder.rejected.status;
+          const closed = workorder.closed.status;
+          const stores = workorder.storesTechnician.uid;
+
+          if (
+            approved === true &&
+            rejected === false &&
+            closed === false &&
+            stores === this.userUid
+          ) { return workorder; }
+
+          return null;
+        });
+
+      return this.storesTechnicianOpenWorkorders;
+    }
+    return null;
+  }
+
+  private filterStoreTechnicianClosedWorkorders(): IntWorkorder[] | null {
+    if (this.workorders) {
+      this.storesTechnicianClosedWorkorders = this.workorders.filter(
+        (workorder: IntWorkorder) => {
+          const approved = workorder.approved.status;
+          const rejected = workorder.rejected.status;
+          const closed = workorder.closed.status;
+          const stores = workorder.storesTechnician.uid;
+
+          if (
+            approved === true &&
+            rejected === false &&
+            closed === true &&
+            stores === this.userUid
+          ) { return workorder; }
+
+          return null;
+        });
+
+      return this.storesTechnicianClosedWorkorders;
+    }
+    return null;
+  }
+
+  // MANAGERS WORKORDERS
+  private filterReviewedWorkorders(): IntWorkorder[] | null {
+    if (this.workorders) {
+      this.reviewedWorkorders = this.workorders.filter(
+        (workorder: IntWorkorder) => {
+          const reviewed = workorder.review?.status;
+          // status => reviewed
+
+          if (reviewed) {
+            return workorder;
+          }
+          return null;
+        }
+      );
+      return this.reviewedWorkorders;
+    }
+    return null;
+  }
+
+  private filterUnReviewedWorkorders(): IntWorkorder[] | null {
+    if (this.workorders) {
+      this.unReviewedWorkorders = this.workorders.filter(
+        (workorder: IntWorkorder) => {
+          const reviewed = workorder.review?.status;
+          // sttaus => accepted, denied, cancelled
+          if (!reviewed || reviewed === '') {
+            return workorder;
+          }
+          return null;
+        }
+      );
+      return this.unReviewedWorkorders;
+    }
+    return null;
+  }
 
   resendVerificationCode(): any {
-    console.log('THE USER before, ', this.user);
     if (this.user) {
       const uid = this.user.uid;
 

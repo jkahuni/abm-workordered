@@ -38,22 +38,22 @@
               filterWorkordersByDateRaised(filterWorkordersOptionsField.value)
             "
           >
+            <mat-option value="None">None</mat-option>
             <mat-option value="Today">Today</mat-option>
             <mat-option value="Yesterday">Yesterday</mat-option>
             <mat-option value="This Week">This Week</mat-option>
             <mat-option value="Last Week">Last Week</mat-option>
             <mat-option value="This Month">This Month</mat-option>
             <mat-option value="Last Month">Last Month</mat-option>
-            <mat-option value="This Year">This Year</mat-option>
-            <mat-option value="Last Year">Last Year</mat-option>
+            
           </mat-select>
         </mat-form-field>
       </div>
     </div>
 
     <!-- filter value -->
-    <div *ngIf="filterOption" class="filter-field-value">
-      <div class="filter-value">Filter: {{ filterOption }}'s </div>
+    <div *ngIf="filterOption && filterOption !== 'None'" class="filter-field-value">
+      <div class="filter-value">Filter: {{ filterOption }}'s</div>
     </div>
 
     <!-- sidenav header -->
@@ -72,8 +72,24 @@
       </div>
     </div>
 
+    <!-- loading workorders failed -->
+    <div *ngIf="!loadingWorkorders && loadingWorkordersFailed">
+      <div class="workorders-sidenav-text-container">
+        <div
+          class="loading-workorders workorders-sidenav-text"
+          style="color: red"
+        >
+          Loading workorders failed.
+        </div>
+      </div>
+    </div>
+
     <!-- workorders loaded -->
-    <div *ngIf="!loadingWorkorders && workordersToDisplay">
+    <div
+      *ngIf="
+        !loadingWorkorders && !loadingWorkordersFailed && workordersToDisplay
+      "
+    >
       <!-- no pending workorders -->
       <div *ngIf="workordersToDisplay.length === 0">
         <div class="workorders-sidenav-text-container">
@@ -466,7 +482,7 @@
             <mat-list-item role="listitem">
               <div *ngIf="approveWorkorderLoading">
                 <button
-                  class="action-button btn btn-link shadow-none"
+                  class="action-button btn btn-success shadow-none"
                   type="button"
                   disabled
                 >
@@ -559,7 +575,7 @@
               <div *ngIf="!workorder.acknowledged.status">
                 <div *ngIf="acknowledgeWorkorderLoading">
                   <button
-                    class="action-button btn btn-link shadow-none"
+                    class="action-button btn btn-success shadow-none"
                     type="button"
                     disabled
                   >
@@ -613,7 +629,7 @@
                 <div *ngIf="!workorder.done.status">
                   <div *ngIf="markWorkorderDoneLoading">
                     <button
-                      class="action-button btn btn-link shadow-none"
+                      class="action-button btn btn-success shadow-none"
                       type="button"
                       disabled
                     >
@@ -751,32 +767,48 @@
             </mat-list-item>
           </div>
 
-          <!-- ENG MANAGERS ACTIONS -->
+          <!-- ENG MANAGER ACTIONS -->
           <div *ngIf="userType === 'manager'">
             <!-- accept current workorder -->
-            <mat-list-item>
+            <mat-list-item class="mt-2 mb-3">
               <button
+                *ngIf="!reviewingWorkorder"
                 type="button"
                 class="action-button btn btn-link shadow-none"
                 (click)="reviewWorkorder()"
               >
-                Accept
+                Mark Reviewed
+              </button>
+              <button
+                *ngIf="reviewingWorkorder"
+                type="button"
+                class="action-button btn btn-success shadow-none"
+                disabled
+              >
+                <span
+                  #reviewWorkorderButtonSpinner
+                  class="spinner-border spinner-border-sm"
+                  role="status"
+                  aria-hidden="true"
+                >
+                </span>
+                Updating...
               </button>
             </mat-list-item>
 
             <!-- accept all workorders -->
-            <mat-list-item>
+            <mat-list-item class="my-3">
               <button
                 type="button"
                 class="action-button btn btn-link shadow-none"
                 (click)="reviewAllWorkorders()"
               >
-                Accept All
+                Mark All Reviewed
               </button>
             </mat-list-item>
 
             <!-- raise-concerns -->
-            <mat-list-item>
+            <mat-list-item class="my-3">
               <button
                 type="button"
                 class="action-button btn btn-link shadow-none"
@@ -821,8 +853,27 @@
       </div>
     </div>
 
+    <!-- error loading workorders -->
+    <div *ngIf="!loadingWorkorders && loadingWorkordersFailed">
+      <div class="no-workorders-to-display" style="color: red">
+        <p>
+          {{
+            loadingWorkordersIndexingError
+              ? loadingWorkordersIndexingError
+              : loadingWorkordersOtherError
+              ? loadingWorkordersOtherError
+              : loadingWorkordersDefaultError
+          }}
+        </p>
+      </div>
+    </div>
+
     <!-- loading workorders done -->
-    <div *ngIf="!loadingWorkorders && workordersToDisplay">
+    <div
+      *ngIf="
+        !loadingWorkorders && !loadingWorkordersFailed && workordersToDisplay
+      "
+    >
       <!-- no workorders -->
       <div *ngIf="workordersToDisplay.length === 0">
         <div class="no-workorders-to-display">
@@ -1442,7 +1493,8 @@
                     *ngIf="
                       userType === 'engineering' ||
                       userType === 'stores' ||
-                      userType === 'supervisor'
+                      userType === 'supervisor' ||
+                      userType === 'manager'
                     "
                   >
                     <ng-container

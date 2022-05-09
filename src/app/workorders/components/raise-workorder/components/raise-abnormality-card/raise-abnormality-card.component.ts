@@ -254,6 +254,11 @@ export class RaiseAbnormalityCardComponent implements OnInit {
 
       // workorder data
       const workorderData: IntWorkorder = {
+        review: {
+          status: '',
+          concerns: [],
+          dateTime: ''
+        },
         sparesUsed: {
           status: false,
           spares: [],

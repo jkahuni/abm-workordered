@@ -262,6 +262,11 @@ export class RaiseMoldServiceComponent implements OnInit {
 
       // workorder data
       const workorderData: IntWorkorder = {
+        review: {
+          status: '',
+          concerns: [],
+          dateTime: ''
+        },
         sparesUsed: {
           status: false,
           spares: [],
@@ -327,13 +332,13 @@ export class RaiseMoldServiceComponent implements OnInit {
       };
 
       // persist w/o to db
-     this.workordersService.raiseWorkorder(workorderData)
+      this.workordersService.raiseWorkorder(workorderData)
         .then(() => {
           this.hideSpinner();
 
           this.toast.success(`Success. Workorder ${workorderNumber} raised successfully.`,
             { duration: 8000, id: 'raise-mold-service-workorder-success' });
-          
+
           this.router.navigate(['/']);
 
         })
@@ -341,7 +346,7 @@ export class RaiseMoldServiceComponent implements OnInit {
           this.hideSpinner();
 
           console.log('ERR IN WORKORDER', err);
-         
+
 
           this.toast.error(`Failed. Raising workorder ${workorderNumber} failed with error code MS-02. Please try again or report the error code to support for assistance.`, {
             duration: 8000, id: 'raise-mold-service-workorder-error-3'

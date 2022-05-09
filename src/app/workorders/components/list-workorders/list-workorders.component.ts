@@ -1,4 +1,4 @@
-import { Component, OnInit, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, OnInit, ElementRef, ViewChild } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormGroup, FormBuilder, Validators, AbstractControl, FormArray } from '@angular/forms';
 import { MatSelect } from '@angular/material/select';
@@ -24,24 +24,17 @@ import * as dayjs from 'dayjs';
 import * as weekOfYear from 'dayjs/plugin/weekOfYear';
 import * as isToday from 'dayjs/plugin/isToday';
 import * as isYesterday from 'dayjs/plugin/isYesterday';
-import * as isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
-import * as isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
-import * as isBetween from 'dayjs/plugin/isBetween';
 
 dayjs.extend(weekOfYear);
 dayjs.extend(isToday);
 dayjs.extend(isYesterday);
-dayjs.extend(isSameOrAfter);
-dayjs.extend(isSameOrBefore);
-dayjs.extend(isBetween);
-
 
 @Component({
   selector: 'app-list-workorders',
   templateUrl: './list-workorders.component.html',
   styleUrls: ['./list-workorders.component.scss']
 })
-export class ListWorkordersComponent implements OnInit, AfterViewInit {
+export class ListWorkordersComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
@@ -51,9 +44,6 @@ export class ListWorkordersComponent implements OnInit, AfterViewInit {
     private toast: HotToastService,
     private fb: FormBuilder
   ) { }
-  ngAfterViewInit(): void {
-    console.log('IN AFTER VIEW', this.filterWorkordersOptionsField?.value);
-  }
 
   // template refs
   @ViewChild('loadingWorkordersSpinner') loadingWorkordersSpinner!: ElementRef;
@@ -68,6 +58,9 @@ export class ListWorkordersComponent implements OnInit, AfterViewInit {
   @ViewChild('markWorkorderDoneLoadingButtonSpinner') markWorkorderDoneLoadingButtonSpinner!: ElementRef;
   @ViewChild('updateEngineeringTechniciansButtonSpinner') updateEngineeringTechniciansButtonSpinner!: ElementRef;
   @ViewChild('updateStoresTechniciansButtonSpinner') updateStoresTechniciansButtonSpinner !: ElementRef;
+  @ViewChild('reviewWorkorderButtonSpinner') reviewWorkorderButtonSpinner!: ElementRef;
+  @ViewChild('reviewWorkordersButtonSpinner') reviewWorkordersButtonSpinner!: ElementRef;
+  @ViewChild('raiseConcernsButtonSpinner') raiseConcernsButtonSpinner!: ElementRef;
 
   // close modals (X on the modal)
   @ViewChild('closeRejectWorkorderModal') closeRejectWorkorderModal!: ElementRef;
@@ -76,6 +69,8 @@ export class ListWorkordersComponent implements OnInit, AfterViewInit {
   @ViewChild('closeAssignTechniciansModal') closeAssignTechniciansModal!: ElementRef;
   @ViewChild('closeEngineeringTechniciansHandoverModal') closeEngineeringTechniciansHandoverModal!: ElementRef;
   @ViewChild('closeStoresTechniciansHandoverModal') closeStoresTechniciansHandoverModal!: ElementRef;
+  @ViewChild('closeReviewWorkordersModal') closeReviewWorkordersModal!: ElementRef;
+  @ViewChild('closeRaiseConcernsModal') closeRaiseConcernsModal!: ElementRef;
 
   // filter workorders options
   @ViewChild('filterWorkordersOptionsField') filterWorkordersOptionsField!: MatSelect;
@@ -122,6 +117,17 @@ export class ListWorkordersComponent implements OnInit, AfterViewInit {
 
   // loading spinners
   loadingWorkorders = true;
+  loadingWorkordersFailed = false;
+  loadingWorkordersIndexingError!: string;
+  loadingWorkordersOtherError!: string;
+  loadingWorkordersDefaultError: string = `
+  Loading workorders failed with error code ULW-01. Try reloading the page or report the error code to support to have it fixed.`;
+
+
+  // managers actions
+  reviewingWorkorder = false;
+  reviewingWorkorders = false;
+  raisingConcerns = false;
 
   // for different actions updating the workorder
   approveWorkorderLoading = false;
@@ -160,14 +166,25 @@ export class ListWorkordersComponent implements OnInit, AfterViewInit {
     ) {
       // manager
       if (this.userType === 'manager') {
-        if (this.workordersType === 'all') {
-          const first200WorkordersQuery = query(
+        if (this.workordersType === 'reviewed') {
+          const first100WorkordersQuery = query(
             workordersColRef,
             orderBy('workorder.number'),
-            limit(200)
+            where('review.status', '==', 'reviewed'),
+            limit(100)
+          );
+          this.workorderHasActions = false;
+          return first100WorkordersQuery;
+        }
+        else if (this.workordersType === 'un-reviewed') {
+          const first100WorkordersQuery = query(
+            workordersColRef,
+            orderBy('workorder.number'),
+            where('review.status', '==', ''),
+            limit(100)
           );
           this.workorderHasActions = true;
-          return first200WorkordersQuery;
+          return first100WorkordersQuery;
         }
       }
 
@@ -180,7 +197,8 @@ export class ListWorkordersComponent implements OnInit, AfterViewInit {
             orderBy('workorder.number'),
             where('approved.status', '==', false),
             where('rejected.status', '==', false),
-            where('supervisor.uid', '==', this.userUid)
+            where('supervisor.uid', '==', this.userUid),
+            limit(100)
           );
 
           // additional supervisor actions
@@ -195,7 +213,8 @@ export class ListWorkordersComponent implements OnInit, AfterViewInit {
             orderBy('workorder.number'),
             where('approved.status', '==', true),
             where('rejected.status', '==', false),
-            where('supervisor.uid', '==', this.userUid));
+            where('supervisor.uid', '==', this.userUid),
+            limit(100));
 
           return approvedWorkordersQuery;
 
@@ -208,7 +227,8 @@ export class ListWorkordersComponent implements OnInit, AfterViewInit {
             orderBy('workorder.number'),
             where('approved.status', '==', false),
             where('rejected.status', '==', true),
-            where('supervisor.uid', '==', this.userUid)
+            where('supervisor.uid', '==', this.userUid),
+            limit(100)
           );
 
           return rejectedWorkordersQuery;
@@ -220,7 +240,8 @@ export class ListWorkordersComponent implements OnInit, AfterViewInit {
           const raisedWorkordersQuery = query(
             workordersColRef,
             orderBy('workorder.number'),
-            where('raiser.uid', '==', this.userUid)
+            where('raiser.uid', '==', this.userUid),
+            limit(100)
           );
 
           return raisedWorkordersQuery;
@@ -237,7 +258,8 @@ export class ListWorkordersComponent implements OnInit, AfterViewInit {
             where('approved.status', '==', true),
             where('rejected.status', '==', false),
             where('closed.status', '==', false),
-            where('technician.uid', '==', this.userUid)
+            where('technician.uid', '==', this.userUid),
+            limit(100)
           );
 
           this.workorderHasActions = true;
@@ -252,7 +274,8 @@ export class ListWorkordersComponent implements OnInit, AfterViewInit {
             where('approved.status', '==', true),
             where('rejected.status', '==', false),
             where('closed.status', '==', true),
-            where('technician.uid', '==', this.userUid)
+            where('technician.uid', '==', this.userUid),
+            limit(100)
           );
 
           return engineeringClosedWorkordersQuery;
@@ -270,7 +293,8 @@ export class ListWorkordersComponent implements OnInit, AfterViewInit {
             where('approved.status', '==', true),
             where('rejected.status', '==', false),
             where('closed.status', '==', false),
-            where('storesTechnician.uid', '==', this.userUid)
+            where('storesTechnician.uid', '==', this.userUid),
+            limit(100)
           );
 
           this.workorderHasActions = true;
@@ -285,7 +309,8 @@ export class ListWorkordersComponent implements OnInit, AfterViewInit {
             where('approved.status', '==', true),
             where('rejected.status', '==', false),
             where('closed.status', '==', true),
-            where('storesTechnician.uid', '==', this.userUid)
+            where('storesTechnician.uid', '==', this.userUid),
+            limit(100)
           );
           this.workorderHasActions = true;
           return storesOpenWorkordersQuery;
@@ -293,13 +318,14 @@ export class ListWorkordersComponent implements OnInit, AfterViewInit {
 
       }
       // other types of users
-      // (operator, mgr, offices, distribution)
+      // (operator, offices, distribution)
       else if (this.userType === 'other') {
         if (this.workordersType === 'raised') {
           const raisedWorkordersQuery = query(
             workordersColRef,
             orderBy('workorder.number'),
-            where('raiser.uid', '==', this.userUid)
+            where('raiser.uid', '==', this.userUid),
+            limit(100)
           );
 
           return raisedWorkordersQuery;
@@ -311,7 +337,8 @@ export class ListWorkordersComponent implements OnInit, AfterViewInit {
             orderBy('workorder.number'),
             where('approved.status', '==', true),
             where('rejected.status', '==', false),
-            where('raiser.uid', '==', this.userUid)
+            where('raiser.uid', '==', this.userUid),
+            limit(100)
           );
 
 
@@ -324,7 +351,8 @@ export class ListWorkordersComponent implements OnInit, AfterViewInit {
             orderBy('workorder.number'),
             where('approved.status', '==', false),
             where('rejected.status', '==', true),
-            where('raiser.uid', '==', this.userUid)
+            where('raiser.uid', '==', this.userUid),
+            limit(100)
           );
 
           return rejectedWorkordersQuery;
@@ -347,25 +375,23 @@ export class ListWorkordersComponent implements OnInit, AfterViewInit {
 
         })
         .catch((err: any) => {
-          this.hideLoadingWorkordersSpinner();
-          this.toast.close();
+          this.hideLoadingWorkordersSpinnerOnError();
+          if (err.code === 'failed-precondition') {
+            this.loadingWorkordersIndexingError = `Loading workorders failed with error code IND-LW-01. Please report this error code to support to have it fixed.`;
+            console.log('ERROR IND-LW-01', err);
+          }
 
-          this.toast.error(`Error: Loading your workorders failed with error code WL-02.
-          Please try reloading the page or report the error code to support for assistance.`,
-            { duration: 6000, id: 'error-code-WL-02' });
-          console.log('ERROR WL-02', err);
-
-
+          else {
+            this.loadingWorkordersOtherError = `Loading workorders failed with error code LW-01. Please try reloading the page or report this error code to support to have it fixed.`;
+            console.log('ERROR LW-01', err);
+          }
         });
-    } else {
-      this.hideLoadingWorkordersSpinner();
-      this.toast.close();
+    }
 
-      this.toast.error(`Error: Loading your workorders failed with error code WL-01.
-          Please ensure you are logged in
-           then try reloading the page
-           or report the error code to support for assistance.`,
-        { duration: 8000, id: 'error-code-WL-01' });
+    else {
+      this.hideLoadingWorkordersSpinnerOnError();
+
+      this.loadingWorkordersOtherError = `Loading workorders failed with error code LW-02. Please try reloading the page or report this error code to support to have it fixed.`;
     }
   }
 
@@ -425,6 +451,12 @@ export class ListWorkordersComponent implements OnInit, AfterViewInit {
     if (this.loadingWorkordersSpinner) {
       this.loadingWorkordersSpinner.nativeElement.style.display = 'none';
     }
+  }
+
+  private hideLoadingWorkordersSpinnerOnError(): void {
+    this.loadingWorkordersFailed = true;
+    this.hideLoadingWorkordersSpinner();
+
   }
 
   private showLoadingWorkordersSpinner(): void {
@@ -572,6 +604,9 @@ export class ListWorkordersComponent implements OnInit, AfterViewInit {
     this.markWorkorderDoneLoading = false;
     this.engTechnicianHandoverLoading = false;
     this.storesTechnicianHandoverLoading = false;
+    this.reviewingWorkorder = false;
+    this.reviewingWorkorders = false;
+    this.raisingConcerns = false;
 
     if (this.appprovingWorkorderLoadingSpinner) {
       this.appprovingWorkorderLoadingSpinner.nativeElement.style.display = 'none';
@@ -600,6 +635,15 @@ export class ListWorkordersComponent implements OnInit, AfterViewInit {
     if (this.updateStoresTechniciansButtonSpinner) {
       this.updateStoresTechniciansButtonSpinner.nativeElement.style.display = 'none';
     }
+
+    if (this.reviewWorkorderButtonSpinner) {
+      this.reviewWorkorderButtonSpinner.nativeElement.style.display = 'none';
+    }
+    if (this.reviewWorkordersButtonSpinner) {
+      this.reviewWorkordersButtonSpinner.nativeElement.style.display = 'none';
+    }
+    if (this.raiseConcernsButtonSpinner)
+      this.raiseConcernsButtonSpinner.nativeElement.style.display = 'none'; { }
   }
 
   private closeOpenModal(): void {
@@ -620,6 +664,12 @@ export class ListWorkordersComponent implements OnInit, AfterViewInit {
     }
     if (this.closeStoresTechniciansHandoverModal) {
       this.closeStoresTechniciansHandoverModal.nativeElement.click();
+    }
+    if (this.closeReviewWorkordersModal) {
+      this.closeReviewWorkordersModal.nativeElement.click();
+    }
+    if (this.closeRaiseConcernsModal) {
+      this.closeRaiseConcernsModal.nativeElement.click();
     }
   }
 
@@ -728,7 +778,7 @@ export class ListWorkordersComponent implements OnInit, AfterViewInit {
 
   // public functions
   createWorkordersHeader(): string {
-    return this.workordersType + ' workorders';
+    return this.workordersType?.replace(/-/g, '') + ' workorders';
   }
 
   closeLeftSidenav(): boolean {
@@ -757,6 +807,7 @@ export class ListWorkordersComponent implements OnInit, AfterViewInit {
 
   }
 
+
   filterWorkordersByDateRaised(filterOption: string): IntWorkorder[] {
     if (filterOption) {
       this.filterOption = filterOption;
@@ -778,7 +829,7 @@ export class ListWorkordersComponent implements OnInit, AfterViewInit {
           else if (filterOption === 'This Month') {
             return this.filterThisMonthsWorkorders(date) ? workorder : null;
           }
-          else if (filterOption === 'lastMonth') {
+          else if (filterOption === 'Last Month') {
             return this.filterLastMonthsWorkorders(date) ? workorder : null;
           }
           else if (filterOption === 'This Year') {
@@ -786,6 +837,8 @@ export class ListWorkordersComponent implements OnInit, AfterViewInit {
           }
           else if (filterOption === 'Last Year') {
             return this.filterLastYearsWorkorders(date) ? workorder : null;
+          } else if (filterOption === 'None') {
+            return workorder;
           }
           else {
             this.workordersToDisplay = this.workorders;
@@ -926,7 +979,8 @@ export class ListWorkordersComponent implements OnInit, AfterViewInit {
   }
 
   reject(): void {
-    const { reason
+    const {
+      reason
     } = this.rejectWorkorderForm?.value;
 
     if (reason === '') {
@@ -988,7 +1042,8 @@ export class ListWorkordersComponent implements OnInit, AfterViewInit {
   }
 
   supervisorsHandover(): void {
-    const { newSupervisor
+    const {
+      newSupervisor
     } = this.supervisorsHandoverForm?.value;
     if (newSupervisor === '') {
       return this.supervisorsHandoverForm?.get('newSupervisor')?.setErrors({ required: true });
@@ -1230,7 +1285,8 @@ export class ListWorkordersComponent implements OnInit, AfterViewInit {
   }
 
   engTechnicianHandover(): void {
-    const { newTechnician
+    const {
+      newTechnician
     } = this.engTechniciansHandoverForm?.value;
 
     if (newTechnician === '') {
@@ -1270,7 +1326,8 @@ export class ListWorkordersComponent implements OnInit, AfterViewInit {
   }
 
   storesTechnicianHandover(): void {
-    const { newTechnician
+    const {
+      newTechnician
     } = this.storesTechniciansHandoverForm?.value;
     if (newTechnician === '') {
       return this.storesTechniciansHandoverForm?.get('newTechnician')?.setErrors({ required: true });
@@ -1312,13 +1369,39 @@ export class ListWorkordersComponent implements OnInit, AfterViewInit {
 
   // ENG MANAGER ACTIONS
   reviewWorkorder(): void {
+    if (this.workorder) {
+      this.reviewingWorkorder = true;
+      const now = dayjs().format();
+      const workorderUid = this.workorder.workorder.uid;
+      const workorderNumber = this.workorder.workorder.number;
+      const workorderUpdateData = {
+        review: {
+          status: 'reviewed',
+          concerns: [],
+          dateTime: now
+
+        }
+      };
+
+      this.workordersService.updateWorkorder(workorderUid, workorderUpdateData)
+        .then(() => {
+          this.closeButtonSpinners();
+          this.refreshWorkorders();
+          this.toast.success(`Success. Workorder ${workorderNumber} reviewed successfully.`, { id: 'review-workorder-success' });
+        })
+        .catch((err: any) => {
+          this.closeButtonSpinners();
+          this.toast.error(`Failed. Reviewing workorder ${workorderNumber} failed with error code RW-01. Please try again or report the error code to support to have the issue fixed.`, { duration: 8000, id: 'review-workorder-error' });
+
+        });
+    }
     console.log('THIS IS WHERE ACCEPTING THE WORKORDER WILL HAPPEN');
   }
 
   reviewAllWorkorders(): void {
     console.log('REVIEW ALL WILL HAPPEN HERE');
   }
-  
+
   raiseConcern(): void {
     console.log('CONCERNS ARE WHAT WE DO BEST');
   }

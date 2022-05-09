@@ -21,3 +21,5 @@ export interface IntFirestoreUser {
     isAdmin: boolean;
     isSuperUser: boolean;
 }
+
+

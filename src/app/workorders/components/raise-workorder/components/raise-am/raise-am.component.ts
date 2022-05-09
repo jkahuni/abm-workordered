@@ -261,6 +261,11 @@ export class RaiseAmComponent implements OnInit {
       this.showSpinner();
 
       const workorderData: IntWorkorder = {
+        review: {
+          status: '',
+          concerns: [],
+          dateTime: ''
+        },
         sparesUsed: {
           status: false,
           spares: [],

@@ -86,6 +86,7 @@ export interface IntWorkorder {
     timeTaken: IntTimeTakenByWorkorder;
     toolChange: IntToolChange;
     workorder: IntWorkorderSummary;
+    review: IntWorkorderReview;
 
 }
 
@@ -116,4 +117,15 @@ export interface IntCloseWorkorderData {
     machineSubAssembly: string;
     rootCause: string;
     moldPartsServiced: string;
+}
+
+export interface IntWorkorderReview {
+    status: string;
+    dateTime: string;
+    concerns: IntConcern[] | [];
+}
+
+export interface IntConcern {
+    to: string;
+    message: string;
 }

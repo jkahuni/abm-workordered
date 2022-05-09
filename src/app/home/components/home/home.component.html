@@ -203,15 +203,27 @@
 
           <!-- eng manager -->
           <div *ngIf="isEngineeringManager" class="navigation-links">
-            <!-- all raised workorders -->
+            <!-- all un-reviewed workorders -->
             <div>
               <a
                 type="button"
                 class="btn btn-link home-nav-button shadow-none"
-                [routerLink]="['/workorders/manager/all', userUid]"
+                [routerLink]="['/workorders/manager/un-reviewed', userUid]"
               >
-                Review Workorders - (
-                {{ allWorkorders ? allWorkorders.length : 0 }} )
+                Unreviewed Workorders - (
+                {{ unReviewedWorkorders ? unReviewedWorkorders.length : 0 }} )
+              </a>
+            </div>
+
+            <!-- all reviewed workorders -->
+             <div>
+              <a
+                type="button"
+                class="btn btn-outline-success home-nav-button shadow-none"
+                [routerLink]="['/workorders/manager/reviewed', userUid]"
+              >
+                Reviewed Workorders - (
+                {{ reviewedWorkorders ? reviewedWorkorders.length : 0 }} )
               </a>
             </div>
           </div>
