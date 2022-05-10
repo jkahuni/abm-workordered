@@ -45,15 +45,17 @@
             <mat-option value="Last Week">Last Week</mat-option>
             <mat-option value="This Month">This Month</mat-option>
             <mat-option value="Last Month">Last Month</mat-option>
-            
           </mat-select>
         </mat-form-field>
       </div>
     </div>
 
     <!-- filter value -->
-    <div *ngIf="filterOption && filterOption !== 'None'" class="filter-field-value">
-      <div class="filter-value">Filter: {{ filterOption }}'s</div>
+    <div
+      *ngIf="filterOption && filterOption !== 'None'"
+      class="filter-field-value"
+    >
+      <div class="filter-value" style="text-decoration: underline;">{{ filterOption }}'s W/o's</div>
     </div>
 
     <!-- sidenav header -->
@@ -801,7 +803,9 @@
               <button
                 type="button"
                 class="action-button btn btn-link shadow-none"
-                (click)="reviewAllWorkorders()"
+                (click)="refreshModals()"
+                data-bs-toggle="modal"
+                data-bs-target="#reviewWorkordersModal"
               >
                 Mark All Reviewed
               </button>
@@ -1689,6 +1693,26 @@
             <strong>Handover:- </strong> Delegate the workorder to another
             stores technician who is on duty and can follow up on the issuance
             of spares.
+          </p>
+        </div>
+
+        <!-- manager -->
+        <div *ngIf="userType === 'manager'">
+          <p>
+            <strong>Mark Reviewed: </strong> The workorder you selected is okay
+            and you are satisfied with it.
+          </p>
+          <p class="mt-2">
+            <strong>Mark All Reviewed: </strong> Mark more than one workorder as
+            reviewed. You will select the group of workorders to mark as
+            reviewed from a predefined list.
+          </p>
+          <p class="mt-2">
+            <strong>Raise Concern: </strong> The workorder does not look okay,
+            or you require further clarification about the workorder. You will
+            select the person to whom the concern is raised, and then provide
+            the concern itself. This individual will be notified with the
+            concern.
           </p>
         </div>
       </div>
@@ -2588,3 +2612,151 @@
 </div>
 
 <!-- MANAGERS - ENG -->
+<div
+  class="modal fade"
+  id="reviewWorkordersModal"
+  tabindex="-1"
+  aria-labelledby="reviewWorkordersModalLabel"
+  aria-hiden="true"
+  data-bs-backdrop="static"
+>
+  <div
+    class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-sm"
+  >
+    <div class="modal-content bg-light">
+      <div class="modal-header text-dark">
+        <h3 class="modal-title m-0" id="reviewWorkordersModalLabel">
+          <strong>Review Multiple Workorders</strong>
+        </h3>
+        <button
+          #closeReviewWorkordersModal
+          class="btn-close border border-success border-2"
+          type="button"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+          (click)="resetForms()"
+        ></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-container mat-elevation-z5">
+          <div class="form-header-container">
+            <h2>Review Workorders</h2>
+          </div>
+
+          <form
+            [formGroup]="reviewWorkordersForm"
+            (ngSubmit)="reviewWorkorders()"
+            id="reviewWorkorders"
+            #reviewWorkordersFormReference
+            autocomplete="off"
+            class="review-workorders-form"
+          >
+            <div>
+              <mat-label
+                class="fw-bold"
+                [ngClass]="{'invalid-date-raised-filter': reviewWorkordersForm.controls['dateRaisedFilter']?.errors?.['required']}"
+                >Date Raised</mat-label
+              >
+
+              <mat-radio-group
+                class="toggle-workorders-to-review-button-group"
+                aria-labelledby="toggle workorders to review"
+                formControlName="dateRaisedFilter"
+              >
+                <mat-radio-button
+                  class="toggle-date-raised-button"
+                  type="button"
+                  value="all"
+                >
+                  All
+                </mat-radio-button>
+                <mat-radio-button
+                  class="toggle-date-raised-button"
+                  type="button"
+                  value="today"
+                >
+                  Today
+                </mat-radio-button>
+                <mat-radio-button
+                  class="toggle-date-raised-button"
+                  type="button"
+                  value="yesterday"
+                >
+                  Yesterday
+                </mat-radio-button>
+                <mat-radio-button
+                  class="toggle-date-raised-button"
+                  type="button"
+                  value="this-week"
+                >
+                  This Week
+                </mat-radio-button>
+                <mat-radio-button
+                  class="toggle-date-raised-button"
+                  type="button"
+                  value="last-week"
+                >
+                  Last Week
+                </mat-radio-button>
+                <mat-radio-button
+                  class="toggle-date-raised-button"
+                  type="button"
+                  value="this-month"
+                >
+                  This Month
+                </mat-radio-button>
+                <mat-radio-button
+                  class="toggle-date-raised-button"
+                  type="button"
+                  value="last-month"
+                >
+                  Last Month
+                </mat-radio-button>
+              </mat-radio-group>
+              <mat-error
+                *ngIf="reviewWorkordersForm.controls['dateRaisedFilter']?.errors?.['required']"
+                >Please select one option.</mat-error
+              >
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <div *ngIf="!reviewingWorkorders">
+          <button
+            type="button"
+            class="btn btn-secondary me-2"
+            data-bs-dismiss="modal"
+            (click)="resetForms()"
+          >
+            Cancel
+          </button>
+
+          <button
+            type="submit"
+            class="btn btn-primary"
+            form="reviewWorkorders"
+            (click)="reviewWorkordersFormReference?.['ngSubmit']?.emit()"
+          >
+            Review Workorders
+          </button>
+        </div>
+
+        <div *ngIf="reviewingWorkorders">
+          <button type="button" class="btn btn-success" disabled>
+            <span
+              #reviewWorkordersButtonSpinner
+              class="spinner-border spinner-border-sm"
+              role="status"
+              aria-hidden="true"
+            >
+            </span>
+            Reviewing Workorders...
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

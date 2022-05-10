@@ -21,7 +21,7 @@ body {
   margin: 16px auto; // margin = top,right,bottom,left
 }
 
-form {
+form:not(.review-workorders-form) {
   display: flex;
   flex-flow: column wrap;
   justify-content: center; // left-right alignment
@@ -32,6 +32,7 @@ form {
     width: 50%;
   }
 }
+
 
 a.router-link {
   cursor: pointer;
@@ -64,3 +65,14 @@ a.router-link {
   }
 }
 
+// for mgrs review workorders form
+form.review-workorders-form {
+  display: flex;
+  flex-flow: column wrap;
+  justify-content: flex-start; // left-right alignment
+  width: 100%;
+
+  .invalid-date-raised-filter {
+    color: red;
+  }
+}

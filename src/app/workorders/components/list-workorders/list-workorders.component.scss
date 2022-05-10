@@ -266,3 +266,16 @@ mat-sidenav-container.sidenav-container {
         z-index: 99999 !important;
     }
 }
+
+// for review workorders
+.toggle-workorders-to-review-button-group {
+    display: flex;
+    // justify-content: flex-start;
+    align-items: flex-start;
+    flex-direction: column;
+    margin: 10px 0px 15px;
+}
+
+.toggle-date-raised-button {
+    margin: 5px;
+}

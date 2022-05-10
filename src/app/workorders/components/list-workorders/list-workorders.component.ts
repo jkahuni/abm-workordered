@@ -94,6 +94,7 @@ export class ListWorkordersComponent implements OnInit {
   assignTechniciansForm!: FormGroup;
   engTechniciansHandoverForm!: FormGroup;
   storesTechniciansHandoverForm!: FormGroup;
+  reviewWorkordersForm!: FormGroup;
 
   // for handover templates
   electricalTechnicians!: IntUser[];
@@ -401,8 +402,12 @@ export class ListWorkordersComponent implements OnInit {
     this.changeTechniciansForm = this.createChangeTechniciansForm();
     this.assignTechniciansForm = this.createAssignTechniciansForm();
     this.supervisorsHandoverForm = this.createSupervisorsHandoverForm();
+
     this.engTechniciansHandoverForm = this.createEngTechniciansHandoverForm();
     this.storesTechniciansHandoverForm = this.createStoresTechniciansHandoverForm();
+
+    this.reviewWorkordersForm = this.createReviewWorkordersForm();
+
   }
 
   // get all users
@@ -563,6 +568,14 @@ export class ListWorkordersComponent implements OnInit {
     const form = this.fb.group({
       currentTechnician: [this.workorder?.storesTechnician?.fullName],
       newTechnician: ['', Validators.required]
+    });
+
+    return form;
+  }
+
+  private createReviewWorkordersForm(): FormGroup {
+    const form = this.fb.group({
+      dateRaisedFilter: ['']
     });
 
     return form;
@@ -814,31 +827,30 @@ export class ListWorkordersComponent implements OnInit {
       this.workordersToDisplay = this.workorders
         .filter((workorder: IntWorkorder) => {
           const date = workorder.raised.dateTime;
-          // today
           if (filterOption === 'Today') {
             return this.filterTodaysWorkorders(date) ? workorder : null;
           } else if (filterOption === 'Yesterday') {
-            return this.filterYesterdaysWorkorders(date) ? workorder : null;
+            return this.filterYesterdaysWorkorders(date);
           }
           else if (filterOption === 'This Week') {
-            return this.filterThisWeeksWorkorders(date) ? workorder : null;
+            return this.filterThisWeeksWorkorders(date);
           }
           else if (filterOption === 'Last Week') {
-            return this.filterLastWeeksWorkorders(date) ? workorder : null;
+            return this.filterLastWeeksWorkorders(date);
           }
           else if (filterOption === 'This Month') {
-            return this.filterThisMonthsWorkorders(date) ? workorder : null;
+            return this.filterThisMonthsWorkorders(date);
           }
           else if (filterOption === 'Last Month') {
-            return this.filterLastMonthsWorkorders(date) ? workorder : null;
+            return this.filterLastMonthsWorkorders(date);
           }
           else if (filterOption === 'This Year') {
-            return this.filterThisYearsWorkorders(date) ? workorder : null;
+            return this.filterThisYearsWorkorders(date);
           }
           else if (filterOption === 'Last Year') {
-            return this.filterLastYearsWorkorders(date) ? workorder : null;
+            return this.filterLastYearsWorkorders(date);
           } else if (filterOption === 'None') {
-            return workorder;
+            return true;
           }
           else {
             this.workordersToDisplay = this.workorders;
@@ -873,7 +885,8 @@ export class ListWorkordersComponent implements OnInit {
       this.supervisorsHandoverForm,
       this.assignTechniciansForm,
       this.engTechniciansHandoverForm,
-      this.storesTechniciansHandoverForm
+      this.storesTechniciansHandoverForm,
+      this.reviewWorkordersForm
     ];
 
     forms.forEach((form: FormGroup) => {
@@ -1398,8 +1411,90 @@ export class ListWorkordersComponent implements OnInit {
     console.log('THIS IS WHERE ACCEPTING THE WORKORDER WILL HAPPEN');
   }
 
-  reviewAllWorkorders(): void {
-    console.log('REVIEW ALL WILL HAPPEN HERE');
+  reviewWorkorders(): void {
+    const { dateRaisedFilter } = this.reviewWorkordersForm?.value;
+
+    if (dateRaisedFilter === '') {
+      return this.reviewWorkordersForm?.get('dateRaisedFilter')?.setErrors({
+        required: true
+      });
+    }
+
+    else if (this.reviewWorkordersForm?.invalid) {
+      this.toast.close();
+      this.toast.error(`An error occured while submitting your form. Please try again.`, { id: 'review-wokrorders-error-1' });
+    }
+
+    else {
+      this.reviewingWorkorders = true;
+
+      const workordersToReview = this.workorders.filter(
+        (workorder: IntWorkorder) => {
+          const reviewStatus = workorder.review.status;
+          const date = workorder.raised.dateTime;
+          if (reviewStatus === '') {
+            if (dateRaisedFilter === 'all') {
+              return true;
+            }
+            else if (dateRaisedFilter === 'today') {
+              return this.filterTodaysWorkorders(date);
+            }
+            else if (dateRaisedFilter === 'yesterday') {
+              return this.filterYesterdaysWorkorders(date);
+            }
+            else if (dateRaisedFilter === 'this-week') {
+              return this.filterThisWeeksWorkorders(date);
+            }
+            else if (dateRaisedFilter === 'last-week') {
+              return this.filterLastWeeksWorkorders(date);
+            }
+            else if (dateRaisedFilter === 'this-month') {
+              return this.filterThisMonthsWorkorders(date);
+            }
+            else if (dateRaisedFilter === 'last-month') {
+              return this.filterLastMonthsWorkorders(date);
+            }
+          }
+          return false;
+        }
+      );
+
+      const totalWorkordersToReview = workordersToReview.length;
+
+      workordersToReview.forEach(
+        (workorder: IntWorkorder, index) => {
+          const workorderUid = workorder.workorder.uid;
+          const now = dayjs().format();
+
+          const workorderUpdateData = {
+            review: {
+              status: 'reviewed',
+              dateTime: now,
+              concerns: []
+            }
+          };
+
+          this.workordersService.updateWorkorder(workorderUid, workorderUpdateData)
+            .then(() => {
+              if (index + 1 === totalWorkordersToReview) {
+                  this.closeButtonSpinners();
+                  this.closeOpenModal();
+                  this.refreshWorkorders();
+                  this.toast.success(`Success. ${totalWorkordersToReview} workorder(s) reviewed successfully.`,
+                    { duration: 8000, id: 'review-workorders-success' });
+                }
+            })
+            .catch(() => {
+              this.closeButtonSpinners();
+              this.toast.error(
+                `Error: Reviewing multiple workorders failed with error code RMW-01. 
+              Please report this error code to support to have the error fixed.`,
+                { duration: 8000, id: 'review-workorders-error-2' });
+            });
+
+        }
+      );
+    }
   }
 
   raiseConcern(): void {
