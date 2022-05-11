@@ -263,7 +263,7 @@ export class RaiseAmComponent implements OnInit {
       const workorderData: IntWorkorder = {
         review: {
           status: '',
-          concerns: [],
+          concern: {},
           dateTime: ''
         },
         sparesUsed: {

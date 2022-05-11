@@ -55,7 +55,9 @@
       *ngIf="filterOption && filterOption !== 'None'"
       class="filter-field-value"
     >
-      <div class="filter-value" style="text-decoration: underline;">{{ filterOption }}'s W/o's</div>
+      <div class="filter-value" style="text-decoration: underline">
+        {{ filterOption }}'s W/o's
+      </div>
     </div>
 
     <!-- sidenav header -->
@@ -816,9 +818,11 @@
               <button
                 type="button"
                 class="action-button btn btn-link shadow-none"
-                (click)="raiseConcern()"
+                (click)="refreshModals()"
+                data-bs-toggle="modal"
+                data-bs-target="#raiseConcernModal"
               >
-                Raise Concerns
+                Raise Concern
               </button>
             </mat-list-item>
           </div>
@@ -2641,7 +2645,7 @@
       <div class="modal-body">
         <div class="form-container mat-elevation-z5">
           <div class="form-header-container">
-            <h2>Review Workorders</h2>
+            <h2>Select Workorders</h2>
           </div>
 
           <form
@@ -2754,6 +2758,134 @@
             >
             </span>
             Reviewing Workorders...
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div
+  class="modal fade"
+  id="raiseConcernModal"
+  tabindex="-1"
+  aria-labelledby="raiseConcernModalLabel"
+  aria-hiden="true"
+  data-bs-backdrop="static"
+>
+  <div
+    class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-sm"
+  >
+    <div class="modal-content bg-light">
+      <div class="modal-header text-dark">
+        <h3 class="modal-title m-0" id="raiseConcernModalLabel">
+          <strong>W/o No. {{ workorder?.workorder?.number }}</strong>
+        </h3>
+        <button
+          #closeRaiseConcernModal
+          class="btn-close border border-success border-2"
+          type="button"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+          (click)="resetForms()"
+        ></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-container mat-elevation-z5">
+          <div class="form-header-container">
+            <h2>Raise Concern</h2>
+          </div>
+
+          <form
+            [formGroup]="raiseConcernForm"
+            (ngSubmit)="raiseConcern()"
+            id="raiseConcern"
+            #raiseConcernFormReference
+            autocomplete="off"
+            class="raise-concern-form"
+          >
+            <mat-form-field>
+              <mat-label>Select User</mat-label>
+              <mat-select class="text-capitalize" formControlName="user">
+                <mat-option
+                  class="text-capitalize"
+                  *ngFor="let user of usersToSendConcernsTo"
+                  [value]="user"
+                  >{{ user.fullName }}</mat-option
+                >
+              </mat-select>
+              <mat-error
+                *ngIf="raiseConcernForm.controls['user']?.errors?.['required']"
+                >Please select a user.</mat-error
+              >
+            </mat-form-field>
+
+            <mat-form-field>
+              <mat-label>Concern</mat-label>
+
+              <textarea
+                matInput
+                appValidateSentenceFormat
+                type="text"
+                formControlName="concern"
+                class="text-capitalize"
+                maxlength="800"
+                cdkTextareaAutosize
+                cdkAutosizeMinRows="1"
+                cdkAutosizeMaxRows="15"
+              >
+              </textarea>
+              <mat-error
+                *ngIf="raiseConcernForm.controls['concern']?.errors?.['required']"
+                >Please provide a concern message.</mat-error
+              >
+              <mat-error
+                *ngIf="raiseConcernForm.controls['concern']?.errors
+                      ?.['invalidSentenceFormat']
+                  "
+              >
+                {{
+                    raiseConcernForm.controls['concern']?.errors
+                      ?.['invalidSentenceFormat']?.value
+                }}
+              </mat-error>
+            </mat-form-field>
+          </form>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <div *ngIf="!raisingConcern">
+          <button
+            type="button"
+            class="btn btn-secondary me-2"
+            data-bs-dismiss="modal"
+            (click)="resetForms()"
+          >
+            Cancel
+          </button>
+
+          <button
+            type="submit"
+            class="btn btn-primary"
+            form="raiseConcern"
+            (click)="raiseConcernFormReference?.['ngSubmit']?.emit()"
+          >
+            Raise Concern
+          </button>
+        </div>
+
+        <div *ngIf="raisingConcern">
+          <button type="button" class="btn btn-success" disabled>
+            <span
+              #raiseConcernButtonSpinner
+              class="spinner-border spinner-border-sm"
+              role="status"
+              aria-hidden="true"
+            >
+            </span>
+            Raising Concern...
           </button>
         </div>
       </div>

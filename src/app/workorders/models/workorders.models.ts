@@ -122,10 +122,10 @@ export interface IntCloseWorkorderData {
 export interface IntWorkorderReview {
     status: string;
     dateTime: string;
-    concerns: IntConcern[] | [];
+    concern: IntConcern | {};
 }
 
 export interface IntConcern {
-    to: string;
+    user: IntUser;
     message: string;
 }

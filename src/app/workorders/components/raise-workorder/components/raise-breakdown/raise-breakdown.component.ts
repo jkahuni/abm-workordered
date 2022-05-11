@@ -309,7 +309,7 @@ export class RaiseBreakdownComponent implements OnInit {
       const workorderData: IntWorkorder = {
         review: {
           status: '',
-          concerns: [],
+          concern: {},
           dateTime: ''
         },
         sparesUsed: {

@@ -262,7 +262,7 @@ export class RaisePmComponent implements OnInit {
       const workorderData: IntWorkorder = {
         review: {
           status: '',
-          concerns: [],
+          concern: {},
           dateTime: ''
         },
         sparesUsed: {
