@@ -41,6 +41,9 @@
       "@shared/*": [
         "src/app/shared/*"
       ],
+      "@resources/*": [
+        "src/app/resources/*"
+      ]
     }
   },
   "angularCompilerOptions": {
