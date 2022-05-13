@@ -24,13 +24,11 @@ import { FlexLayoutModule } from '@angular/flex-layout';
 
 // spinner
 import { NgxSpinnerModule } from 'ngx-spinner';
-
-
-
+import { ValidateSentenceFormatDirective } from '@shared/directives/validate-sentence-format/validate-sentence-format.directive';
 
 
 @NgModule({
-  declarations: [],
+  declarations: [ValidateSentenceFormatDirective],
   imports: [
     CommonModule,
     ReactiveFormsModule,
@@ -54,6 +52,7 @@ import { NgxSpinnerModule } from 'ngx-spinner';
     NgxSpinnerModule
   ], 
   exports: [
+    ValidateSentenceFormatDirective,
     ReactiveFormsModule,
     FormsModule,
     MatButtonModule,

@@ -18,7 +18,6 @@ import { FormatWorkorderNumberPipe } from '@workorders/directives/format-workord
 import { MachinesFilterPipe } from '@workorders/directives/machines-filter/machines-filter.pipe';
 import { SectionsFilterPipe } from '@workorders/directives/sections-filter/sections-filter.pipe';
 import { ValidateMixedFormatDirective } from '@workorders/directives/validate-mixed-format/validate-mixed-format.directive';
-import { ValidateSentenceFormatDirective } from '@workorders/directives/validate-sentence-format/validate-sentence-format.directive';
 
 @NgModule({
   declarations: [
@@ -26,7 +25,6 @@ import { ValidateSentenceFormatDirective } from '@workorders/directives/validate
     MachinesFilterPipe,
     SectionsFilterPipe,
     ValidateMixedFormatDirective,
-    ValidateSentenceFormatDirective,
 
     // components
     raiseWorkorderComponents,

@@ -84,7 +84,7 @@ export class WorkordersService {
     const q = query(sparesColRef,
       orderBy('code'),
       where('searchParams', 'array-contains', searchValue),
-      limit(30)
+      limit(50)
     );
 
     const querySnapshot = await getDocs(q);

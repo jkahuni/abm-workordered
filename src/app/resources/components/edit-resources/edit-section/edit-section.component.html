@@ -1,1 +1,129 @@
-<p>edit-section works!</p>
+<div *ngIf="loading">
+  <div class="form-container mat-elevation-z8">
+    <div class="bootstrap-spinner-container">
+      <div class="bootstrap-spinner">
+        <div
+          #sectionsLoadingSpinner
+          class="spinner-border"
+          style="width: 2rem; height: 2rem"
+          role="status"
+        ></div>
+        <span class="loading-tag"><strong>Loading sections...</strong></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="!loading">
+  <div *ngIf="!loadingFailed">
+    <div class="form-container mat-elevation-z5">
+      <div class="form-header fw-bold mb-3">Edit Section</div>
+      <form [formGroup]="form" (ngSubmit)="editSection()">
+        <mat-form-field>
+          <mat-label>Sections</mat-label>
+          <mat-select
+            #selectSections
+            class="text-capitalize"
+            formControlName="section"
+            (selectionChange)="displaySection(selectSections.value)"
+          >
+            <mat-option value="">--select section--</mat-option>
+            <mat-option
+              *ngFor="let section of sections"
+              [value]="section"
+              class="text-capitalize"
+            >
+              {{ section.name }}
+            </mat-option>
+          </mat-select>
+
+          <mat-error *ngIf="form.controls['section']?.errors?.['required']">
+            Please select a section.
+          </mat-error>
+        </mat-form-field>
+
+        <div *ngIf="sectionSelected">
+          <mat-form-field>
+            <mat-label>Current Section Name</mat-label>
+            <textarea
+              matInput
+              formControlName="currentName"
+              class="text-capitalize"
+              type="text"
+              maxlength="500"
+              cdkTextareaAutosize
+              cdkAutosizeMinRows="2"
+              cdkAutosizeMaxRows="3"
+            >
+            </textarea>
+          </mat-form-field>
+
+          <mat-form-field>
+            <mat-label>New Section Name</mat-label>
+            <textarea
+              matInput
+              formControlName="newName"
+              class="text-capitalize"
+              appValidateSentenceFormat
+              type="text"
+              maxlength="500"
+              cdkTextareaAutosize
+              cdkAutosizeMinRows="2"
+              cdkAutosizeMaxRows="7"
+            >
+            </textarea>
+
+            <mat-error *ngIf="form.controls['newName']?.errors?.['required']"
+              >New section name is required.</mat-error
+            >
+            <mat-error
+              *ngIf="form.controls['newName']?.errors?.['invalidSentenceFormat']"
+            >
+              {{
+                form.controls['newName']?.errors?.['invalidSentenceFormat'].value
+              }}
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <button
+          *ngIf="!editingSection"
+          type="submit"
+          class="btn btn-primary my-3"
+        >
+          Edit Section
+        </button>
+
+        <button
+          *ngIf="editingSection"
+          type="button"
+          disabled
+          class="btn btn-success my-3"
+        >
+          <span
+            #editingSectionButtonSpinner
+            class="spinner-border spinner-border-sm"
+            role="status"
+            aria-hidden="true"
+          >
+          </span>
+          Editing Section...
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <div *ngIf="loadingFailed">
+    <div class="form-container mat-elevation-z5">
+      <div>
+        {{
+          loadingSectionsIndexingError
+            ? loadingSectionsIndexingError
+            : loadingSectionsOtherError
+            ? loadingSectionsOtherError
+            : loadingSectionsUnknownError
+        }}
+      </div>
+    </div>
+  </div>
+</div>
