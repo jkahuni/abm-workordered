@@ -881,13 +881,10 @@ export class ListWorkordersComponent implements OnInit {
 
     forms.forEach((form: FormGroup) => {
       if (form) {
-        console.log('form accessed initial');
         form.reset();
         Object.keys(form?.controls).forEach(
           (key: string) => {
             if (key) {
-              console.log('form accessed final');
-
               form.get(key)?.setErrors(null);
             }
           }
@@ -1412,26 +1409,28 @@ export class ListWorkordersComponent implements OnInit {
           const reviewStatus = workorder.review.status;
           const date = workorder.raised.dateTime;
           if (reviewStatus === '') {
-            if (dateRaisedFilter === 'all') {
+            if (dateRaisedFilter === 'All') {
               return true;
             }
-            else if (dateRaisedFilter === 'today') {
+            else if (dateRaisedFilter === 'Today') {
               return this.filterTodaysWorkorders(date);
             }
-            else if (dateRaisedFilter === 'yesterday') {
+            else if (dateRaisedFilter === 'Yesterday') {
               return this.filterYesterdaysWorkorders(date);
             }
-            else if (dateRaisedFilter === 'this-week') {
+            else if (dateRaisedFilter === 'This Week') {
               return this.filterThisWeeksWorkorders(date);
             }
-            else if (dateRaisedFilter === 'last-week') {
+            else if (dateRaisedFilter === 'Last Week') {
               return this.filterLastWeeksWorkorders(date);
             }
-            else if (dateRaisedFilter === 'this-month') {
+            else if (dateRaisedFilter === 'This Month') {
               return this.filterThisMonthsWorkorders(date);
             }
-            else if (dateRaisedFilter === 'last-month') {
+            else if (dateRaisedFilter === 'Last Month') {
               return this.filterLastMonthsWorkorders(date);
+            } else {
+              return false;
             }
           }
           return false;
@@ -1439,40 +1438,48 @@ export class ListWorkordersComponent implements OnInit {
       );
 
       const totalWorkordersToReview = workordersToReview.length;
+      if (totalWorkordersToReview) {
+        workordersToReview.forEach(
+          (workorder: IntWorkorder, index) => {
+            const workorderUid = workorder.workorder.uid;
+            const now = dayjs().format();
 
-      workordersToReview.forEach(
-        (workorder: IntWorkorder, index) => {
-          const workorderUid = workorder.workorder.uid;
-          const now = dayjs().format();
-
-          const workorderUpdateData = {
-            review: {
-              status: 'reviewed',
-              dateTime: now,
-              concern: {}
-            }
-          };
-
-          this.workordersService.updateWorkorder(workorderUid, workorderUpdateData)
-            .then(() => {
-              if (index + 1 === totalWorkordersToReview) {
-                this.closeButtonSpinners();
-                this.closeOpenModal();
-                this.refreshWorkorders();
-                this.toast.success(`Success. ${totalWorkordersToReview} workorder(s) reviewed successfully.`,
-                  { duration: 8000, id: 'review-workorders-success' });
+            const workorderUpdateData = {
+              review: {
+                status: 'reviewed',
+                dateTime: now,
+                concern: {}
               }
-            })
-            .catch(() => {
-              this.closeButtonSpinners();
-              this.toast.error(
-                `Error: Reviewing multiple workorders failed with error code LW-RMW-01. 
-              Please report this error code to support to have the error fixed.`,
-                { autoClose: false, id: 'review-workorders-error-2' });
-            });
+            };
 
-        }
-      );
+            this.workordersService.updateWorkorder(workorderUid, workorderUpdateData)
+              .then(() => {
+                if (index + 1 === totalWorkordersToReview) {
+                  this.closeButtonSpinners();
+                  this.closeOpenModal();
+                  this.refreshWorkorders();
+                  this.toast.success(`Success. ${totalWorkordersToReview} workorder(s) reviewed successfully.`,
+                    { duration: 8000, id: 'review-workorders-success' });
+                }
+              })
+              .catch(() => {
+                this.closeButtonSpinners();
+                this.toast.error(
+                  `Error: Reviewing multiple workorders failed with error code LW-RMW-01. 
+              Please report this error code to support to have the error fixed.`,
+                  { autoClose: false, id: 'review-workorders-error-2' });
+              });
+
+          }
+        );
+      }
+      else {
+        this.closeButtonSpinners();
+        this.toast.info(`No workorders raised ${dateRaisedFilter
+          } were found. Consider changing the selected option in order to review multiple workorders.`,
+          { duration: 10000, id: 'date-raised-filter-info' });
+
+      }
     }
   }
 
