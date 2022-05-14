@@ -58,7 +58,7 @@ export class ResourcesService {
     const q = query(sparesColRef,
       orderBy('code'),
       where('searchParams', 'array-contains', searchValue),
-      limit(10)
+      limit(5)
     );
 
     const querySnapshot = await getDocs(q);

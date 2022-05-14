@@ -1,1 +1,127 @@
-<p>edit-machine works!</p>
+<div *ngIf="loading">
+  <div class="form-container mat-elevation-z8">
+    <div class="bootstrap-spinner-container">
+      <div class="bootstrap-spinner">
+        <div
+          class="spinner-border"
+          style="width: 2rem; height: 2rem"
+          role="status"
+        ></div>
+        <span class="loading-tag"><strong>Loading machines...</strong></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="!loading">
+  <div *ngIf="!loadingFailed">
+    <div class="form-container mat-elevation-z5">
+      <div class="form-header fw-bold mb-3">Edit Machine</div>
+      <form [formGroup]="form" (ngSubmit)="editMachine()">
+        <mat-form-field>
+          <mat-label>Machines</mat-label>
+          <mat-select
+            #selectMachines
+            class="text-capitalize"
+            formControlName="machine"
+            (selectionChange)="displayMachine(selectMachines.value)"
+          >
+            <mat-option value="" selected>--select machine--</mat-option>
+            <mat-option
+              *ngFor="let machine of machines"
+              [value]="machine"
+              class="text-capitalize"
+            >
+              {{ machine.name }}
+            </mat-option>
+          </mat-select>
+
+          <mat-error *ngIf="form.controls['machine']?.errors?.['required']">
+            Please select a machine.
+          </mat-error>
+        </mat-form-field>
+
+        <div *ngIf="machineSelected">
+          <mat-form-field>
+            <mat-label>Current Machine Name</mat-label>
+            <textarea
+              matInput
+              formControlName="currentName"
+              class="text-capitalize"
+              type="text"
+              maxlength="500"
+              cdkTextareaAutosize
+              cdkAutosizeMinRows="2"
+              cdkAutosizeMaxRows="3"
+            >
+            </textarea>
+          </mat-form-field>
+
+          <mat-form-field>
+            <mat-label>New Machine Name</mat-label>
+            <textarea
+              matInput
+              formControlName="newName"
+              class="text-capitalize"
+              appValidateSentenceFormat
+              type="text"
+              maxlength="500"
+              cdkTextareaAutosize
+              cdkAutosizeMinRows="2"
+              cdkAutosizeMaxRows="7"
+            >
+            </textarea>
+
+            <mat-error *ngIf="form.controls['newName']?.errors?.['required']"
+              >New machine name is required.</mat-error
+            >
+            <mat-error
+              *ngIf="form.controls['newName']?.errors?.['invalidSentenceFormat']"
+            >
+              {{
+                form.controls['newName']?.errors?.['invalidSentenceFormat'].value
+              }}
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <button
+          *ngIf="!editingMachine"
+          type="submit"
+          class="btn btn-primary my-3"
+        >
+          Edit Machine
+        </button>
+
+        <button
+          *ngIf="editingMachine"
+          type="button"
+          disabled
+          class="btn btn-success my-3"
+        >
+          <span
+            class="spinner-border spinner-border-sm"
+            role="status"
+            aria-hidden="true"
+          >
+          </span>
+          Editing Machine...
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <div *ngIf="loadingFailed">
+    <div class="form-container mat-elevation-z5">
+      <div>
+        {{
+          loadingMachinesIndexingError
+            ? loadingMachinesIndexingError
+            : loadingMachinesOtherError
+            ? loadingMachinesOtherError
+            : loadingMachinesUnknownError
+        }}
+      </div>
+    </div>
+  </div>
+</div>

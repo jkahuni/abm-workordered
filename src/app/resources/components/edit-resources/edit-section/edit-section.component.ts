@@ -106,19 +106,20 @@ export class EditSectionComponent implements OnInit {
       currentName,
       newName
     } = this.form?.value;
-
+    const { id, uid } = section;
     if (section === '' && currentName === null) {
       this.form?.get('section')?.setErrors({ required: true });
     } else if (this.form?.invalid) {
-      this.toast.error(`Error: Please ensure new spare name is not blank or invalid.`, { duration: 6000, id: 'blank-or-invalid-new-name' });
+      this.toast.error(`Error: Please ensure new section name is not blank or invalid.`, { duration: 6000, id: 'blank-or-invalid-new-name' });
 
     } else {
       this.editingSection = true;
-      const ref: string = section.uid;
+      const ref: string = uid;
       const col: string = 'sections';
+      const name = this.formatTitleCase(newName);
       const data: IntExpandedSection = {
-        id: section.id,
-        name: this.formatTitleCase(newName),
+        id,
+        name,
         nameLowercase: newName.toLocaleLowerCase()
       };
 
@@ -126,7 +127,7 @@ export class EditSectionComponent implements OnInit {
         .then(() => {
           this.editingSection = false;
           this.router.navigate(['/']);
-          this.toast.success(`Success. Section ${currentName} changed successfully to ${newName}.`, {duration: 12000, id: 'edit-section-success'});
+          this.toast.success(`Success. Section: ${currentName} changed successfully to: ${name}.`, {duration: 12000, id: 'edit-section-success'});
         })
         .catch(() => {
           this.editingSection = false;

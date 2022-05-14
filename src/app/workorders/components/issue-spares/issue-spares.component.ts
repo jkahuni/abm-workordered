@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { FormGroup, FormBuilder, AbstractControl, FormArray } from '@angular/forms';
+import { FormGroup, FormBuilder, FormArray } from '@angular/forms';
 import { CurrencyPipe } from '@angular/common';
 
 // rxjs
