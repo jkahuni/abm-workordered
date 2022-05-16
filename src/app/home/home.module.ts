@@ -12,6 +12,7 @@ import { NgxSpinnerModule } from 'ngx-spinner';
 
 
 import { HomeComponent } from './components/home/home.component';
+import { NgChartsModule } from 'ng2-charts';
 
 
 @NgModule({
@@ -23,7 +24,8 @@ import { HomeComponent } from './components/home/home.component';
     HomeRoutingModule,
     MatButtonModule,
     MatCardModule,
-    NgxSpinnerModule
+    NgxSpinnerModule,
+    NgChartsModule
   ]
 })
 export class HomeModule { }

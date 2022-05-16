@@ -66,6 +66,11 @@ export interface IntSparesUsed {
     totalCost: string;
 }
 
+export interface WorkorderViewed {
+    status: boolean;
+    dateTime: string;
+}
+
 export interface IntWorkorder {
     abnormalityCard: IntAbnormalityCard;
     acknowledged: IntStatusAndTime;
@@ -87,6 +92,7 @@ export interface IntWorkorder {
     toolChange: IntToolChange;
     workorder: IntWorkorderSummary;
     review: IntWorkorderReview;
+    viewedByTechnician: WorkorderViewed;
 
 }
 

@@ -160,7 +160,7 @@ export class ListWorkordersComponent implements OnInit {
   }
 
   // create query
-  private createWorkordersQuery(): Query<DocumentData> | undefined {
+  private filterWorkordersByUser(workorders: IntWorkorder[]): IntWorkorder[] | undefined {
     const workordersColRef: CollectionReference<DocumentData> = collection(this.firestore, 'workorders');
     if (
       this.userType &&
@@ -170,24 +170,32 @@ export class ListWorkordersComponent implements OnInit {
       // manager
       if (this.userType === 'manager') {
         if (this.workordersType === 'reviewed') {
-          const first100WorkordersQuery = query(
-            workordersColRef,
-            orderBy('workorder.number'),
-            where('review.status', '==', 'reviewed'),
-            limit(100)
-          );
-          this.workorderHasActions = false;
-          return first100WorkordersQuery;
+          const reviewedWorkorders = workorders.filter(
+            (workorder: IntWorkorder) => {
+              const reviewed = workorder.review.status;
+              if (reviewed) {
+                return true;
+              }
+              return false;
+            });
+
+          return reviewedWorkorders;
+
         }
+
         else if (this.workordersType === 'un-reviewed') {
-          const first100WorkordersQuery = query(
-            workordersColRef,
-            orderBy('workorder.number'),
-            where('review.status', '==', ''),
-            limit(100)
-          );
+          const unReviewedWorkorders = workorders.filter(
+            (workorder: IntWorkorder) => {
+              const reviewed = workorder.review.status;
+              if (reviewed === '') {
+                return true;
+              }
+              return false;
+
+            });
           this.workorderHasActions = true;
-          return first100WorkordersQuery;
+          return unReviewedWorkorders;
+
         }
       }
 
@@ -195,128 +203,195 @@ export class ListWorkordersComponent implements OnInit {
       else if (this.userType === 'supervisor') {
         // unverified workorders
         if (this.workordersType === 'unverified') {
-          const unverifiedWorkordersQuery = query(
-            workordersColRef,
-            orderBy('workorder.number'),
-            where('approved.status', '==', false),
-            where('rejected.status', '==', false),
-            where('supervisor.uid', '==', this.userUid),
-            limit(100)
+          const unverifiedWorkorders = workorders.filter(
+            (workorder: IntWorkorder) => {
+              const approved = workorder.approved.status;
+              const rejected = workorder.rejected.status;
+              const supervisor = workorder.supervisor.uid;
+
+              if (
+                !approved &&
+                !rejected &&
+                supervisor === this.userUid) {
+                return true;
+              }
+              return false;
+            }
           );
 
-          // additional supervisor actions
           this.workorderHasActions = true;
-          return unverifiedWorkordersQuery;
+          return unverifiedWorkorders;
         }
 
         // approved workorders
         else if (this.workordersType === 'approved') {
-          const approvedWorkordersQuery = query(
-            workordersColRef,
-            orderBy('workorder.number'),
-            where('approved.status', '==', true),
-            where('rejected.status', '==', false),
-            where('supervisor.uid', '==', this.userUid),
-            limit(100));
+          const approvedWorkorders = workorders.filter(
+            (workorder: IntWorkorder) => {
+              const approved = workorder.approved.status;
+              const rejected = workorder.rejected.status;
+              const supervisor = workorder.supervisor.uid;
 
-          return approvedWorkordersQuery;
+              if (
+                approved &&
+                !rejected &&
+                supervisor === this.userUid) {
+                return true;
+              }
+
+              return false;
+
+            }
+          );
+
+          return approvedWorkorders;
 
         }
 
         // rejected workorders
         else if (this.workordersType === 'rejected') {
-          const rejectedWorkordersQuery = query(
-            workordersColRef,
-            orderBy('workorder.number'),
-            where('approved.status', '==', false),
-            where('rejected.status', '==', true),
-            where('supervisor.uid', '==', this.userUid),
-            limit(100)
-          );
+          const rejectedWorkorders = workorders.filter(
+            (workorder: IntWorkorder) => {
+              const approved = workorder.approved.status;
+              const rejected = workorder.rejected.status;
+              const supervisor = workorder.supervisor.uid;
 
-          return rejectedWorkordersQuery;
+              if (
+                !approved &&
+                rejected &&
+                supervisor === this.userUid) {
+                return true;
+              }
+              return false;
+            });
+
+          return rejectedWorkorders;
 
         }
 
         // raised workorders
         else if (this.workordersType === 'raised') {
-          const raisedWorkordersQuery = query(
-            workordersColRef,
-            orderBy('workorder.number'),
-            where('raiser.uid', '==', this.userUid),
-            limit(100)
+          const raisedWorkorders = workorders.filter(
+            (workorder: IntWorkorder) => {
+              const raiser = workorder.raiser.uid;
+
+              if (raiser === this.userUid) {
+                return true;
+              }
+
+              return false;
+            }
           );
 
-          return raisedWorkordersQuery;
+          return raisedWorkorders;
 
         }
       }
       // engineering technician
       else if (this.userType === 'engineering') {
+        console.log('ENGINEERING');
         // eng open workorders
         if (this.workordersType === 'open') {
-          const engineeringOpenWorkordersQuery = query(
-            workordersColRef,
-            orderBy('workorder.number'),
-            where('approved.status', '==', true),
-            where('rejected.status', '==', false),
-            where('closed.status', '==', false),
-            where('technician.uid', '==', this.userUid),
-            limit(100)
-          );
+          console.log('ENGINEERING OPEN');
+
+          const openWorkorders = workorders.filter
+            ((workorder: IntWorkorder) => {
+              const approved = workorder.approved.status;
+              const rejected = workorder.rejected.status;
+              const closed = workorder.closed.status;
+              const technician = workorder.technician.uid;
+
+              if (
+                approved &&
+                !rejected &&
+                !closed &&
+                technician === this.userUid
+              ) {
+                return true;
+              }
+
+              return false;
+            });
 
           this.workorderHasActions = true;
-          return engineeringOpenWorkordersQuery;
+          return openWorkorders;
         }
 
         // eng closed workorders
         else if (this.workordersType === 'closed') {
-          const engineeringClosedWorkordersQuery = query(
-            workordersColRef,
-            orderBy('workorder.number'),
-            where('approved.status', '==', true),
-            where('rejected.status', '==', false),
-            where('closed.status', '==', true),
-            where('technician.uid', '==', this.userUid),
-            limit(100)
-          );
+          console.log('ENGINEERING CLOSED');
 
-          return engineeringClosedWorkordersQuery;
+          const closedWorkorders = workorders.filter
+            ((workorder: IntWorkorder) => {
+              const approved = workorder.approved.status;
+              const rejected = workorder.rejected.status;
+              const closed = workorder.closed.status;
+              const technician = workorder.technician.uid;
 
+              if (
+                approved &&
+                !rejected &&
+                closed &&
+                technician === this.userUid
+              ) {
+                return true;
+              }
+
+              return false;
+            });
+
+          return closedWorkorders;
         }
 
       }
-      // stores technician
+
       else if (this.userType === 'stores') {
-        // stores open workorders
         if (this.workordersType === 'open') {
-          const storesOpenWorkordersQuery = query(
-            workordersColRef,
-            orderBy('workorder.number'),
-            where('approved.status', '==', true),
-            where('rejected.status', '==', false),
-            where('closed.status', '==', false),
-            where('storesTechnician.uid', '==', this.userUid),
-            limit(100)
-          );
+          const openWorkorders = workorders.filter
+            ((workorder: IntWorkorder) => {
+              const approved = workorder.approved.status;
+              const rejected = workorder.rejected.status;
+              const closed = workorder.closed.status;
+              const technician = workorder.storesTechnician.uid;
+
+              if (
+                approved &&
+                !rejected &&
+                !closed &&
+                technician === this.userUid
+              ) {
+                return true;
+              }
+
+              return false;
+            });
 
           this.workorderHasActions = true;
-          return storesOpenWorkordersQuery;
+          return openWorkorders;
         }
 
         // stores closed workorders
         else if (this.workordersType === 'closed') {
-          const storesOpenWorkordersQuery = query(
-            workordersColRef,
-            orderBy('workorder.number'),
-            where('approved.status', '==', true),
-            where('rejected.status', '==', false),
-            where('closed.status', '==', true),
-            where('storesTechnician.uid', '==', this.userUid),
-            limit(100)
-          );
+          const closedWorkorders = workorders.filter
+            ((workorder: IntWorkorder) => {
+              const approved = workorder.approved.status;
+              const rejected = workorder.rejected.status;
+              const closed = workorder.closed.status;
+              const technician = workorder.storesTechnician.uid;
+
+              if (
+                approved &&
+                !rejected &&
+                closed &&
+                technician === this.userUid
+              ) {
+                return true;
+              }
+
+              return false;
+            });
+
           this.workorderHasActions = true;
-          return storesOpenWorkordersQuery;
+          return closedWorkorders;
         }
 
       }
@@ -324,78 +399,103 @@ export class ListWorkordersComponent implements OnInit {
       // (operator, offices, distribution)
       else if (this.userType === 'other') {
         if (this.workordersType === 'raised') {
-          const raisedWorkordersQuery = query(
-            workordersColRef,
-            orderBy('workorder.number'),
-            where('raiser.uid', '==', this.userUid),
-            limit(100)
+          const raisedWorkorders = workorders.filter(
+            (workorder: IntWorkorder) => {
+              const raiser = workorder.raiser.uid;
+
+              if (raiser === this.userUid) {
+                return true;
+              }
+
+              return false;
+            }
           );
 
-          return raisedWorkordersQuery;
+          return raisedWorkorders;
         }
 
         else if (this.workordersType === 'approved') {
-          const approvedWorkordersQuery = query(
-            workordersColRef,
-            orderBy('workorder.number'),
-            where('approved.status', '==', true),
-            where('rejected.status', '==', false),
-            where('raiser.uid', '==', this.userUid),
-            limit(100)
-          );
+          const approvedWorkorders = workorders.filter(
+            (workorder: IntWorkorder) => {
+              const approved = workorder.approved.status;
+              const rejected = workorder.rejected.status;
+              const raiser = workorder.raiser.uid;
 
+              if (
+                approved &&
+                !rejected &&
+                raiser === this.userUid) {
+                return true;
+              }
 
-          return approvedWorkordersQuery;
+              return false;
+            });
+
+          return approvedWorkorders;
         }
 
         else if (this.workordersType === 'rejected') {
-          const rejectedWorkordersQuery = query(
-            workordersColRef,
-            orderBy('workorder.number'),
-            where('approved.status', '==', false),
-            where('rejected.status', '==', true),
-            where('raiser.uid', '==', this.userUid),
-            limit(100)
-          );
+          const rejectedWorkorders = workorders.filter(
+            (workorder: IntWorkorder) => {
+              const approved = workorder.approved.status;
+              const rejected = workorder.rejected.status;
+              const raiser = workorder.raiser.uid;
 
-          return rejectedWorkordersQuery;
+              if (
+                !approved &&
+                rejected &&
+                raiser === this.userUid) {
+                return true;
+              }
+
+              return false;
+            });
+
+          return rejectedWorkorders;
         }
       }
     }
     return;
-
   }
 
   // get workorders
   private getWorkorders(): void {
-    const workordersQuery = this.createWorkordersQuery();
-    if (workordersQuery) {
-      this.workordersService.getWorkorders(workordersQuery)
-        .then((workorders: IntWorkorder[]) => {
-          this.workorders = workorders;
-          this.workordersToDisplay = this.workorders;
-          this.hideLoadingWorkordersSpinner();
+    this.workordersService.$allWorkorders.subscribe(
+      (workorders: IntWorkorder[] | null) => {
+        if (workorders !== null) {
+          const filteredWorkorders = this.filterWorkordersByUser(workorders);
+          if (filteredWorkorders) {
+            this.workorders = filteredWorkorders;
+            this.workordersToDisplay = this.workorders;
+            this.hideLoadingWorkordersSpinner();
+            console.log(this.workordersToDisplay);
 
-        })
-        .catch((err: any) => {
-          this.hideLoadingWorkordersSpinnerOnError();
-          if (err.code === 'failed-precondition') {
-            this.loadingWorkordersIndexingError = `Loading workorders failed with error code IND-LW-01. Please report this error code to support to have it fixed.`;
-            console.log('ERROR IND-LW-01', err);
+          } else {
+            this.hideLoadingWorkordersSpinnerOnError();
+            this.loadingWorkordersOtherError = `Loading workorders failed with error code FAW-LW-01. Please try reloading the page or report this error code to support to have it fixed.`;
           }
+        }
 
-          else {
-            this.loadingWorkordersOtherError = `Loading workorders failed with error code LW-01. Please try reloading the page or report this error code to support to have it fixed.`;
-            console.log('ERROR LW-01', err);
-          }
-        });
-    }
+        else {
+          this.workordersService.getAllWorkorders()
+            .then(() => {
+              // this.getWorkorders();
+            })
+            .catch((err: any) => {
+              this.hideLoadingWorkordersSpinnerOnError();
+              if (err.code === 'failed-precondition') {
+                this.loadingWorkordersIndexingError = `Loading workorders failed with error code IND-LW-01. Please report this error code to support to have it fixed.`;
+                console.log('ERROR IND-LW-01', err);
+              }
 
-    else {
-      this.hideLoadingWorkordersSpinnerOnError();
+              else {
+                this.loadingWorkordersOtherError = `Loading workorders failed with error code LW-01. Please try reloading the page or report this error code to support to have it fixed.`;
+              }
+            });
+        }
+      }
+    );
 
-      this.loadingWorkordersOtherError = `Loading workorders failed with error code LW-02. Please try reloading the page or report this error code to support to have it fixed.`;
-    }
   }
 
   // create modal forms
@@ -616,6 +716,17 @@ export class ListWorkordersComponent implements OnInit {
     this.getWorkorders();
   }
 
+  // refresh all workorders
+  private refreshWorkorder(uid: string, update: {}): void {
+    this.workordersService.refreshWorkorders(uid, update)
+      .then(() => {
+        this.workorder = this.workorders?.find((workorder: IntWorkorder) => workorder.workorder.uid === uid);
+        if (this.workorder) { this.createForm(this.workorder); }
+
+      });
+
+  }
+
   private closeButtonSpinners(): void {
     this.toast.close();
     this.approveWorkorderLoading = false;
@@ -767,6 +878,30 @@ export class ListWorkordersComponent implements OnInit {
     return yearsDifference === 0 && monthsDifference === -1 ? true : false;
   }
 
+  private updateWorkorderViewStatus(workorder: IntWorkorder) {
+    const workorderUid = workorder.workorder.uid;
+    const now = dayjs().format();
+    // allowed seconds
+    const allowedTime = 60;
+    const updateData = {
+      viewedByTechnician: {
+        status: true,
+        dateTime: now
+      }
+    };
+
+    this.workordersService.updateWorkorder(workorderUid, updateData)
+      .then(() => {
+        this.refreshWorkorder(workorderUid, updateData);
+        this.toast.info('You have 5 minutes to acknowledge or hand the workorder over to another technician. Please note that once you acknowledge you cannot hand over.', { duration: 12000, id: 'workorder-opened' });
+        setTimeout(() => {
+          this.toast.close();
+          this.toast.error('You have exceeded the allowed time to acknowledge or handover the workorder.', { autoClose: false, id: 'viewed-but-not-updated' });
+        }, 1000 * allowedTime);
+      })
+      .catch();
+  }
+
   // form getters
   get f(): { [key: string]: AbstractControl } {
     return this.form?.controls;
@@ -796,7 +931,7 @@ export class ListWorkordersComponent implements OnInit {
   }
 
   displayWorkorder(workorderNumber: string): IntWorkorder | undefined {
-    this.workorder = this.workorders?.find((workorder: IntWorkorder) => workorder?.workorder.number === workorderNumber);
+    this.workorder = this.workordersToDisplay?.find((workorder: IntWorkorder) => workorder?.workorder.number === workorderNumber);
 
     if (this.workorder) {
       this.workorderUid = this.workorder.workorder.uid;
@@ -805,6 +940,12 @@ export class ListWorkordersComponent implements OnInit {
         this.workorder.storesTechnician,
         this.workorder.supervisor);
       this.createForm(this.workorder);
+
+      // technician has opened the workorder
+      const viewedByTechnician = this.workorder.viewedByTechnician.status;
+      if (this.userType === 'engineering' && !viewedByTechnician) {
+        this.updateWorkorderViewStatus(this.workorder);
+      }
       if (this.workorderHasActions) {
         this.showLeftSidenav = false;
         this.showRightSidenav = true;
@@ -946,6 +1087,7 @@ export class ListWorkordersComponent implements OnInit {
   // supervisors
   approve(): void {
     if (this.workorder) {
+      const workorder = this.workorder;
       this.approveWorkorderLoading = true;
 
       const now = dayjs().format();
@@ -963,8 +1105,9 @@ export class ListWorkordersComponent implements OnInit {
       this.workordersService.updateWorkorder(workorderUid, workorderUpdateData)
         .then(() => {
           this.closeButtonSpinners();
-          this.refreshWorkorders();
+          // this.refreshWorkorders();
           this.toast.close();
+          this.refreshWorkorder(workorderUid, workorderUpdateData);
 
           this.toast.success(`Success. Workorder ${workorderNumber} approved successfully.`, { id: 'approve-workorder-success' });
 
@@ -999,6 +1142,7 @@ export class ListWorkordersComponent implements OnInit {
 
     } else {
       if (this.workorder) {
+        const workorder = this.workorder;
 
         this.rejectWorkorderLoading = true;
 
@@ -1025,7 +1169,9 @@ export class ListWorkordersComponent implements OnInit {
             this.closeOpenModal();
             this.closeButtonSpinners();
 
-            this.refreshWorkorders();
+            // this.refreshWorkorders();
+            this.refreshWorkorder(workorderUid, workorderUpdateData);
+
             this.toast.success(`Success.
              Workorder ${workorderNumber} rejected successfully.`, { id: 'reject-success' });
 
@@ -1055,6 +1201,7 @@ export class ListWorkordersComponent implements OnInit {
       this.toast.error(`Error. Ensure a new supervisor has been selected.`, { id: 'supervisor-handover-error' });
     } else {
       if (this.workorder) {
+        const workorder = this.workorder;
         this.supervisorHandoverLoading = true;
 
         const workorderNumber = this.workorder.workorder.number;
@@ -1070,7 +1217,10 @@ export class ListWorkordersComponent implements OnInit {
             this.closeButtonSpinners();
             this.closeOpenModal();
 
-            this.refreshWorkorders();
+            // this.refreshWorkorders();
+            this.refreshWorkorder(workorderUid,
+              workorderUpdateData);
+
             this.toast.success(`Success.
              Workorder ${workorderNumber} delegated successfully.`, { id: 'supervisor-handover-success' });
           })
@@ -1107,6 +1257,7 @@ export class ListWorkordersComponent implements OnInit {
         { duration: 8000, id: 'change-technicians-error' });
     } else {
       if (this.workorder) {
+        const workorder = this.workorder;
         this.changeTechniciansLoading = true;
         const workorderNumber = this.workorder.workorder.number;
         const workorderUid = this.workorder.workorder.uid;
@@ -1127,7 +1278,10 @@ export class ListWorkordersComponent implements OnInit {
             this.closeButtonSpinners();
             this.closeOpenModal();
 
-            this.refreshWorkorders();
+            // this.refreshWorkorders();
+            this.refreshWorkorder(workorderUid,
+              workorderUpdateData);
+
             this.toast.success(`Success. Technicians on workorder ${workorderNumber} changed successfully.`);
           })
           .catch(() => {
@@ -1162,6 +1316,7 @@ export class ListWorkordersComponent implements OnInit {
         { duration: 5000, id: 'assign-technicians-error' });
     } else {
       if (this.workorder) {
+        const workorder = this.workorder;
         this.assignTechniciansLoading = true;
         const now = dayjs().format();
         const workorderUid = this.workorder.workorder.uid;
@@ -1179,7 +1334,10 @@ export class ListWorkordersComponent implements OnInit {
             this.closeButtonSpinners();
             this.closeOpenModal();
 
-            this.refreshWorkorders();
+            // this.refreshWorkorders();
+            this.refreshWorkorder(workorderUid,
+              workorderUpdateData);
+
 
             this.toast.success(`Success. Technicians assigned to workorder ${workorderNumber} successfully.`, { id: 'assign-technicians-success' });
           })
@@ -1197,6 +1355,7 @@ export class ListWorkordersComponent implements OnInit {
   // technicians
   acknowledge(): void {
     if (this.workorder) {
+      const workorder = this.workorder;
       this.acknowledgeWorkorderLoading = true;
       const workorderUid = this.workorder.workorder.uid;
       const workorderNumber = this.workorder.workorder.number;
@@ -1212,7 +1371,10 @@ export class ListWorkordersComponent implements OnInit {
       this.workordersService.updateWorkorder(workorderUid, workorderUpdateData)
         .then(() => {
           this.closeButtonSpinners();
-          this.refreshWorkorders();
+          this.refreshWorkorder(workorderUid,
+            workorderUpdateData);
+
+          // this.refreshWorkorders();
           this.toast.success(`Success. Workorder ${workorderNumber} acknowledged successfully.`, { id: 'acknowledge-workorder-success' });
 
         })
@@ -1228,6 +1390,7 @@ export class ListWorkordersComponent implements OnInit {
 
   markDone(): void {
     if (this.workorder) {
+      const workorder = this.workorder;
       this.markWorkorderDoneLoading = true;
       const workorderNumber = this.workorder.workorder.number;
       const workorderUid = this.workorder.workorder.uid;
@@ -1258,7 +1421,10 @@ export class ListWorkordersComponent implements OnInit {
       this.workordersService.updateWorkorder(workorderUid, workorderUpdateData)
         .then(() => {
           this.closeButtonSpinners();
-          this.refreshWorkorders();
+          // this.refreshWorkorders();
+          this.refreshWorkorder(workorderUid,
+            workorderUpdateData);
+
           this.toast.success(`Success. Workorder ${workorderNumber} marked as done. Click on the workorder to view the time taken.`, { id: 'mark-workorder-done-success' });
         })
         .catch(() => {
@@ -1288,6 +1454,7 @@ export class ListWorkordersComponent implements OnInit {
       this.toast.error(`Error: Ensure a new technician has been picked, or click on cancel to abort the handover.`, { id: 'eng-technician-handover-error' });
     } else {
       if (this.workorder) {
+        const workorder = this.workorder;
         this.engTechnicianHandoverLoading = true;
 
         const workorderUid = this.workorder.workorder.uid;
@@ -1300,7 +1467,10 @@ export class ListWorkordersComponent implements OnInit {
           .then(() => {
             this.closeButtonSpinners();
             this.closeOpenModal();
-            this.refreshWorkorders();
+            // this.refreshWorkorders();
+            this.refreshWorkorder(workorderUid,
+              workorderUpdateData);
+
             this.toast.success(`Success. Workorder ${workorderNumber} handed over successfully.`,
               { id: 'eng-technician-handover-success' });
           })
@@ -1328,6 +1498,7 @@ export class ListWorkordersComponent implements OnInit {
       this.toast.error(`Error: Please ensure a new technician has been picked, or click on cancel to abort the handover.`, { id: 'stores-technician-handover-error' });
     } else {
       if (this.workorder) {
+        const workorder = this.workorder;
         this.storesTechnicianHandoverLoading = true;
 
         const workorderUid = this.workorder.workorder.uid;
@@ -1341,7 +1512,10 @@ export class ListWorkordersComponent implements OnInit {
             this.closeButtonSpinners();
             this.closeOpenModal();
 
-            this.refreshWorkorders();
+            // this.refreshWorkorders();
+            this.refreshWorkorder(workorderUid,
+              workorderUpdateData);
+
 
             this.toast.success(`Success. Workorder ${workorderNumber} handed over successfully.`,
               { id: 'stores-technician-handover-success' });
@@ -1360,6 +1534,7 @@ export class ListWorkordersComponent implements OnInit {
   // ENG MANAGER ACTIONS
   reviewWorkorder(): void {
     if (this.workorder) {
+      const workorder = this.workorder;
       this.reviewingWorkorder = true;
       const now = dayjs().format();
       const workorderUid = this.workorder.workorder.uid;
@@ -1376,7 +1551,10 @@ export class ListWorkordersComponent implements OnInit {
       this.workordersService.updateWorkorder(workorderUid, workorderUpdateData)
         .then(() => {
           this.closeButtonSpinners();
-          this.refreshWorkorders();
+          // this.refreshWorkorders();
+          this.refreshWorkorder(workorderUid,
+            workorderUpdateData);
+
           this.toast.success(`Success. Workorder ${workorderNumber} reviewed successfully.`, { id: 'review-workorder-success' });
         })
         .catch(() => {
@@ -1457,7 +1635,10 @@ export class ListWorkordersComponent implements OnInit {
                 if (index + 1 === totalWorkordersToReview) {
                   this.closeButtonSpinners();
                   this.closeOpenModal();
-                  this.refreshWorkorders();
+                  // this.refreshWorkorders();
+                  this.refreshWorkorder(workorderUid,
+                    workorderUpdateData);
+
                   this.toast.success(`Success. ${totalWorkordersToReview} workorder(s) reviewed successfully.`,
                     { duration: 8000, id: 'review-workorders-success' });
                 }
@@ -1504,6 +1685,7 @@ export class ListWorkordersComponent implements OnInit {
 
     else {
       if (this.workorder) {
+        const workorder = this.workorder;
 
         this.raisingConcern = true;
 
@@ -1525,7 +1707,10 @@ export class ListWorkordersComponent implements OnInit {
           .then(() => {
             this.closeButtonSpinners();
             this.closeOpenModal();
-            this.refreshWorkorders();
+            this.refreshWorkorder(workorderUid,
+              workorderUpdateData);
+            // this.refreshWorkorders();
+
             this.toast.success(`Success. Concern on workorder ${workorderNumber
               } raised successfully.`, { duration: 6000, id: 'raise-concern-success' });
 

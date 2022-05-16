@@ -7,6 +7,9 @@ import {
 
 import { IntMachine, IntSection, IntSpare, IntUser, IntWorkorder } from '@workorders/models/workorders.models';
 
+// rxjs
+import { BehaviorSubject } from 'rxjs';
+
 
 @Injectable({
   providedIn: 'root'
@@ -17,6 +20,9 @@ export class WorkordersService {
     private firestore: Firestore,
   ) {
   }
+
+  private allWorkorders = new BehaviorSubject<IntWorkorder[] | null>(null);
+  public $allWorkorders = this.allWorkorders.asObservable();
 
   // get current user name and uid
   async getUser(userUid: string): Promise<IntUser> {
@@ -138,4 +144,45 @@ export class WorkordersService {
     return updatedWorkorder;
   }
 
+  // get all workorders 
+  async getAllWorkorders(): Promise<void> {
+    const colRef = collection(this.firestore, 'workorders');
+    const workordersQuery = query(colRef,
+      orderBy('workorder.number'));
+
+    const workordersQuerySnapshot = await getDocs(workordersQuery);
+
+    const workordersArray = workordersQuerySnapshot?.docs.map(
+      (workorder: DocumentData) => {
+        return workorder['data']() as IntWorkorder;
+      }
+    ) as IntWorkorder[];
+
+    return this.allWorkorders.next(workordersArray);
+  }
+
+  // refresh all workorders
+  async refreshWorkorders(uid: string, update: any): Promise<void> {
+    console.log('METHOD CALLED');
+    let updatedWorkordersArray: IntWorkorder[] = [];
+
+    this.$allWorkorders.subscribe(
+      (workorders: IntWorkorder[] | null) => {
+        if (workorders) {
+          const updatedWorkorders = workorders.map(
+            (workorder: IntWorkorder) => {
+              if (workorder.workorder.uid === uid) {
+                return { ...workorder, ...update };
+              }
+              return workorder;
+            }
+          );
+          updatedWorkordersArray = updatedWorkorders;
+        }
+      }
+    ).unsubscribe();
+
+    return Promise.resolve(this.allWorkorders.next(updatedWorkordersArray));
+
+  }
 }

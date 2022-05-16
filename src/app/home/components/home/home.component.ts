@@ -15,9 +15,8 @@ import { IntUser, IntWorkorder } from '@workorders/models/workorders.models';
 
 //  firebase and firestore
 import { User, Auth, onAuthStateChanged } from '@angular/fire/auth';
-import {
-  Firestore, collection, where, query, orderBy, limit
-} from '@angular/fire/firestore';
+import { ChartOptions, ChartType, ChartDataset } from 'chart.js';
+
 
 @Component({
   selector: 'app-home',
@@ -29,13 +28,11 @@ export class HomeComponent implements OnInit {
   constructor(
     // for resending verification email
     private authenticationService: AuthenticationService,
-
     private workordersService: WorkordersService,
     private spinner: NgxSpinnerService,
     private auth: Auth,
     private toast: HotToastService,
     private router: Router,
-    private firestore: Firestore
   ) { }
 
   // used in the template and in resending verification code
@@ -46,10 +43,7 @@ export class HomeComponent implements OnInit {
   userUid!: string;
   technicianType!: string;
 
-  // w/o col ref
-  workordersCollectionReference = collection(this.firestore, 'workorders');
-
-  // for the different workorder views
+  // different workorders
   raisedWorkorders!: IntWorkorder[];
   unverifiedWorkorders!: IntWorkorder[];
   approvedWorkorders!: IntWorkorder[];
@@ -58,9 +52,9 @@ export class HomeComponent implements OnInit {
   engTechnicianClosedWorkorders!: IntWorkorder[];
   storesTechnicianOpenWorkorders!: IntWorkorder[];
   storesTechnicianClosedWorkorders!: IntWorkorder[];
-  workorders!: IntWorkorder[];
   unReviewedWorkorders!: IntWorkorder[];
   reviewedWorkorders!: IntWorkorder[];
+  workorders!: IntWorkorder[];
 
 
   // for controlling access to the various views in home page
@@ -77,16 +71,28 @@ export class HomeComponent implements OnInit {
   otherError!: string;
   defaultError = `Error UHE-01 occured. Please report this error to support to have if fixed.`;
 
-  // for controlling the spinner
-  raisedWorkordersSet = false;
-  unverifiedWorkordersSet = false;
-  approvedWorkordersSet = false;
-  rejectedWorkordersSet = false;
-  engTechnicianOpenWorkordersSet = false;
-  engTechnicianClosedWorkordersSet = false;
-  storesTechnicianOpenWorkordersSet = false;
-  storesTechnicianClosedWorkordersSet = false;
-  workordersSet = false;
+  // for bar chart
+  seeChart = false;
+  barChartType: ChartType = 'line';
+  barChartOptions: ChartOptions = {
+    responsive: true,
+    plugins: {
+      title: {
+        display: true,
+        text: 'Monthly Maintenance Costs'
+      }
+    }
+  };
+  barChartLabels = ['Apr', 'May'];
+  barChartLegend = true;
+  barChartData: ChartDataset[] = [
+    { data: [10, 15, 20, 25, 30, 35, 40, 45, 50], label: 'label 1' },
+    { data: [20, 25, 30, 35, 40, 45, 50, 55, 60], label: 'label 2' }
+  ];
+
+
+
+
 
   ngOnInit(): void {
     onAuthStateChanged(this.auth,
@@ -97,7 +103,7 @@ export class HomeComponent implements OnInit {
           if (!user.emailVerified) {
             this.loading = false;
           } else {
-            this.getWorkorders();
+            this.getAllWorkorders();
             this.getUserAndWorkorders(this.userUid);
           }
         } else {
@@ -156,7 +162,7 @@ export class HomeComponent implements OnInit {
     this.loadingFailed = true;
   }
 
-  // get user
+  // get user and their specific workorders
   private getUserAndWorkorders(userUid: string): void {
     this.workordersService.getUser(userUid)
       .then((firestoreUser: IntUser) => {
@@ -223,25 +229,27 @@ export class HomeComponent implements OnInit {
   }
 
   // get all wokrorders first
-  private getWorkorders(): void {
-    const workordersQuery = query(this.workordersCollectionReference,
-      orderBy('workorder.number')
-    );
-    this.workordersService.getWorkorders(workordersQuery)
-      .then((workorders: IntWorkorder[]) => {
-        this.workorders = workorders;
-      })
-      .catch((err: any) => {
-        this.hideSpinnerOnError();
-        if (err.code === 'failed-precondition') {
-          this.indexingError = `Error IND-H-01 occured. Please report this error to support to have it fixed.`;
+  private getAllWorkorders(): void {
+    this.workordersService.$allWorkorders.subscribe(
+      (workorders: IntWorkorder[] | null) => {
+        if (workorders) {
+          this.workorders = workorders;
         } else {
-          this.otherError = `Error H-01 occured. Please report this error to support to have it fixed.`;
+          this.workordersService.getAllWorkorders()
+            .then(() => {
+              this.getAllWorkorders();
+            })
+            .catch((err: any) => {
+              this.hideSpinnerOnError();
+              if (err.code === 'failed-precondition') {
+                this.indexingError = `Error IND-H-01 occured. Please report this error to support to have it fixed.`;
+              } else {
+                this.otherError = `Error H-01 occured. Please report this error to support to have it fixed.`;
+              }
+            });
         }
-      });
-
-
-
+      }
+    );
   }
 
   // SUPERVISORS WORKORDERS
@@ -252,14 +260,11 @@ export class HomeComponent implements OnInit {
           if (workorder.raiser.uid === this.userUid) {
             return workorder;
           }
-          return null;
-
+          return false;
         }
       );
-
       return this.raisedWorkorders;
     }
-
     return null;
   }
 
@@ -276,8 +281,6 @@ export class HomeComponent implements OnInit {
           return null;
         }
       );
-
-
       return this.unverifiedWorkorders;
     }
 
@@ -300,10 +303,8 @@ export class HomeComponent implements OnInit {
           } return null;
         }
       );
-
       return this.approvedWorkorders;
     }
-
     return null;
   }
 
@@ -323,7 +324,6 @@ export class HomeComponent implements OnInit {
           } return null;
         }
       );
-
       return this.rejectedWorkorders;
     }
 
@@ -399,7 +399,6 @@ export class HomeComponent implements OnInit {
 
         }
       );
-
       return this.engTechnicianOpenWorkorders;
     }
 
@@ -427,7 +426,6 @@ export class HomeComponent implements OnInit {
 
         }
       );
-
       return this.engTechnicianClosedWorkorders;
     }
 
@@ -453,7 +451,6 @@ export class HomeComponent implements OnInit {
 
           return null;
         });
-
       return this.storesTechnicianOpenWorkorders;
     }
     return null;
@@ -497,6 +494,7 @@ export class HomeComponent implements OnInit {
           return null;
         }
       );
+
       return this.reviewedWorkorders;
     }
     return null;
@@ -514,6 +512,7 @@ export class HomeComponent implements OnInit {
           return null;
         }
       );
+
       return this.unReviewedWorkorders;
     }
     return null;

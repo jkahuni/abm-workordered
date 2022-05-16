@@ -469,6 +469,12 @@
       </div>
     </div>
 
+    <div *ngIf="workorder && workorder.viewedByTechnician.status" class="filter-field-value mb-4">
+      <div class="filter-value">
+        status: Opened
+      </div>
+    </div>
+
     <!-- no workorder selected -->
     <div *ngIf="!workorder">
       <div class="workorders-sidenav-text">
@@ -1272,7 +1278,7 @@
                   <!-- acknowledged date and time -->
                   <ng-container
                     class="date-time-acknowledged"
-                    *ngIf="workorder.acknowledged.dateTime"
+                    *ngIf="workorder.acknowledged.status"
                   >
                     <div class="shareWidth">
                       <mat-form-field class="shareWidth">
@@ -1302,7 +1308,7 @@
                   <!-- done date and time -->
                   <ng-container
                     class="date-time-acknowledged"
-                    *ngIf="workorder.done.dateTime"
+                    *ngIf="workorder.done.status"
                   >
                     <div>
                       <mat-form-field class="shareWidth">

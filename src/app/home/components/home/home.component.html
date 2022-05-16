@@ -23,236 +23,269 @@
       <div *ngIf="user">
         <!-- user email verified -->
         <div *ngIf="user.emailVerified">
-          <!-- operators -->
-          <div *ngIf="isOperatorOrOperatorLike" class="navigation-links">
-            <!-- raise new workorder -->
-            <div>
-              <a
-                type="button"
-                class="btn btn-link home-nav-button shadow-none"
-                routerLink="/new-workorder"
-              >
-                Raise New Workorder
-              </a>
-            </div>
-
-            <!-- raised workorders -->
-            <div>
-              <a
-                type="button"
-                class="btn btn-link home-nav-button shadow-none"
-                [routerLink]="['/workorders/other/raised', userUid]"
-              >
-                Raised Workorders - (
-                {{ raisedWorkorders ? raisedWorkorders.length : 0 }} )
-              </a>
-            </div>
-
-            <!-- approved workorders -->
-            <div>
-              <a
-                type="button"
-                class="btn btn-outline-success home-nav-button shadow-none"
-                [routerLink]="['/workorders/other/approved', userUid]"
-                >Approved Workorders - (
-                {{ approvedWorkorders ? approvedWorkorders.length : 0 }} )
-              </a>
-            </div>
-
-            <!-- rejected workorders -->
-            <div>
-              <a
-                type="button"
-                class="btn btn-outline-warning home-nav-button shadow-none"
-                [routerLink]="['/workorders/other/rejected', userUid]"
-                >Rejected Workorders - (
-                {{ rejectedWorkorders ? rejectedWorkorders.length : 0 }} )
-              </a>
-            </div>
+          <!-- pick what to see -->
+          <div class="toggle-chart-and-data">
+            <button
+              type="button"
+              class="btn btn-primary btn-sm"
+              (click)="seeChart = !seeChart"
+            >
+              View Chart
+            </button>
+            <button
+              type="button"
+              class="btn btn-primary btn-sm"
+              (click)="seeChart = !seeChart"
+            >
+              View Data
+            </button>
           </div>
 
-          <!-- supervisors -->
-          <div *ngIf="isSupervisor" class="navigation-links">
-            <!-- raise workorders-->
-            <div>
-              <a
-                type="button"
-                class="btn btn-link home-nav-button shadow-none"
-                routerLink="/new-workorder"
-              >
-                Raise New Workorder
-              </a>
-            </div>
+          <!-- chart -->
+          <div *ngIf="seeChart" style="display: block;">
+            <canvas baseChart
+            [datasets]="barChartData"
+            [labels]="barChartLabels"
+            [options]="barChartOptions"
+            [legend]="barChartLegend"
+            [type]="barChartType">
+            </canvas>
 
-            <!-- raised workorders -->
-            <div>
-              <a
-                type="button"
-                class="btn btn-link home-nav-button shadow-none"
-                [routerLink]="['/workorders/supervisor/raised', userUid]"
-              >
-                Raised Workorders - (
-                {{ raisedWorkorders ? raisedWorkorders.length : 0 }} )
-              </a>
-            </div>
-
-            <!-- unverified workorders -->
-            <div>
-              <a
-                type="button"
-                class="btn btn-link home-nav-button shadow-none"
-                [routerLink]="['/workorders/supervisor/unverified', userUid]"
-                >Unverified Workorders - (
-                {{ unverifiedWorkorders ? unverifiedWorkorders.length : 0 }}
-                )</a
-              >
-            </div>
-
-            <!-- approved workorders -->
-            <div>
-              <a
-                type="button"
-                class="btn btn-outline-success home-nav-button shadow-none"
-                [routerLink]="['/workorders/supervisor/approved', userUid]"
-                >Approved Workorders - (
-                {{ approvedWorkorders ? approvedWorkorders.length : 0 }} )
-              </a>
-            </div>
-
-            <!-- rejected workorders -->
-            <div>
-              <a
-                type="button"
-                class="btn btn-outline-warning home-nav-button shadow-none"
-                [routerLink]="['/workorders/supervisor/rejected', userUid]"
-                >Rejected Workorders - (
-                {{ rejectedWorkorders ? rejectedWorkorders.length : 0 }} )
-              </a>
-            </div>
           </div>
 
-          <!-- eng technicians -->
-          <div *ngIf="isEngineeringTechnician" class="navigation-links">
-            <!-- open workorders -->
-            <div>
-              <a
-                type="button"
-                class="btn btn-link home-nav-button shadow-none"
-                [routerLink]="['/workorders/engineering/open', userUid]"
-                >Open Workorders - (
-                {{
-                  engTechnicianOpenWorkorders
-                    ? engTechnicianOpenWorkorders.length
-                    : 0
-                }}
-                )
-              </a>
+          <!-- raw data -->
+          <div *ngIf="!seeChart">
+            <!-- operators -->
+            <div *ngIf="isOperatorOrOperatorLike" class="navigation-links">
+              <!-- raise new workorder -->
+              <div>
+                <a
+                  type="button"
+                  class="btn btn-link home-nav-button shadow-none"
+                  routerLink="/new-workorder"
+                >
+                  Raise New Workorder
+                </a>
+              </div>
+
+              <!-- raised workorders -->
+              <div>
+                <a
+                  type="button"
+                  class="btn btn-link home-nav-button shadow-none"
+                  [routerLink]="['/workorders/other/raised', userUid]"
+                >
+                  Raised Workorders - (
+                  {{ raisedWorkorders ? raisedWorkorders.length : 0 }} )
+                </a>
+              </div>
+
+              <!-- approved workorders -->
+              <div>
+                <a
+                  type="button"
+                  class="btn btn-outline-success home-nav-button shadow-none"
+                  [routerLink]="['/workorders/other/approved', userUid]"
+                  >Approved Workorders - (
+                  {{ approvedWorkorders ? approvedWorkorders.length : 0 }} )
+                </a>
+              </div>
+
+              <!-- rejected workorders -->
+              <div>
+                <a
+                  type="button"
+                  class="btn btn-outline-warning home-nav-button shadow-none"
+                  [routerLink]="['/workorders/other/rejected', userUid]"
+                  >Rejected Workorders - (
+                  {{ rejectedWorkorders ? rejectedWorkorders.length : 0 }} )
+                </a>
+              </div>
             </div>
 
-            <!-- closed workorders -->
-            <div>
-              <a
-                type="button"
-                class="btn btn-link home-nav-button shadow-none"
-                [routerLink]="['/workorders/engineering/closed', userUid]"
-                >Closed Workorders - (
-                {{
-                  engTechnicianClosedWorkorders
-                    ? engTechnicianClosedWorkorders.length
-                    : 0
-                }}
-                )
-              </a>
-            </div>
-          </div>
+            <!-- supervisors -->
+            <div *ngIf="isSupervisor" class="navigation-links">
+              <!-- raise workorders-->
+              <div>
+                <a
+                  type="button"
+                  class="btn btn-link home-nav-button shadow-none"
+                  routerLink="/new-workorder"
+                >
+                  Raise New Workorder
+                </a>
+              </div>
 
-          <!-- stores technicians -->
-          <div *ngIf="isStoresTechnician" class="navigation-links">
-            <!-- open workorders -->
-            <div>
-              <a
-                type="button"
-                class="btn btn-link home-nav-button shadow-none"
-                [routerLink]="['/workorders/stores/open', userUid]"
-                >Open Workorders - (
-                {{
-                  storesTechnicianOpenWorkorders
-                    ? storesTechnicianOpenWorkorders.length
-                    : 0
-                }}
-                )
-              </a>
-            </div>
+              <!-- raised workorders -->
+              <div>
+                <a
+                  type="button"
+                  class="btn btn-link home-nav-button shadow-none"
+                  [routerLink]="['/workorders/supervisor/raised', userUid]"
+                >
+                  Raised Workorders - (
+                  {{ raisedWorkorders ? raisedWorkorders.length : 0 }} )
+                </a>
+              </div>
 
-            <!-- closed-workorders -->
-            <div>
-              <a
-                type="button"
-                class="btn btn-link home-nav-button shadow-none"
-                [routerLink]="['/workorders/stores/closed', userUid]"
-                >Closed Workorders - (
-                {{
-                  storesTechnicianClosedWorkorders
-                    ? storesTechnicianClosedWorkorders.length
-                    : 0
-                }}
-                )
-              </a>
-            </div>
+              <!-- unverified workorders -->
+              <div>
+                <a
+                  type="button"
+                  class="btn btn-link home-nav-button shadow-none"
+                  [routerLink]="['/workorders/supervisor/unverified', userUid]"
+                  >Unverified Workorders - (
+                  {{ unverifiedWorkorders ? unverifiedWorkorders.length : 0 }}
+                  )</a
+                >
+              </div>
 
-            <!-- edit section -->
-            <div>
-              <a
-                type="button"
-                class="btn btn-link home-nav-button shadow-none"
-                [routerLink]="['/resources/edit-section']"
-                >Edit Sections</a
-              >
-            </div>
-            <!-- edit machine -->
-            <div>
-              <a
-                type="button"
-                class="btn btn-link home-nav-button shadow-none"
-                [routerLink]="['/resources/edit-machine']"
-                >Edit Machines</a
-              >
-            </div>
-            <!-- edit spare -->
-            <div>
-              <a
-                type="button"
-                class="btn btn-link home-nav-button shadow-none"
-                [routerLink]="['/resources/edit-spare']"
-                >Edit Spares</a
-              >
-            </div>
-          </div>
+              <!-- approved workorders -->
+              <div>
+                <a
+                  type="button"
+                  class="btn btn-outline-success home-nav-button shadow-none"
+                  [routerLink]="['/workorders/supervisor/approved', userUid]"
+                  >Approved Workorders - (
+                  {{ approvedWorkorders ? approvedWorkorders.length : 0 }} )
+                </a>
+              </div>
 
-          <!-- eng manager -->
-          <div *ngIf="isEngineeringManager" class="navigation-links">
-            <!-- all un-reviewed workorders -->
-            <div>
-              <a
-                type="button"
-                class="btn btn-link home-nav-button shadow-none"
-                [routerLink]="['/workorders/manager/un-reviewed', userUid]"
-              >
-                Unreviewed Workorders - (
-                {{ unReviewedWorkorders ? unReviewedWorkorders.length : 0 }} )
-              </a>
+              <!-- rejected workorders -->
+              <div>
+                <a
+                  type="button"
+                  class="btn btn-outline-warning home-nav-button shadow-none"
+                  [routerLink]="['/workorders/supervisor/rejected', userUid]"
+                  >Rejected Workorders - (
+                  {{ rejectedWorkorders ? rejectedWorkorders.length : 0 }} )
+                </a>
+              </div>
             </div>
 
-            <!-- all reviewed workorders -->
-            <div>
-              <a
-                type="button"
-                class="btn btn-outline-success home-nav-button shadow-none"
-                [routerLink]="['/workorders/manager/reviewed', userUid]"
-              >
-                Reviewed Workorders - (
-                {{ reviewedWorkorders ? reviewedWorkorders.length : 0 }} )
-              </a>
+            <!-- eng technicians -->
+            <div *ngIf="isEngineeringTechnician" class="navigation-links">
+              <!-- open workorders -->
+              <div>
+                <a
+                  type="button"
+                  class="btn btn-link home-nav-button shadow-none"
+                  [routerLink]="['/workorders/engineering/open', userUid]"
+                  >Open Workorders - (
+                  {{
+                    engTechnicianOpenWorkorders
+                      ? engTechnicianOpenWorkorders.length
+                      : 0
+                  }}
+                  )
+                </a>
+              </div>
+
+              <!-- closed workorders -->
+              <div>
+                <a
+                  type="button"
+                  class="btn btn-link home-nav-button shadow-none"
+                  [routerLink]="['/workorders/engineering/closed', userUid]"
+                  >Closed Workorders - (
+                  {{
+                    engTechnicianClosedWorkorders
+                      ? engTechnicianClosedWorkorders.length
+                      : 0
+                  }}
+                  )
+                </a>
+              </div>
+            </div>
+
+            <!-- stores technicians -->
+            <div *ngIf="isStoresTechnician" class="navigation-links">
+              <!-- open workorders -->
+              <div>
+                <a
+                  type="button"
+                  class="btn btn-link home-nav-button shadow-none"
+                  [routerLink]="['/workorders/stores/open', userUid]"
+                  >Open Workorders - (
+                  {{
+                    storesTechnicianOpenWorkorders
+                      ? storesTechnicianOpenWorkorders.length
+                      : 0
+                  }}
+                  )
+                </a>
+              </div>
+
+              <!-- closed-workorders -->
+              <div>
+                <a
+                  type="button"
+                  class="btn btn-link home-nav-button shadow-none"
+                  [routerLink]="['/workorders/stores/closed', userUid]"
+                  >Closed Workorders - (
+                  {{
+                    storesTechnicianClosedWorkorders
+                      ? storesTechnicianClosedWorkorders.length
+                      : 0
+                  }}
+                  )
+                </a>
+              </div>
+
+              <!-- edit section -->
+              <div>
+                <a
+                  type="button"
+                  class="btn btn-link home-nav-button shadow-none"
+                  [routerLink]="['/resources/edit-section']"
+                  >Edit Sections</a
+                >
+              </div>
+              <!-- edit machine -->
+              <div>
+                <a
+                  type="button"
+                  class="btn btn-link home-nav-button shadow-none"
+                  [routerLink]="['/resources/edit-machine']"
+                  >Edit Machines</a
+                >
+              </div>
+              <!-- edit spare -->
+              <div>
+                <a
+                  type="button"
+                  class="btn btn-link home-nav-button shadow-none"
+                  [routerLink]="['/resources/edit-spare']"
+                  >Edit Spares</a
+                >
+              </div>
+            </div>
+
+            <!-- eng manager -->
+            <div *ngIf="isEngineeringManager" class="navigation-links">
+              <!-- all un-reviewed workorders -->
+              <div>
+                <a
+                  type="button"
+                  class="btn btn-link home-nav-button shadow-none"
+                  [routerLink]="['/workorders/manager/un-reviewed', userUid]"
+                >
+                  Unreviewed Workorders - (
+                  {{ unReviewedWorkorders ? unReviewedWorkorders.length : 0 }} )
+                </a>
+              </div>
+
+              <!-- all reviewed workorders -->
+              <div>
+                <a
+                  type="button"
+                  class="btn btn-outline-success home-nav-button shadow-none"
+                  [routerLink]="['/workorders/manager/reviewed', userUid]"
+                >
+                  Reviewed Workorders - (
+                  {{ reviewedWorkorders ? reviewedWorkorders.length : 0 }} )
+                </a>
+              </div>
             </div>
           </div>
         </div>

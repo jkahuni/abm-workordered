@@ -27,6 +27,7 @@ import { SharedModule } from '@shared/shared.module';
 import { HotToastModule } from '@ngneat/hot-toast';
 import { NgxSpinnerModule } from 'ngx-spinner';
 import { AutosizeModule } from 'ngx-autosize';
+import { NgChartsModule } from 'ng2-charts';
 
 
 
@@ -59,6 +60,7 @@ import { AutosizeModule } from 'ngx-autosize';
     HotToastModule.forRoot({
       dismissible: true
     }),
+     NgChartsModule,
 
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],

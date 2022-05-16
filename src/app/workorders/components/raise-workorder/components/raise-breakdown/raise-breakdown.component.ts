@@ -307,6 +307,11 @@ export class RaiseBreakdownComponent implements OnInit {
       this.showSpinner();
 
       const workorderData: IntWorkorder = {
+        viewedByTechnician: {
+          status: false,
+          dateTime: ''
+
+        },
         review: {
           status: '',
           concern: {},
