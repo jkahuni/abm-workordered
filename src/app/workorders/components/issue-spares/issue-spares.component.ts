@@ -395,6 +395,7 @@ export class IssueSparesComponent implements OnInit {
         .then(() => {
           this.navigateToListWorkorders();
           this.hideIssuingSparesSpinner();
+          this.workordersService.refreshWorkorders(workorderUid, workorderUpdateData);
           this.toast.success(`Success. ${totalSpares
             } spare(s) added succesfuly to workorder ${workorderNumber}.`);
 
@@ -410,5 +411,4 @@ export class IssueSparesComponent implements OnInit {
 
 
   }
-
 }

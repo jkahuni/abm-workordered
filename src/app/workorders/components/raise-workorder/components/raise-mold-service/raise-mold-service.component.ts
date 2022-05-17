@@ -343,7 +343,7 @@ export class RaiseMoldServiceComponent implements OnInit {
 
           this.toast.success(`Success. Workorder ${workorderNumber} raised successfully.`,
             { duration: 8000, id: 'raise-mold-service-workorder-success' });
-
+          this.workordersService.refreshWorkorders('', workorderData);
           this.router.navigate(['/']);
 
         })

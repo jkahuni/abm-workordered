@@ -339,6 +339,7 @@ export class RaiseCorrectiveMaintenanceComponent implements OnInit {
           this.hideSpinner();
           this.toast.success(`Success. Workorder ${workorderNumber} raised successfully.`,
             { duration: 10000, id: 'raise-corrective-maintenance-workorder-success' });
+          this.workordersService.refreshWorkorders('', workorderData);
           this.router.navigate(['/']);
         })
         .catch((err: any) => {

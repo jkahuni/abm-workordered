@@ -216,7 +216,7 @@ export class CloseMoldServiceComponent implements OnInit {
       this.workordersService.updateWorkorder(workorderUid, workorderUpdateData)
         .then(() => {
           this.hideButtonSpinnerOnSuccess();
-
+          this.workordersService.refreshWorkorders(workorderUid, workorderUpdateData);
           this.router.navigate([`/workorders/engineering/open/${this.userUid}`]);
 
           this.toast.success(`Success. Workorder ${workorderNumber} closed successfully.`,

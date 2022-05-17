@@ -343,6 +343,7 @@ export class RaiseAmComponent implements OnInit {
           this.hideSpinner();
           this.toast.success(`Success. AM Workorder ${workorderNumber} raised successfully.`,
             { duration: 10000, id: 'raise-am-workorder-success' });
+          this.workordersService.refreshWorkorders('', workorderData);
           this.router.navigate(['/']);
 
         })

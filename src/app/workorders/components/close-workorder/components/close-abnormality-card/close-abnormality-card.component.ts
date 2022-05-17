@@ -205,6 +205,7 @@ export class CloseAbnormalityCardComponent implements OnInit {
       this.workordersService.updateWorkorder(workorderUid, workorderUpdateData)
         .then(() => {
           this.hideButtonSpinnerOnSuccess();
+          this.workordersService.refreshWorkorders(workorderUid, workorderUpdateData);
 
           this.router.navigate([`/workorders/engineering/open/${this.userUid}`]);
 

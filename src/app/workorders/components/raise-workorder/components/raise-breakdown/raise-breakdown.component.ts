@@ -86,7 +86,7 @@ export class RaiseBreakdownComponent implements OnInit {
     this.loadingFailed = true;
     this.hideSpinner();
   }
-  
+
   private formatDate(): string {
     return dayjs(this.now).format('MMM DD, YYYY');
   }
@@ -386,6 +386,7 @@ export class RaiseBreakdownComponent implements OnInit {
           this.hideSpinner();
           this.toast.success(`Success. Workorder ${workorderNumber} raised successfully.`,
             { duration: 10000, id: 'raise-breakdown-workorder-success' });
+          this.workordersService.refreshWorkorders('', workorderData);
           this.router.navigate(['/']);
         })
         .catch((err: any) => {

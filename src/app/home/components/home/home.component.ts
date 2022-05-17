@@ -91,9 +91,6 @@ export class HomeComponent implements OnInit {
   ];
 
 
-
-
-
   ngOnInit(): void {
     onAuthStateChanged(this.auth,
       (user: User | null) => {
@@ -230,15 +227,14 @@ export class HomeComponent implements OnInit {
 
   // get all wokrorders first
   private getAllWorkorders(): void {
+    console.log('HOME METHOD CALLED');
     this.workordersService.$allWorkorders.subscribe(
       (workorders: IntWorkorder[] | null) => {
         if (workorders) {
           this.workorders = workorders;
+          console.log('INSIDE HOME METHOD SUBSCRIBE', this.workorders);
         } else {
           this.workordersService.getAllWorkorders()
-            .then(() => {
-              this.getAllWorkorders();
-            })
             .catch((err: any) => {
               this.hideSpinnerOnError();
               if (err.code === 'failed-precondition') {
@@ -258,7 +254,7 @@ export class HomeComponent implements OnInit {
       this.raisedWorkorders = this.workorders.filter(
         (workorder: IntWorkorder) => {
           if (workorder.raiser.uid === this.userUid) {
-            return workorder;
+            return true;
           }
           return false;
         }
@@ -276,9 +272,9 @@ export class HomeComponent implements OnInit {
           const rejected = workorder.rejected.status;
           const supervisor = workorder.supervisor.uid;
 
-          if (approved === rejected === false && supervisor === this.userUid) { return workorder; }
+          if (!approved && !rejected && supervisor === this.userUid) { return true; }
 
-          return null;
+          return false;
         }
       );
       return this.unverifiedWorkorders;
@@ -299,8 +295,8 @@ export class HomeComponent implements OnInit {
             approved === true &&
             rejected === false &&
             supervisor === this.userUid) {
-            return workorder;
-          } return null;
+            return true;
+          } return false;
         }
       );
       return this.approvedWorkorders;
@@ -320,8 +316,8 @@ export class HomeComponent implements OnInit {
             approved === false &&
             rejected === true &&
             supervisor === this.userUid) {
-            return workorder;
-          } return null;
+            return true;
+          } return false;
         }
       );
       return this.rejectedWorkorders;
@@ -344,9 +340,9 @@ export class HomeComponent implements OnInit {
             rejected === false &&
             raiser === this.userUid
           ) {
-            return workorder;
+            return true;
           }
-          return null;
+          return false;
         }
       );
       return this.approvedWorkorders;
@@ -367,9 +363,9 @@ export class HomeComponent implements OnInit {
             rejected === true &&
             raiser === this.userUid
           ) {
-            return workorder;
+            return true;
           }
-          return null;
+          return false;
         }
       );
       return this.rejectedWorkorders;
@@ -393,9 +389,9 @@ export class HomeComponent implements OnInit {
             closed === false &&
             technician === this.userUid
 
-          ) { return workorder; }
+          ) { return true; }
 
-          return null;
+          return false;
 
         }
       );
@@ -420,9 +416,9 @@ export class HomeComponent implements OnInit {
             closed === true &&
             technician === this.userUid
 
-          ) { return workorder; }
+          ) { return true; }
 
-          return null;
+          return false;
 
         }
       );
@@ -447,9 +443,9 @@ export class HomeComponent implements OnInit {
             rejected === false &&
             closed === false &&
             stores === this.userUid
-          ) { return workorder; }
+          ) { return true; }
 
-          return null;
+          return false;
         });
       return this.storesTechnicianOpenWorkorders;
     }
@@ -470,9 +466,9 @@ export class HomeComponent implements OnInit {
             rejected === false &&
             closed === true &&
             stores === this.userUid
-          ) { return workorder; }
+          ) { return true; }
 
-          return null;
+          return false;
         });
 
       return this.storesTechnicianClosedWorkorders;
@@ -488,10 +484,9 @@ export class HomeComponent implements OnInit {
           const reviewed = workorder.review?.status;
           // status => reviewed
 
-          if (reviewed) {
-            return workorder;
-          }
-          return null;
+          if (reviewed) { return true; }
+
+          return false;
         }
       );
 
@@ -506,10 +501,9 @@ export class HomeComponent implements OnInit {
         (workorder: IntWorkorder) => {
           const reviewed = workorder.review?.status;
           // sttaus => accepted, denied, cancelled
-          if (!reviewed || reviewed === '') {
-            return workorder;
-          }
-          return null;
+          if (!reviewed || reviewed === '') { return true; }
+
+          return false;
         }
       );
 

@@ -469,10 +469,16 @@
       </div>
     </div>
 
-    <div *ngIf="workorder && workorder.viewedByTechnician.status" class="filter-field-value mb-4">
-      <div class="filter-value">
-        status: Opened
-      </div>
+    <div
+      *ngIf="
+        workorder &&
+        userType === 'engineering' &&
+        workorder.viewedByTechnician.status &&
+        !workorder.acknowledged.status
+      "
+      class="filter-field-value mb-4"
+    >
+      <div class="filter-value">W/O Opened</div>
     </div>
 
     <!-- no workorder selected -->
@@ -492,7 +498,7 @@
             <mat-list-item role="listitem">
               <div *ngIf="approveWorkorderLoading">
                 <button
-                  class="action-button btn btn-success shadow-none"
+                  class="action-button btn btn-sm btn-success shadow-none"
                   type="button"
                   disabled
                 >
@@ -567,7 +573,7 @@
                 <button
                   class="action-button btn btn-link shadow-none"
                   type="button"
-                  (click)="(refreshModals)"
+                  (click)="refreshModals()"
                   data-bs-toggle="modal"
                   data-bs-target="#assignTechniciansModal"
                 >
@@ -585,7 +591,7 @@
               <div *ngIf="!workorder.acknowledged.status">
                 <div *ngIf="acknowledgeWorkorderLoading">
                   <button
-                    class="action-button btn btn-success shadow-none"
+                    class="action-button btn btn-sm btn-success shadow-none"
                     type="button"
                     disabled
                   >
@@ -639,7 +645,7 @@
                 <div *ngIf="!workorder.done.status">
                   <div *ngIf="markWorkorderDoneLoading">
                     <button
-                      class="action-button btn btn-success shadow-none"
+                      class="action-button btn btn-sm btn-success shadow-none"
                       type="button"
                       disabled
                     >

@@ -288,11 +288,8 @@ export class ListWorkordersComponent implements OnInit {
       }
       // engineering technician
       else if (this.userType === 'engineering') {
-        console.log('ENGINEERING');
         // eng open workorders
         if (this.workordersType === 'open') {
-          console.log('ENGINEERING OPEN');
-
           const openWorkorders = workorders.filter
             ((workorder: IntWorkorder) => {
               const approved = workorder.approved.status;
@@ -318,8 +315,6 @@ export class ListWorkordersComponent implements OnInit {
 
         // eng closed workorders
         else if (this.workordersType === 'closed') {
-          console.log('ENGINEERING CLOSED');
-
           const closedWorkorders = workorders.filter
             ((workorder: IntWorkorder) => {
               const approved = workorder.approved.status;
@@ -460,16 +455,17 @@ export class ListWorkordersComponent implements OnInit {
 
   // get workorders
   private getWorkorders(): void {
+    console.log('LW METHOD CALLED');
     this.workordersService.$allWorkorders.subscribe(
       (workorders: IntWorkorder[] | null) => {
         if (workorders !== null) {
           const filteredWorkorders = this.filterWorkordersByUser(workorders);
+          
           if (filteredWorkorders) {
             this.workorders = filteredWorkorders;
             this.workordersToDisplay = this.workorders;
+            console.log('INSIDE LW METHOD SUBSCRIBE', this.workorders);
             this.hideLoadingWorkordersSpinner();
-            console.log(this.workordersToDisplay);
-
           } else {
             this.hideLoadingWorkordersSpinnerOnError();
             this.loadingWorkordersOtherError = `Loading workorders failed with error code FAW-LW-01. Please try reloading the page or report this error code to support to have it fixed.`;
@@ -485,10 +481,8 @@ export class ListWorkordersComponent implements OnInit {
               this.hideLoadingWorkordersSpinnerOnError();
               if (err.code === 'failed-precondition') {
                 this.loadingWorkordersIndexingError = `Loading workorders failed with error code IND-LW-01. Please report this error code to support to have it fixed.`;
-                console.log('ERROR IND-LW-01', err);
-              }
 
-              else {
+              }  else {
                 this.loadingWorkordersOtherError = `Loading workorders failed with error code LW-01. Please try reloading the page or report this error code to support to have it fixed.`;
               }
             });
@@ -707,21 +701,18 @@ export class ListWorkordersComponent implements OnInit {
     return sparesArray;
   }
 
-  // updating workorders based on user interaction
-  private refreshWorkorders(): void {
-    this.showLoadingWorkordersSpinner();
-    this.workorder = undefined;
-    this.showLeftSidenav = true;
-    this.showRightSidenav = false;
-    this.getWorkorders();
-  }
-
   // refresh all workorders
-  private refreshWorkorder(uid: string, update: {}): void {
+  private refreshWorkorders(uid: string, update: {}): void {
     this.workordersService.refreshWorkorders(uid, update)
       .then(() => {
         this.workorder = this.workorders?.find((workorder: IntWorkorder) => workorder.workorder.uid === uid);
+        console.log('THE WORKORDER', this.workorder);
         if (this.workorder) { this.createForm(this.workorder); }
+
+        else {
+          this.closeRightSidenav();
+          this.showLeftSidenav = true;
+        }
 
       });
 
@@ -882,21 +873,25 @@ export class ListWorkordersComponent implements OnInit {
     const workorderUid = workorder.workorder.uid;
     const now = dayjs().format();
     // allowed seconds
-    const allowedTime = 60;
-    const updateData = {
+    const allowedTime = 180;
+    const workorderUpdateData = {
       viewedByTechnician: {
         status: true,
         dateTime: now
       }
     };
 
-    this.workordersService.updateWorkorder(workorderUid, updateData)
+    this.workordersService.updateWorkorder(workorderUid, workorderUpdateData)
       .then(() => {
-        this.refreshWorkorder(workorderUid, updateData);
-        this.toast.info('You have 5 minutes to acknowledge or hand the workorder over to another technician. Please note that once you acknowledge you cannot hand over.', { duration: 12000, id: 'workorder-opened' });
+        this.refreshWorkorders(workorderUid, workorderUpdateData);
+        this.toast.info('Acknowledge or handover the workorder within 3 minutes, failure to which the workorder will be escalated to the supervisor. Please note that once you acknowledge you cannot handover.', { duration: 15000, id: 'workorder-opened' });
         setTimeout(() => {
-          this.toast.close();
-          this.toast.error('You have exceeded the allowed time to acknowledge or handover the workorder.', { autoClose: false, id: 'viewed-but-not-updated' });
+          if (this.workorder) {
+            if (!this.workorder.acknowledged.status) {
+              this.toast.error('You have exceeded the allowed time to acknowledge or handover the workorder. The workorder has been escalated to the supervisor.', { autoClose: false, id: 'viewed-but-not-updated' });
+            }
+          }
+
         }, 1000 * allowedTime);
       })
       .catch();
@@ -1087,7 +1082,6 @@ export class ListWorkordersComponent implements OnInit {
   // supervisors
   approve(): void {
     if (this.workorder) {
-      const workorder = this.workorder;
       this.approveWorkorderLoading = true;
 
       const now = dayjs().format();
@@ -1105,9 +1099,7 @@ export class ListWorkordersComponent implements OnInit {
       this.workordersService.updateWorkorder(workorderUid, workorderUpdateData)
         .then(() => {
           this.closeButtonSpinners();
-          // this.refreshWorkorders();
-          this.toast.close();
-          this.refreshWorkorder(workorderUid, workorderUpdateData);
+          this.refreshWorkorders(workorderUid, workorderUpdateData);
 
           this.toast.success(`Success. Workorder ${workorderNumber} approved successfully.`, { id: 'approve-workorder-success' });
 
@@ -1115,8 +1107,6 @@ export class ListWorkordersComponent implements OnInit {
         .catch((err: any) => {
           this.closeButtonSpinners();
 
-          console.log('ERR IN APPPROVE WORKORDER ', err);
-          this.toast.close();
           this.toast.error(`Failed:
              Approving workorder ${workorderNumber} failed with error WL-04. Please try again, or report the error code to support if the issue persists.`,
             { duration: 8000, id: 'error-code-WL-04' });
@@ -1142,8 +1132,6 @@ export class ListWorkordersComponent implements OnInit {
 
     } else {
       if (this.workorder) {
-        const workorder = this.workorder;
-
         this.rejectWorkorderLoading = true;
 
 
@@ -1168,9 +1156,7 @@ export class ListWorkordersComponent implements OnInit {
           .then(() => {
             this.closeOpenModal();
             this.closeButtonSpinners();
-
-            // this.refreshWorkorders();
-            this.refreshWorkorder(workorderUid, workorderUpdateData);
+            this.refreshWorkorders(workorderUid, workorderUpdateData);
 
             this.toast.success(`Success.
              Workorder ${workorderNumber} rejected successfully.`, { id: 'reject-success' });
@@ -1216,9 +1202,7 @@ export class ListWorkordersComponent implements OnInit {
           .then(() => {
             this.closeButtonSpinners();
             this.closeOpenModal();
-
-            // this.refreshWorkorders();
-            this.refreshWorkorder(workorderUid,
+            this.refreshWorkorders(workorderUid,
               workorderUpdateData);
 
             this.toast.success(`Success.
@@ -1257,7 +1241,6 @@ export class ListWorkordersComponent implements OnInit {
         { duration: 8000, id: 'change-technicians-error' });
     } else {
       if (this.workorder) {
-        const workorder = this.workorder;
         this.changeTechniciansLoading = true;
         const workorderNumber = this.workorder.workorder.number;
         const workorderUid = this.workorder.workorder.uid;
@@ -1277,9 +1260,7 @@ export class ListWorkordersComponent implements OnInit {
           .then(() => {
             this.closeButtonSpinners();
             this.closeOpenModal();
-
-            // this.refreshWorkorders();
-            this.refreshWorkorder(workorderUid,
+            this.refreshWorkorders(workorderUid,
               workorderUpdateData);
 
             this.toast.success(`Success. Technicians on workorder ${workorderNumber} changed successfully.`);
@@ -1316,7 +1297,6 @@ export class ListWorkordersComponent implements OnInit {
         { duration: 5000, id: 'assign-technicians-error' });
     } else {
       if (this.workorder) {
-        const workorder = this.workorder;
         this.assignTechniciansLoading = true;
         const now = dayjs().format();
         const workorderUid = this.workorder.workorder.uid;
@@ -1333,11 +1313,8 @@ export class ListWorkordersComponent implements OnInit {
           .then(() => {
             this.closeButtonSpinners();
             this.closeOpenModal();
-
-            // this.refreshWorkorders();
-            this.refreshWorkorder(workorderUid,
+            this.refreshWorkorders(workorderUid,
               workorderUpdateData);
-
 
             this.toast.success(`Success. Technicians assigned to workorder ${workorderNumber} successfully.`, { id: 'assign-technicians-success' });
           })
@@ -1355,7 +1332,6 @@ export class ListWorkordersComponent implements OnInit {
   // technicians
   acknowledge(): void {
     if (this.workorder) {
-      const workorder = this.workorder;
       this.acknowledgeWorkorderLoading = true;
       const workorderUid = this.workorder.workorder.uid;
       const workorderNumber = this.workorder.workorder.number;
@@ -1371,12 +1347,9 @@ export class ListWorkordersComponent implements OnInit {
       this.workordersService.updateWorkorder(workorderUid, workorderUpdateData)
         .then(() => {
           this.closeButtonSpinners();
-          this.refreshWorkorder(workorderUid,
+          this.refreshWorkorders(workorderUid,
             workorderUpdateData);
-
-          // this.refreshWorkorders();
           this.toast.success(`Success. Workorder ${workorderNumber} acknowledged successfully.`, { id: 'acknowledge-workorder-success' });
-
         })
         .catch(() => {
           this.closeButtonSpinners();
@@ -1390,7 +1363,6 @@ export class ListWorkordersComponent implements OnInit {
 
   markDone(): void {
     if (this.workorder) {
-      const workorder = this.workorder;
       this.markWorkorderDoneLoading = true;
       const workorderNumber = this.workorder.workorder.number;
       const workorderUid = this.workorder.workorder.uid;
@@ -1422,7 +1394,7 @@ export class ListWorkordersComponent implements OnInit {
         .then(() => {
           this.closeButtonSpinners();
           // this.refreshWorkorders();
-          this.refreshWorkorder(workorderUid,
+          this.refreshWorkorders(workorderUid,
             workorderUpdateData);
 
           this.toast.success(`Success. Workorder ${workorderNumber} marked as done. Click on the workorder to view the time taken.`, { id: 'mark-workorder-done-success' });
@@ -1454,7 +1426,6 @@ export class ListWorkordersComponent implements OnInit {
       this.toast.error(`Error: Ensure a new technician has been picked, or click on cancel to abort the handover.`, { id: 'eng-technician-handover-error' });
     } else {
       if (this.workorder) {
-        const workorder = this.workorder;
         this.engTechnicianHandoverLoading = true;
 
         const workorderUid = this.workorder.workorder.uid;
@@ -1467,16 +1438,13 @@ export class ListWorkordersComponent implements OnInit {
           .then(() => {
             this.closeButtonSpinners();
             this.closeOpenModal();
-            // this.refreshWorkorders();
-            this.refreshWorkorder(workorderUid,
+            this.refreshWorkorders(workorderUid,
               workorderUpdateData);
-
             this.toast.success(`Success. Workorder ${workorderNumber} handed over successfully.`,
               { id: 'eng-technician-handover-success' });
           })
           .catch(() => {
             this.closeButtonSpinners();
-
             this.toast.error(`Failed. Handing over workorder ${workorderNumber} failed with error code LW-ETH-01. Please try again or report this error code to support for assistance if the issue persists.`, {
               autoClose: false, id: 'error-code-WL-11'
             });
@@ -1498,7 +1466,6 @@ export class ListWorkordersComponent implements OnInit {
       this.toast.error(`Error: Please ensure a new technician has been picked, or click on cancel to abort the handover.`, { id: 'stores-technician-handover-error' });
     } else {
       if (this.workorder) {
-        const workorder = this.workorder;
         this.storesTechnicianHandoverLoading = true;
 
         const workorderUid = this.workorder.workorder.uid;
@@ -1511,18 +1478,13 @@ export class ListWorkordersComponent implements OnInit {
           .then(() => {
             this.closeButtonSpinners();
             this.closeOpenModal();
-
-            // this.refreshWorkorders();
-            this.refreshWorkorder(workorderUid,
+            this.refreshWorkorders(workorderUid,
               workorderUpdateData);
-
-
             this.toast.success(`Success. Workorder ${workorderNumber} handed over successfully.`,
               { id: 'stores-technician-handover-success' });
           })
           .catch(() => {
             this.closeButtonSpinners();
-
             this.toast.error(`Failed. Handing over workorder ${workorderNumber} failed with error code LW-STH-01. Please try again or report this error code to support for assistance if the issue persists.`, {
               autoClose: false, id: 'error-code-WL-12'
             });
@@ -1534,7 +1496,6 @@ export class ListWorkordersComponent implements OnInit {
   // ENG MANAGER ACTIONS
   reviewWorkorder(): void {
     if (this.workorder) {
-      const workorder = this.workorder;
       this.reviewingWorkorder = true;
       const now = dayjs().format();
       const workorderUid = this.workorder.workorder.uid;
@@ -1551,16 +1512,13 @@ export class ListWorkordersComponent implements OnInit {
       this.workordersService.updateWorkorder(workorderUid, workorderUpdateData)
         .then(() => {
           this.closeButtonSpinners();
-          // this.refreshWorkorders();
-          this.refreshWorkorder(workorderUid,
+          this.refreshWorkorders(workorderUid,
             workorderUpdateData);
-
           this.toast.success(`Success. Workorder ${workorderNumber} reviewed successfully.`, { id: 'review-workorder-success' });
         })
         .catch(() => {
           this.closeButtonSpinners();
           this.toast.error(`Failed. Reviewing workorder ${workorderNumber} failed with error code LW-RSW-01. Please try again or report the error code to support to have the issue fixed.`, { autoClose: false, id: 'review-workorder-error' });
-
         });
     }
   }
@@ -1635,10 +1593,8 @@ export class ListWorkordersComponent implements OnInit {
                 if (index + 1 === totalWorkordersToReview) {
                   this.closeButtonSpinners();
                   this.closeOpenModal();
-                  // this.refreshWorkorders();
-                  this.refreshWorkorder(workorderUid,
+                  this.refreshWorkorders(workorderUid,
                     workorderUpdateData);
-
                   this.toast.success(`Success. ${totalWorkordersToReview} workorder(s) reviewed successfully.`,
                     { duration: 8000, id: 'review-workorders-success' });
                 }
@@ -1646,8 +1602,7 @@ export class ListWorkordersComponent implements OnInit {
               .catch(() => {
                 this.closeButtonSpinners();
                 this.toast.error(
-                  `Error: Reviewing multiple workorders failed with error code LW-RMW-01. 
-              Please report this error code to support to have the error fixed.`,
+                  `Error: Reviewing multiple workorders failed with error code LW-RMW-01. Please report this error code to support to have the error fixed.`,
                   { autoClose: false, id: 'review-workorders-error-2' });
               });
 
@@ -1685,13 +1640,9 @@ export class ListWorkordersComponent implements OnInit {
 
     else {
       if (this.workorder) {
-        const workorder = this.workorder;
-
         this.raisingConcern = true;
-
         const workorderUid = this.workorder.workorder.uid;
         const workorderNumber = this.workorder.workorder.number;
-
         const workorderUpdateData = {
           review: {
             status: 'reviewed',
@@ -1707,14 +1658,11 @@ export class ListWorkordersComponent implements OnInit {
           .then(() => {
             this.closeButtonSpinners();
             this.closeOpenModal();
-            this.refreshWorkorder(workorderUid,
+            this.refreshWorkorders(workorderUid,
               workorderUpdateData);
-            // this.refreshWorkorders();
 
             this.toast.success(`Success. Concern on workorder ${workorderNumber
               } raised successfully.`, { duration: 6000, id: 'raise-concern-success' });
-
-
           })
           .catch(() => {
             this.closeButtonSpinners();

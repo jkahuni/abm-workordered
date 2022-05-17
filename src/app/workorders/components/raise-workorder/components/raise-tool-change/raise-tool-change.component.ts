@@ -342,6 +342,7 @@ export class RaiseToolChangeComponent implements OnInit {
           this.hideSpinner();
           this.toast.success(`Success. Workorder ${workorderNumber} raised successfully.`,
             { duration: 10000, id: 'raise-tool-change-workorder-success' });
+          this.workordersService.refreshWorkorders('', workorderData);
           this.router.navigate(['/']);
 
         })

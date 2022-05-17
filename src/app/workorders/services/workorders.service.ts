@@ -163,22 +163,28 @@ export class WorkordersService {
 
   // refresh all workorders
   async refreshWorkorders(uid: string, update: any): Promise<void> {
-    console.log('METHOD CALLED');
+    console.log('METHOD IN SERVICE CALLED');
     let updatedWorkordersArray: IntWorkorder[] = [];
 
     this.$allWorkorders.subscribe(
       (workorders: IntWorkorder[] | null) => {
-        if (workorders) {
-          const updatedWorkorders = workorders.map(
-            (workorder: IntWorkorder) => {
-              if (workorder.workorder.uid === uid) {
-                return { ...workorder, ...update };
+        if (workorders !== null) {
+          if (uid && update) {
+            const updatedWorkorders = workorders.map(
+              (workorder: IntWorkorder) => {
+                if (workorder.workorder.uid === uid) {
+                  return { ...workorder, ...update };
+                }
+                return workorder;
               }
-              return workorder;
-            }
-          );
-          updatedWorkordersArray = updatedWorkorders;
+            );
+            updatedWorkordersArray = updatedWorkorders;
+          } else if (!uid && update) {
+            workorders.push(update);
+            updatedWorkordersArray = workorders;
+          }
         }
+
       }
     ).unsubscribe();
 

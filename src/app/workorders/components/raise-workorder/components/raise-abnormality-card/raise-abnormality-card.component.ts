@@ -346,6 +346,7 @@ export class RaiseAbnormalityCardComponent implements OnInit {
           this.router.navigate(['/']);
           this.toast.success(`Success. Abnormality card ${workorderNumber} raised successfully.`,
             { duration: 10000, id: 'raise-abnormality-card-success' });
+          this.workordersService.refreshWorkorders('', workorderData);
 
         })
         .catch((err: any) => {

@@ -340,6 +340,7 @@ export class RaisePmComponent implements OnInit {
           this.hideSpinner();
           this.toast.success(`Success. Workorder ${workorderNumber} raised successfully.`,
             { duration: 10000, id: 'raise-pm-workorder-success' });
+          this.workordersService.refreshWorkorders('', workorderData);
           this.router.navigate(['/']);
 
 
