@@ -1,0 +1,15 @@
+<button class="btn btn-link m-auto" (click)="playAroundWithWorkorders()">
+  Click Me!
+</button>
+
+<div class="maintenance-cost-canvas">
+  <canvas
+    baseChart
+    [datasets]="barChartData"
+    [labels]="barChartLabels"
+    [options]="barChartOptions"
+    [legend]="barChartLegend"
+    [type]="barChartType"
+  >
+  </canvas>
+</div>
