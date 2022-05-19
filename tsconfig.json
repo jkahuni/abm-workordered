@@ -43,6 +43,9 @@
       ],
       "@resources/*": [
         "src/app/resources/*"
+      ],
+      "@reports/*": [
+        "src/app/reports/*"
       ]
     }
   },

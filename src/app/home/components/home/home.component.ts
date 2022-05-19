@@ -15,7 +15,6 @@ import { IntUser, IntWorkorder } from '@workorders/models/workorders.models';
 
 //  firebase and firestore
 import { User, Auth, onAuthStateChanged } from '@angular/fire/auth';
-import { ChartOptions, ChartType, ChartDataset } from 'chart.js';
 
 
 @Component({
@@ -71,25 +70,8 @@ export class HomeComponent implements OnInit {
   otherError!: string;
   defaultError = `Error UHE-01 occured. Please report this error to support to have if fixed.`;
 
-  // for bar chart
-  seeChart = false;
-  barChartType: ChartType = 'line';
-  barChartOptions: ChartOptions = {
-    responsive: true,
-    plugins: {
-      title: {
-        display: true,
-        text: 'Monthly Maintenance Costs'
-      }
-    }
-  };
-  barChartLabels = ['Apr', 'May'];
-  barChartLegend = true;
-  barChartData: ChartDataset[] = [
-    { data: [10, 15, 20, 25, 30, 35, 40, 45, 50], label: 'label 1' },
-    { data: [20, 25, 30, 35, 40, 45, 50, 55, 60], label: 'label 2' }
-  ];
-
+  // toggle view chart/data
+  viewData = true;
 
   ngOnInit(): void {
     onAuthStateChanged(this.auth,

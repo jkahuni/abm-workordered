@@ -1,3 +1,5 @@
+$mat-card-header-height: 10%;
+
 span.emailAddress {
     color: blue;
 }
@@ -10,12 +12,12 @@ span.emailAddress:hover {
     border: 2px solid #73ad21;
 }
 
+// general card formatting
 mat-card.home-page-card {
     display: flex;
     justify-content: flex-start;
-    align-items: center;
+    align-items: flex-start;
     flex-flow: row wrap;
-    max-width: 300px;
     padding: 15px;
     border-radius: 20px;
     margin: 16px auto;
@@ -41,7 +43,40 @@ mat-card.home-page-card {
                 }
             }
         }
+    }
+}
 
+// with chart displayed = .home-page-card.chart-displayed
+mat-card.home-page-card:not(.chart-hidden) {
+    max-width: 90vw;
+    height: 75vh;
+
+    mat-card-header {
+        ::ng-deep {
+            .mat-card-header-text {
+                display: flex;
+                margin: 0;
+                padding: 0;
+            }
+        }
+        height: $mat-card-header-height;
+    }
+
+    mat-card-content {
+        height: calc(100% - $mat-card-header-height);
+        // .custom-chart-container {
+        //     display: block;
+        //     height: 100%;
+        //     width: 100%;
+        // }
+    }
+}
+
+// with chart hidden = .home-page-card.chart-hidden
+mat-card.home-page-card:not(.chart-displayed) {
+    max-width: 300px;
+
+    mat-card-content {
         .navigation-links {
             display: flex;
             justify-content: flex-start;

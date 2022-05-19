@@ -1,15 +1,22 @@
-<button class="btn btn-link m-auto" (click)="playAroundWithWorkorders()">
-  Click Me!
-</button>
+<div>
+  <div>
+    <div class="maintenance-cost-canvas">
+      <canvas
+        #reportsChart
+        baseChart
+        [type]="chartType"
+        [data]="lineChartData"
+        [options]="lineChartOptions"
+        [plugins]="lineChartPlugins"
+      >
+      </canvas>
+    </div>
 
-<div class="maintenance-cost-canvas">
-  <canvas
-    baseChart
-    [datasets]="barChartData"
-    [labels]="barChartLabels"
-    [options]="barChartOptions"
-    [legend]="barChartLegend"
-    [type]="barChartType"
-  >
-  </canvas>
+    <button
+      class="btn btn-primary btn-sm"
+      (click)="getMaintenanceCostsPerSection('Assembly Line')"
+    >
+      Update
+    </button>
+  </div>
 </div>

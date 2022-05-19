@@ -3,6 +3,7 @@ import {
   IntSection, IntMachine, IntSpare, IntExpandedSection, IntExpandedMachine, IntExpandedSpare
 } from '@resources/models/resources.models';
 import { DocumentData, query, getDocs, collection, Firestore, orderBy, where, limit, doc, setDoc, updateDoc } from '@angular/fire/firestore';
+import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -10,6 +11,11 @@ import { DocumentData, query, getDocs, collection, Firestore, orderBy, where, li
 export class ResourcesService {
 
   constructor(private firestore: Firestore) { }
+
+  private sections = new BehaviorSubject<IntSection[] | null>(null);
+  private machines = new BehaviorSubject<IntMachine[] | null>(null);
+  public $sections = this.sections.asObservable();
+  public $machines = this.machines.asObservable();
 
   // get sections and machines
   async getSections(): Promise<IntSection[]> {
@@ -26,6 +32,8 @@ export class ResourcesService {
 
       return data;
     }) as IntSection[];
+
+    this.sections.next(sectionsArray);
 
     return sectionsArray;
 
@@ -48,7 +56,7 @@ export class ResourcesService {
         return data;
       }
     ) as IntMachine[];
-
+    this.machines.next(machinesArray);
     return machinesArray;
   }
 

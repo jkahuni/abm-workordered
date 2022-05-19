@@ -9,10 +9,8 @@ import { MatCardModule } from '@angular/material/card';
 
 // spinner
 import { NgxSpinnerModule } from 'ngx-spinner';
-
-
 import { HomeComponent } from './components/home/home.component';
-import { NgChartsModule } from 'ng2-charts';
+import { ReportsModule } from '@reports/reports.module';
 
 
 @NgModule({
@@ -25,7 +23,7 @@ import { NgChartsModule } from 'ng2-charts';
     MatButtonModule,
     MatCardModule,
     NgxSpinnerModule,
-    NgChartsModule
+    ReportsModule
   ]
 })
 export class HomeModule { }

@@ -1,6 +1,6 @@
-<mat-card class="home-page-card">
+<mat-card class="home-page-card" [ngClass]="{'chart-displayed': !viewData, 'chart-hidden': viewData }">
   <mat-card-header class="mx-auto">
-    <mat-card-title class="text-center"> ABM Workordered Home </mat-card-title>
+    <mat-card-title> ABM Workordered Home </mat-card-title>
   </mat-card-header>
 
   <mat-card-content>
@@ -26,35 +26,30 @@
           <!-- pick what to see -->
           <div class="toggle-chart-and-data">
             <button
+              *ngIf="viewData"
               type="button"
               class="btn btn-primary btn-sm"
-              (click)="seeChart = !seeChart"
+              (click)="viewData = !viewData"
             >
-              View Chart
+              View Report
             </button>
             <button
+              *ngIf="!viewData"
               type="button"
               class="btn btn-primary btn-sm"
-              (click)="seeChart = !seeChart"
+              (click)="viewData = !viewData"
             >
               View Data
             </button>
           </div>
 
           <!-- chart -->
-          <div *ngIf="seeChart" style="display: block;">
-            <canvas baseChart
-            [datasets]="barChartData"
-            [labels]="barChartLabels"
-            [options]="barChartOptions"
-            [legend]="barChartLegend"
-            [type]="barChartType">
-            </canvas>
-
+          <div *ngIf="!viewData" class="custom-chart-container">
+            <app-maintenance-cost></app-maintenance-cost>
           </div>
 
           <!-- raw data -->
-          <div *ngIf="!seeChart">
+          <div *ngIf="viewData">
             <!-- operators -->
             <div *ngIf="isOperatorOrOperatorLike" class="navigation-links">
               <!-- raise new workorder -->
