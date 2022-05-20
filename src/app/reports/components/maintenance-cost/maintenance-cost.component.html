@@ -2,21 +2,23 @@
   <div>
     <div class="maintenance-cost-canvas">
       <canvas
-        #reportsChart
         baseChart
         [type]="chartType"
         [data]="lineChartData"
         [options]="lineChartOptions"
         [plugins]="lineChartPlugins"
+        (chartClick)="lineChartClicked($event)"
       >
       </canvas>
     </div>
-
-    <button
-      class="btn btn-primary btn-sm"
-      (click)="getMaintenanceCostsPerSection('Assembly Line')"
-    >
-      Update
-    </button>
+<div  class="filter-sections-form-field-container">
+    <mat-form-field class="filter-sections-form-field" appearance="outline">
+      <mat-label>Select Section</mat-label>
+      <mat-select #sectionsFilterField (selectionChange)="generateMaintenanceCostPerSection(sectionsFilterField.value)">
+        <mat-option *ngFor="let section of factorySections" value="{{section}}" >{{section}}</mat-option>
+      </mat-select>
+    </mat-form-field>
+   
+  </div>
   </div>
 </div>
