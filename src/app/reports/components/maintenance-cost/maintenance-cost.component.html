@@ -3,12 +3,8 @@
     <div class="maintenance-cost-canvas">
       <canvas
         baseChart
-        [type]="chartType"
-        [data]="lineChartData"
-        [options]="lineChartOptions"
-        [plugins]="lineChartPlugins"
-        (chartClick)="lineChartClicked($event)"
-      >
+        id="maintenanceCostsChart"
+      > {{chartObject}}
       </canvas>
     </div>
 <div  class="filter-sections-form-field-container">
@@ -22,3 +18,9 @@
   </div>
   </div>
 </div>
+
+<!-- [type]="chartType"
+        [data]="lineChartData"
+        [options]="lineChartOptions"
+        [plugins]="lineChartPlugins"
+        (chartClick)="lineChartClicked($event)" -->

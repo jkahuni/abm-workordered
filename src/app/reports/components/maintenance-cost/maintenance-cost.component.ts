@@ -12,7 +12,7 @@ import { IntSection, IntMachine } from '@resources/models/resources.models';
 import { Subject, takeUntil } from 'rxjs';
 
 // for chart
-import { ChartConfiguration, ChartType, ChartData, ChartEvent } from 'chart.js';
+import { ChartConfiguration, ChartType, ChartData, ChartEvent, Chart } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
 import DataLabelsPlugin from 'chartjs-plugin-datalabels';
 
@@ -52,6 +52,9 @@ export class MaintenanceCostComponent implements OnInit, OnDestroy {
   workordersPerSectionPerMonth!: IntWorkorder[];
   section!: string;
 
+  // chart
+  chartObject!: Chart;
+
 
   // for bar chart
   public chartType: ChartType = 'line';
@@ -74,13 +77,136 @@ export class MaintenanceCostComponent implements OnInit, OnDestroy {
         fill: 'origin',
       }
     ],
-   
+
   };
 
 
   ngOnInit(): void {
     this.getWorkorders();
     this.generateMaintenanceCostPerSection('Grid Casting');
+  }
+
+  private createChart(type: ChartType, labels: string[], chartData: any[]): Chart {
+    const data: ChartConfiguration['data'] = {
+      labels,
+      datasets: [
+        {
+          data: chartData,
+          borderWidth: 1,
+          backgroundColor: 'rgba(77,83,96,0.2)',
+          borderColor: 'rgba(77,83,96,1)',
+          pointBackgroundColor: 'rgba(77,83,96,1)',
+          pointBorderColor: '#fff',
+          pointRadius: 5,
+          pointHoverBackgroundColor: '#fff',
+          pointHoverBorderColor: 'rgba(77,83,96,1)',
+          fill: 'origin',
+        }
+      ]
+    };
+
+    const maximumCost = Math.max(...chartData as number[]);
+    console.log(maximumCost, maximumCost + maximumCost * 0.1, maximumCost + (maximumCost * 0.1));
+
+    const chart = new Chart('maintenanceCostsChart', {
+      type,
+      data,
+      plugins: [DataLabelsPlugin],
+      options: {
+        responsive: true,
+
+        elements: type === 'line' ? {
+          line: {
+            tension: 0.5
+          }
+        } : {},
+
+        scales: {
+          x: {
+            grid: {
+              tickColor: 'blue'
+            },
+            ticks: {
+              color: 'blue',
+            },
+            title: {
+              color: 'blue',
+              display: true,
+              text: 'Months'
+            }
+          },
+          y: {
+            grid: {
+              tickColor: 'blue'
+            },
+            ticks: {
+              color: 'blue',
+            },
+
+            suggestedMin: 0,
+            suggestedMax: maximumCost * 1.1,
+            beginAtZero: true,
+
+          }
+        },
+
+        plugins: {
+          legend: {
+            display: false
+          },
+          title: {
+            display: true,
+            text: ['Monthly Maintenance Costs', `${this.section}`]
+          },
+          datalabels: {
+            anchor: 'end',
+            align: 'left',
+            textAlign: 'center',
+            formatter: function (value) {
+              if (+value === 0) {
+                return '';
+              } else {
+                const roundedValue = ~~value;
+                return roundedValue.toLocaleString('en-US', { minimumFractionDigits: 0 });
+              }
+            },
+            color: function (context) {
+              return context.dataIndex === 0 ? 'red' : 'blue';
+
+
+            },
+            offset: 10
+
+          },
+        },
+
+        // interaction.mode default = 'nearest'
+        interaction: {
+          mode: 'nearest',
+          axis: 'y'
+        },
+
+        events: ['click'],
+
+        onClick: (event) => {
+          const points = chart.getElementsAtEventForMode(event as unknown as Event, 'nearest', { intersect: true }, false);
+          if (points.length) {
+            const point = points[0];
+
+            const maintenanceCost = chart.data.datasets[point.datasetIndex].data[point.index];
+            const monthYearLabel = chart.data.labels?.[point.index];
+
+            console.log('cost', maintenanceCost);
+            console.log('label', monthYearLabel);
+          }
+
+        }
+
+      }
+    });
+
+    return chart;
+
   }
 
   private getWorkorders(): void {
@@ -153,7 +279,7 @@ export class MaintenanceCostComponent implements OnInit, OnDestroy {
         (month: number) => {
           const label = dayjs(dayjs().month(month)).format('MMM YY');
           const workorders = this.filterMonthlyWorkorders(sectionsWorkorders, month, year).map((workorder: IntWorkorder) => {
-            const totalSparesCost = workorder.sparesUsed.status ? Math.round(this.formatCostAsInteger(workorder.sparesUsed.totalCost)) : 0;
+            const totalSparesCost = workorder.sparesUsed.status ? this.formatCostAsInteger(workorder.sparesUsed.totalCost) : 0;
 
             return totalSparesCost;
           }).reduce((totalSparesCost: number, totalSpareCost: number) => {
@@ -166,69 +292,10 @@ export class MaintenanceCostComponent implements OnInit, OnDestroy {
         }
       );
 
-      this.lineChartOptions = {
-        responsive: true,
-        elements: {
-          line: {
-            tension: 0.5
-          }
-        },
-        scales: {
-          x: {
-            grid: {
-              tickColor: 'blue'
-            },
-            ticks: {
-              color: 'blue',
-            },
-            title: {
-              color: 'blue',
-              display: true,
-              text: 'Months'
-            }
-          },
-          y: {
-            grid: {
-              tickColor: 'blue'
-            },
-            ticks: {
-              color: 'blue',
-            },
-
-            suggestedMin: 0,
-            beginAtZero: true,
-
-          }
-        },
-        plugins: {
-          legend: {
-            display: false
-          },
-          title: {
-            display: true,
-            text: `${this.section} Maintenance Costs`
-          },
-          datalabels: {
-            anchor: 'end',
-            align: 'left',
-            textAlign: 'center',
-            formatter: function (value) {
-              if (+value === 0) {
-                return '';
-              } else {
-                return value.toLocaleString('en-US', { minimumFractionDigits: 0 });
-              }
-            },
-            color: 'blue',
-            offset: 10
-
-          },
-        },
-
-      };
-      this.lineChartData.labels = monthsLabels;
-      this.lineChartData.datasets[0].data = workordersDataArray;
-      this.chart?.update();
+      if (this.chartObject) {
+        this.chartObject.destroy();
+      }
+      this.chartObject = this.createChart('line', monthsLabels, workordersDataArray);
     }
 
 
@@ -240,17 +307,14 @@ export class MaintenanceCostComponent implements OnInit, OnDestroy {
     console.log('HVR ACTIVE', active);
 
   }
-
-
-
   // on click
   lineChartClicked({ event, active }: { event?: ChartEvent, active?: {}[] }): void {
     // console.log('CLICK ACTIVE', active);
 
     if (active) {
-      if (active[0]) {
-        for (let key in Object.keys(active[0])) {
-        }
+      if (active[0] !== {}) {
+        console.log('ACTIVE', active);
+        console.log('Event', event);
       }
     }
 
