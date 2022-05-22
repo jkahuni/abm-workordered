@@ -4,7 +4,7 @@
   </mat-card-header>
 
   <mat-card-content>
-    <div *ngIf="loading">
+    <div *ngIf="loading" class="bootstrap-spinner-container-wrapper">
       <div class="bootstrap-spinner-container">
         <div class="bootstrap-spinner">
           <div
@@ -19,10 +19,10 @@
     </div>
 
     <!-- user logged in -->
-    <div *ngIf="!loading && !loadingFailed">
-      <div *ngIf="user">
+    <div *ngIf="!loading && !loadingFailed" class="loading-finished-container">
+      <div *ngIf="user" class="user-logged-in-container">
         <!-- user email verified -->
-        <div *ngIf="user.emailVerified">
+        <div *ngIf="user.emailVerified" class="user-email-verified-container">
           <!-- pick what to see -->
           <div class="toggle-chart-and-data">
             <button
@@ -31,7 +31,7 @@
               class="btn btn-primary btn-sm"
               (click)="viewData = !viewData"
             >
-              View Report
+              View Reports
             </button>
             <button
               *ngIf="!viewData"
@@ -44,7 +44,7 @@
           </div>
 
           <!-- chart -->
-          <div *ngIf="!viewData" class="custom-chart-container">
+          <div *ngIf="!viewData" class="canvas-object-container">
             <app-maintenance-cost></app-maintenance-cost>
           </div>
 

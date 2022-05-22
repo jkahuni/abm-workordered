@@ -1,21 +1,26 @@
-<div>
-  <div>
-    <div class="maintenance-cost-canvas">
-      <canvas
-        baseChart
-        id="maintenanceCostsChart"
-      > {{chartObject}}
-      </canvas>
-    </div>
-<div  class="filter-sections-form-field-container">
-    <mat-form-field class="filter-sections-form-field" appearance="outline">
-      <mat-label>Select Section</mat-label>
-      <mat-select #sectionsFilterField (selectionChange)="generateMaintenanceCostPerSection(sectionsFilterField.value)">
-        <mat-option *ngFor="let section of factorySections" value="{{section}}" >{{section}}</mat-option>
-      </mat-select>
-    </mat-form-field>
-   
+<div class="canvas-container">
+  <div class="canvas-object">
+    <canvas baseChart id="reportsChart"> {{ chartObject }} </canvas>
   </div>
+  <div class="filter-sections-form-field-container canvas-filter-fields">
+    <div class="charts-filter-label">Filter Charts</div>
+    <div>
+      <mat-form-field class="filter-sections-form-field" appearance="outline">
+        <mat-label>Select Section</mat-label>
+        <mat-select
+          #sectionsFilterField
+          (selectionChange)="
+            generateMaintenanceCostPerSection(sectionsFilterField.value)
+          "
+        >
+          <mat-option
+            *ngFor="let section of factorySections"
+            value="{{ section }}"
+            >{{ section }}</mat-option
+          >
+        </mat-select>
+      </mat-form-field>
+    </div>
   </div>
 </div>
 
@@ -24,3 +29,4 @@
         [options]="lineChartOptions"
         [plugins]="lineChartPlugins"
         (chartClick)="lineChartClicked($event)" -->
+        

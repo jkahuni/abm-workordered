@@ -106,9 +106,8 @@ export class MaintenanceCostComponent implements OnInit, OnDestroy {
     };
 
     const maximumCost = Math.max(...chartData as number[]);
-    console.log(maximumCost, maximumCost + maximumCost * 0.1, maximumCost + (maximumCost * 0.1));
 
-    const chart = new Chart('maintenanceCostsChart', {
+    const chart = new Chart('reportsChart', {
       type,
       data,
       plugins: [DataLabelsPlugin],
@@ -296,26 +295,6 @@ export class MaintenanceCostComponent implements OnInit, OnDestroy {
         this.chartObject.destroy();
       }
       this.chartObject = this.createChart('line', monthsLabels, workordersDataArray);
-    }
-
-
-  }
-
-  // on hover
-  lineChartHovered({ event, active }: { event?: ChartEvent, active?: {}[] }): void {
-    console.log('HOV EVT', event);
-    console.log('HVR ACTIVE', active);
-
-  }
-  // on click
-  lineChartClicked({ event, active }: { event?: ChartEvent, active?: {}[] }): void {
-    // console.log('CLICK ACTIVE', active);
-
-    if (active) {
-      if (active[0] !== {}) {
-        console.log('ACTIVE', active);
-        console.log('Event', event);
-      }
     }
 
 

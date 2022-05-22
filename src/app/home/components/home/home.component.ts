@@ -68,10 +68,10 @@ export class HomeComponent implements OnInit {
   loadingFailed = false;
   indexingError!: string;
   otherError!: string;
-  defaultError = `Error UHE-01 occured. Please report this error to support to have if fixed.`;
+  defaultError = `Error UHE-01 occured. Please try reloading this page or report this error to support to have the issue fixed if it persists.`;
 
   // toggle view chart/data
-  viewData = true;
+  viewData = false;
 
   ngOnInit(): void {
     onAuthStateChanged(this.auth,
@@ -81,12 +81,16 @@ export class HomeComponent implements OnInit {
           this.userUid = user.uid;
           if (!user.emailVerified) {
             this.loading = false;
+            this.viewData = true;
+
           } else {
             this.getAllWorkorders();
             this.getUserAndWorkorders(this.userUid);
           }
         } else {
           this.loading = false;
+          this.viewData = true;
+          
         }
       },
       (err: any) => {
@@ -222,7 +226,7 @@ export class HomeComponent implements OnInit {
               if (err.code === 'failed-precondition') {
                 this.indexingError = `Error IND-H-01 occured. Please report this error to support to have it fixed.`;
               } else {
-                this.otherError = `Error H-01 occured. Please report this error to support to have it fixed.`;
+                this.otherError = `Error H-01 occured. Please try reloading this page or report this error to support to have the issue fixed if it persists.`;
               }
             });
         }
