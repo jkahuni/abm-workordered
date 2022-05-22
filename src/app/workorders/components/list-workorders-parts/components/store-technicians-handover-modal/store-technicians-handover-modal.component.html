@@ -1,0 +1,121 @@
+
+<div
+  class="modal fade"
+  id="storesTechnicianHandoverModal"
+  tabindex="-1"
+  aria-labelledby="storesTechniciansHandoverModalLabel"
+  aria-hiden="true"
+  data-bs-backdrop="static"
+>
+  <div
+    class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-sm"
+  >
+    <div class="modal-content bg-light">
+      <div class="modal-header text-dark">
+        <h3 class="modal-title m-0" id="storesTechniciansHandoverModalLabel">
+          <strong>W/o No. {{ workorder?.workorder?.number }}</strong>
+        </h3>
+        <button
+          #closeStoresTechniciansHandoverModal
+          class="btn-close border border-success border-2"
+          type="button"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+          (click)="closeModal()"
+        ></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-container mat-elevation-z5">
+          <div class="form-header-container">
+            <h2>Handover</h2>
+          </div>
+
+          <form
+            [formGroup]="form"
+            (ngSubmit)="handover()"
+            id="storesTechniciansHandover"
+            #formReference
+            autocomplete="off"
+          >
+            <ng-container class="current-technician">
+              <mat-form-field>
+                <mat-label>Current Technician</mat-label>
+                <input
+                  readonly
+                  matInput
+                  formControlName="currentTechnician"
+                  class="text-capitalize"
+                />
+              </mat-form-field>
+            </ng-container>
+
+            <ng-container class="select-new-technician">
+              <mat-form-field>
+                <mat-label>New Technician</mat-label>
+                <mat-select
+                  class="text-capitalize"
+                  formControlName="newTechnician"
+                >
+                  <mat-option selected value=""
+                    >--select store technician</mat-option
+                  >
+                  <mat-option
+                    class="text-capitalize"
+                    *ngFor="let technician of storeTechnicians"
+                    [value]="technician"
+                  >
+                    {{ technician.fullName }}
+                  </mat-option>
+                </mat-select>
+                <mat-error
+                  *ngIf="
+                    form.controls['newTechnician']?.errors
+                      ?.['required']
+                  "
+                >
+                  New stores technician is required.
+                </mat-error>
+              </mat-form-field>
+            </ng-container>
+          </form>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <div *ngIf="!handingOver">
+          <button
+            type="button"
+            class="btn btn-secondary me-2"
+            data-bs-dismiss="modal"
+            (click)="closeModal()"
+          >
+            Cancel
+          </button>
+
+          <button
+            type="submit"
+            class="btn btn-primary"
+            form="storesTechniciansHandover"
+            (click)="formReference?.['ngSubmit']?.emit()"
+          >
+            Handover
+          </button>
+        </div>
+
+        <div *ngIf="handingOver">
+          <button type="button" class="btn btn-success" disabled>
+            <span
+              #buttonSpinner
+              class="spinner-border spinner-border-sm"
+              role="status"
+              aria-hidden="true"
+            >
+            </span>
+            Handing Over...
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

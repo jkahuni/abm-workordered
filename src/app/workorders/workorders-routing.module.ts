@@ -22,8 +22,6 @@ import { RaiseToolChangeComponent } from '@workorders/components/raise-workorder
 import { NewWorkorderComponent } from '@workorders/components/raise-workorder/components/new-workorder/new-workorder.component';
 
 
-
-
 // close w/o components
 import { CloseAbnormalityCardComponent } from '@workorders/components/close-workorder/components/close-abnormality-card/close-abnormality-card.component';
 import { CloseAmComponent } from '@workorders/components/close-workorder/components/close-am/close-am.component';
@@ -35,6 +33,19 @@ import { ClosePmComponent } from '@workorders/components/close-workorder/compone
 import { CloseProjectComponent } from '@workorders/components/close-workorder/components/close-project/close-project.component';
 import { CloseServiceComponent } from '@workorders/components/close-workorder/components/close-service/close-service.component';
 import { CloseToolChangeComponent } from '@workorders/components/close-workorder/components/close-tool-change/close-tool-change.component';
+
+// exportable components
+import { WorkorderComponent } from '@workorders/components/list-workorders-parts/components/workorder/workorder.component';
+import { HelpModalComponent } from '@workorders/components/list-workorders-parts/components/help-modal/help-modal.component';
+import { RejectWorkorderModalComponent } from '@workorders/components/list-workorders-parts/components/reject-workorder-modal/reject-workorder-modal.component';
+import { SupervisorsHandoverModalComponent } from '@workorders/components/list-workorders-parts/components/supervisors-handover-modal/supervisors-handover-modal.component';
+import { ChangeTechniciansModalComponent } from '@workorders/components/list-workorders-parts/components/change-technicians-modal/change-technicians-modal.component';
+import { AssignTechniciansModalComponent } from '@workorders/components/list-workorders-parts/components/assign-technicians-modal/assign-technicians-modal.component';
+import { TechniciansHandoverModalComponent } from '@workorders/components/list-workorders-parts/components/technicians-handover-modal/technicians-handover-modal.component';
+import { StoreTechniciansHandoverModalComponent } from '@workorders/components/list-workorders-parts/components/store-technicians-handover-modal/store-technicians-handover-modal.component';
+import { ReviewWorkordersModalComponent } from '@workorders/components/list-workorders-parts/components/review-workorders-modal/review-workorders-modal.component';
+import { RaiseConcernModalComponent } from '@workorders/components/list-workorders-parts/components/raise-concern-modal/raise-concern-modal.component';
+
 
 // firebase auth guards
 import { canActivate, redirectUnauthorizedTo } from '@angular/fire/auth-guard';
@@ -196,4 +207,17 @@ export const workordersComponents = [
   ListWorkordersComponent,
   IssueSparesComponent,
   CloseWorkorderComponent
+];
+
+export const exportableComponents = [
+  WorkorderComponent,
+  HelpModalComponent,
+  RejectWorkorderModalComponent,
+  SupervisorsHandoverModalComponent,
+  ChangeTechniciansModalComponent,
+  AssignTechniciansModalComponent,
+  TechniciansHandoverModalComponent,
+  StoreTechniciansHandoverModalComponent,
+  ReviewWorkordersModalComponent,
+  RaiseConcernModalComponent
 ];

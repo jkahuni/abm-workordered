@@ -1,0 +1,230 @@
+
+<div
+  class="modal fade"
+  id="changeTechniciansModal"
+  tabindex="-1"
+  aria-labelledby="changeTechniciansModalLabel"
+  aria-hiden="true"
+  data-bs-backdrop="static"
+>
+  <div
+    class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-sm"
+  >
+    <div class="modal-content bg-light">
+      <div class="modal-header text-dark">
+        <h3 class="modal-title m-0" id="changeTechniciansModalLabel">
+          <strong>W/o No. {{ workorder?.workorder?.number }}</strong>
+        </h3>
+        <button
+          #closeChangeTechniciansModal
+          class="btn-close border border-success border-2"
+          type="button"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+          (click)="closeModal()"
+        ></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-container mat-elevation-z5">
+          <div class="form-header-container">
+            <h2>Change Technicians</h2>
+          </div>
+
+          <!-- no technicians set -->
+          <!-- workorder is an abnormality card -->
+          <div
+            class="no-technicians-set"
+            *ngIf="
+              workorder?.workorder?.type === 'Abnormality Card' &&
+              !workorder?.technician?.fullName &&
+              !workorder?.storesTechnician?.fullName
+            "
+          >
+            <div class="d-flex justify-content-center align-items-center">
+              <span class="text-center fst-italic">
+                <p>This is an abnormality card.</p>
+                <p>
+                  No technicians have been assigned to this abnormality yet.
+                </p>
+                <p>You cannot change technicians if none have been assigned.</p>
+                <p>
+                  Please refer to the Help? section in the workorder actions
+                  pane (right hand side) to better understand what each of the
+                  available actions does.
+                </p>
+              </span>
+            </div>
+          </div>
+
+          <!-- workorder is not an abnormality card
+           -->
+          <!-- technicians set -->
+          <div
+            class="no-technicians-set"
+            [hidden]="
+              workorder?.workorder?.type === 'Abnormality Card' &&
+              !workorder?.technician?.fullName &&
+              !workorder?.storesTechnician?.fullName
+            "
+          >
+            <form
+              [formGroup]="form"
+              (ngSubmit)="updateTechnicians()"
+              id="changeTechnicians"
+              #formReference
+              autocomplete="off"
+            >
+              <ng-container class="current-eng-technician">
+                <mat-form-field>
+                  <mat-label>Current Eng. Technician</mat-label>
+                  <input
+                    readonly
+                    matInput
+                    formControlName="currentEngTechnician"
+                    class="text-capitalize"
+                  />
+                </mat-form-field>
+              </ng-container>
+
+              <ng-container class="current-store-technician">
+                <mat-form-field>
+                  <mat-label>Current Store Technician</mat-label>
+                  <input
+                    readonly
+                    matInput
+                    class="text-capitalize"
+                    formControlName="currentStoreTechnician"
+                  />
+                </mat-form-field>
+              </ng-container>
+
+              <ng-container class="select-new-eng-technician">
+                <mat-form-field>
+                  <mat-label>New Eng. Technician</mat-label>
+                  <mat-select
+                    class="text-capitalize"
+                    formControlName="newEngTechnician"
+                  >
+                    <mat-option selected value=""
+                      >--select eng. technician</mat-option
+                    >
+
+                    <mat-optgroup label="Electrical Technicians">
+                      <mat-option
+                        class="text-capitalize"
+                        *ngFor="let technician of electricalTechnicians"
+                        [value]="technician"
+                        >{{ technician.fullName }}</mat-option
+                      >
+                    </mat-optgroup>
+                    <mat-optgroup label="Mechanical Technicians">
+                      <mat-option
+                        class="text-capitalize"
+                        *ngFor="let technician of mechanicalTechnicians"
+                        [value]="technician"
+                        >{{ technician.fullName }}</mat-option
+                      >
+                    </mat-optgroup>
+                  </mat-select>
+                  <mat-error
+                    *ngIf="
+                      form.get('newEngTechnician')?.errors
+                        ?.['required']
+                    "
+                  >
+                    Eng technician is required.
+                  </mat-error>
+                </mat-form-field>
+              </ng-container>
+
+              <ng-container class="select-new-store-technician">
+                <mat-form-field>
+                  <mat-label>New Store Technician</mat-label>
+                  <mat-select
+                    class="text-capitalize"
+                    formControlName="newStoreTechnician"
+                  >
+                    <mat-option selected value=""
+                      >--select store technician</mat-option
+                    >
+                    <mat-option
+                      class="text-capitalize"
+                      *ngFor="let technician of storeTechnicians"
+                      [value]="technician"
+                    >
+                      {{ technician.fullName }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-error
+                    *ngIf="
+                      form.get('newStoreTechnician')?.errors
+                        ?.['required']
+                    "
+                  >
+                    Stores technician is required.
+                  </mat-error>
+                </mat-form-field>
+              </ng-container>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <!-- no technicians set -->
+        <!-- workorder is an abnormality card -->
+        <div
+          *ngIf="
+            workorder?.workorder?.type === 'Abnormality Card' &&
+            !workorder?.technician?.fullName &&
+            !workorder?.storesTechnician?.fullName
+          "
+        >
+          <button
+            type="button"
+            class="btn btn-success"
+            data-bs-dismiss="modal"
+            (click)="closeModal()"
+          >
+            Understood
+          </button>
+        </div>
+
+        <!-- technicians set -->
+        <!-- w/o not abnormality card -->
+        <div
+          [hidden]="
+            workorder?.workorder?.type === 'Abnormality Card' &&
+            !workorder?.technician?.fullName &&
+            !workorder?.storesTechnician?.fullName
+          "
+        >
+          <div *ngIf="!changingTechnicians ">
+            <button
+              type="submit"
+              class="btn btn-primary"
+              form="changeTechnicians"
+              (click)="formReference?.['ngSubmit']?.emit()"
+            >
+              Change Technicians
+            </button>
+          </div>
+
+          <div *ngIf="changingTechnicians ">
+            <button type="button" class="btn btn-success" disabled>
+              <span
+                #buttonSpinner
+                class="spinner-border spinner-border-sm"
+                role="status"
+                aria-hidden="true"
+              >
+              </span>
+              Changing Technicians...
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

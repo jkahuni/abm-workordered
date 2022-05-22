@@ -1,0 +1,118 @@
+<div
+  class="modal fade"
+  id="supervisorHandoverModal"
+  tabindex="-1"
+  aria-labelledby="supervisorHandoverModalLabel"
+  aria-hiden="true"
+  data-bs-backdrop="static"
+>
+  <div
+    class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-sm"
+  >
+    <div class="modal-content bg-light">
+      <div class="modal-header text-dark">
+        <h3 class="modal-title m-0" id="supervisorHandoverModalLabel">
+          <strong>W/o No. {{ workorder?.workorder?.number }}</strong>
+        </h3>
+        <button
+          #closeSupervisorHandoverModal
+          class="btn-close border border-success border-2"
+          type="button"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+          (click)="closeModal()"
+        ></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-container mat-elevation-z5">
+          <div class="form-header-container">
+            <h2>Workorder Handover</h2>
+          </div>
+          <form
+            [formGroup]="form"
+            (ngSubmit)="handover()"
+            id="supervisorsHandover"
+            #formReference
+            autocomplete="off"
+          >
+            <ng-container class="current-supervisor">
+              <mat-form-field>
+                <mat-label>Current Supervisor</mat-label>
+                <input
+                  readonly
+                  matInput
+                  class="text-capitalize"
+                  formControlName="currentSupervisor"
+                />
+              </mat-form-field>
+            </ng-container>
+
+            <ng-container class="select-new-supervisor">
+              <mat-form-field>
+                <mat-label>New Supervisor</mat-label>
+                <mat-select
+                  formControlName="newSupervisor"
+                  class="text-capitalize"
+                >
+                  <mat-option value="" selected
+                    >-- select new supervisor --</mat-option
+                  >
+
+                  <mat-optgroup label="Production Supervisors">
+                    <mat-option
+                      class="text-capitalize"
+                      *ngFor="let supervisor of productionSupervisors"
+                      [value]="supervisor"
+                      >{{ supervisor.fullName }}</mat-option
+                    >
+                  </mat-optgroup>
+                  <mat-optgroup label="Engineering Supervisors">
+                    <mat-option
+                      class="text-capitalize"
+                      *ngFor="let supervisor of engineeringSupervisors"
+                      [value]="supervisor"
+                      >{{ supervisor.fullName }}</mat-option
+                    >
+                  </mat-optgroup>
+                </mat-select>
+                <mat-error
+                  *ngIf="
+                    form.controls['newSupervisor']?.errors
+                      ?.['required']
+                  "
+                >
+                  A new supervisor is required.
+                </mat-error>
+              </mat-form-field>
+            </ng-container>
+          </form>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <div *ngIf="!handingOver">
+          <button
+            type="submit"
+            class="btn btn-primary"
+            form="supervisorsHandover"
+            (click)="formReference?.['ngSubmit']?.emit()"
+          >
+            Delegate
+          </button>
+        </div>
+
+        <div *ngIf="handingOver">
+          <button type="button" class="btn btn-success" disabled>
+            <span
+              #buttonSpinner
+              class="spinner-border spinner-border-sm"
+              role="status"
+              aria-hidden="true"
+            ></span>
+            Delegating...
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

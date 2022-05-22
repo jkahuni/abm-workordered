@@ -1,15 +1,16 @@
-import { Component, OnInit, ElementRef, ViewChild } from '@angular/core';
+import { Component, OnInit, ElementRef, ViewChild, OnDestroy } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormGroup, FormBuilder, Validators, AbstractControl, FormArray } from '@angular/forms';
 import { MatSelect } from '@angular/material/select';
 
+// rxjs
+import { takeUntil, Subject } from 'rxjs';
+
 // firestore imports
 import {
-  Query, DocumentData,
-  query, orderBy, where,
+  DocumentData,
   Firestore, collection,
-  CollectionReference,
-  limit
+  CollectionReference
 } from '@angular/fire/firestore';
 
 // services
@@ -17,7 +18,7 @@ import { WorkordersService } from '@workorders/services/workorders.service';
 import { HotToastService } from '@ngneat/hot-toast';
 
 // interfaces
-import { IntUser, IntWorkorder, IntSpareWithQuantities } from '@workorders/models/workorders.models';
+import { IntUser, IntWorkorder } from '@workorders/models/workorders.models';
 
 // dayjs
 import * as dayjs from 'dayjs';
@@ -34,7 +35,7 @@ dayjs.extend(isYesterday);
   templateUrl: './list-workorders.component.html',
   styleUrls: ['./list-workorders.component.scss']
 })
-export class ListWorkordersComponent implements OnInit {
+export class ListWorkordersComponent implements OnInit, OnDestroy {
 
   constructor(
     private route: ActivatedRoute,
@@ -42,8 +43,8 @@ export class ListWorkordersComponent implements OnInit {
     private firestore: Firestore,
     private workordersService: WorkordersService,
     private toast: HotToastService,
-    private fb: FormBuilder
   ) { }
+  private stopWorkordersListener: Subject<boolean> = new Subject<boolean>();
 
   // template refs
   @ViewChild('loadingWorkordersSpinner') loadingWorkordersSpinner!: ElementRef;
@@ -61,16 +62,6 @@ export class ListWorkordersComponent implements OnInit {
   @ViewChild('reviewWorkorderButtonSpinner') reviewWorkorderButtonSpinner!: ElementRef;
   @ViewChild('reviewWorkordersButtonSpinner') reviewWorkordersButtonSpinner!: ElementRef;
   @ViewChild('raiseConcernButtonSpinner') raiseConcernButtonSpinner!: ElementRef;
-
-  // close modals (X on the modal)
-  @ViewChild('closeRejectWorkorderModal') closeRejectWorkorderModal!: ElementRef;
-  @ViewChild('closeSupervisorHandoverModal') closeSupervisorHandoverModal!: ElementRef;
-  @ViewChild('closeChangeTechniciansModal') closeChangeTechniciansModal!: ElementRef;
-  @ViewChild('closeAssignTechniciansModal') closeAssignTechniciansModal!: ElementRef;
-  @ViewChild('closeEngineeringTechniciansHandoverModal') closeEngineeringTechniciansHandoverModal!: ElementRef;
-  @ViewChild('closeStoresTechniciansHandoverModal') closeStoresTechniciansHandoverModal!: ElementRef;
-  @ViewChild('closeReviewWorkordersModal') closeReviewWorkordersModal!: ElementRef;
-  @ViewChild('closeRaiseConcernModal') closeRaiseConcernModal!: ElementRef;
 
   // filter workorders options
   @ViewChild('filterWorkordersOptionsField') filterWorkordersOptionsField!: MatSelect;
@@ -103,6 +94,8 @@ export class ListWorkordersComponent implements OnInit {
   storeTechnicians!: IntUser[];
   productionSupervisors!: IntUser[];
   engineeringSupervisors!: IntUser[];
+  supervisors!: IntUser[];
+  technicians!: IntUser[];
 
   // showing spares to engineering supervisors
   isEngineeringSupervisor = false;
@@ -140,13 +133,24 @@ export class ListWorkordersComponent implements OnInit {
   reviewingWorkorders = false;
   raisingConcern = false;
 
-
   // for showing the filter option
   filterOption!: string;
 
-  // to select users to send concerns to
-  usersToSendConcernsTo: IntUser[] = [];
+  // FOR THE UPDATES
+  showHelpModal = false;
+  showRejectWorkorderModal = false;
+  showSupervisorsHandoverModal = false;
+  showChangeTechniciansModal = false;
+  showAssignTechniciansModal = false;
+  showEngTechnicianHandoverModal = false;
+  showStoreTechnicianHandoverModal = false;
+  showReviewWorkordersModal = false;
+  showRaiseConcernsModal = false;
 
+  ngOnDestroy(): void {
+    this.stopWorkordersListener.next(true);
+    this.stopWorkordersListener.complete();
+  }
 
   ngOnInit(): void {
     this.userType = this.route.snapshot.paramMap.get('userType');
@@ -155,8 +159,6 @@ export class ListWorkordersComponent implements OnInit {
 
     this.getWorkorders();
     this.getUsers();
-
-    this.createModalForms();
   }
 
   // create query
@@ -456,54 +458,42 @@ export class ListWorkordersComponent implements OnInit {
   // get workorders
   private getWorkorders(): void {
     console.log('LW METHOD CALLED');
-    this.workordersService.$allWorkorders.subscribe(
-      (workorders: IntWorkorder[] | null) => {
-        if (workorders !== null) {
-          const filteredWorkorders = this.filterWorkordersByUser(workorders);
-          
-          if (filteredWorkorders) {
-            this.workorders = filteredWorkorders;
-            this.workordersToDisplay = this.workorders;
-            console.log('INSIDE LW METHOD SUBSCRIBE', this.workorders);
-            this.hideLoadingWorkordersSpinner();
-          } else {
-            this.hideLoadingWorkordersSpinnerOnError();
-            this.loadingWorkordersOtherError = `Loading workorders failed with error code FAW-LW-01. Please try reloading the page or report this error code to support to have it fixed.`;
+    this.workordersService.$allWorkorders
+      .pipe(takeUntil(this.stopWorkordersListener))
+      .subscribe(
+        (workorders: IntWorkorder[] | null) => {
+          if (workorders !== null) {
+            const filteredWorkorders = this.filterWorkordersByUser(workorders);
+
+            if (filteredWorkorders) {
+              this.workorders = filteredWorkorders;
+              this.workordersToDisplay = this.workorders;
+              console.log('INSIDE LW METHOD SUBSCRIBE', this.workorders);
+
+              this.hideLoadingWorkordersSpinner();
+            } else {
+              this.hideLoadingWorkordersSpinnerOnError();
+              this.loadingWorkordersOtherError = `Loading workorders failed with error code FAW-LW-01. Please try reloading the page or report this error code to support to have it fixed.`;
+            }
+          }
+
+          else {
+            this.workordersService.getAllWorkorders()
+              .then(() => {
+                // this.getWorkorders();
+              })
+              .catch((err: any) => {
+                this.hideLoadingWorkordersSpinnerOnError();
+                if (err.code === 'failed-precondition') {
+                  this.loadingWorkordersIndexingError = `Loading workorders failed with error code IND-LW-01. Please report this error code to support to have it fixed.`;
+
+                } else {
+                  this.loadingWorkordersOtherError = `Loading workorders failed with error code LW-01. Please try reloading the page or report this error code to support to have it fixed.`;
+                }
+              });
           }
         }
-
-        else {
-          this.workordersService.getAllWorkorders()
-            .then(() => {
-              // this.getWorkorders();
-            })
-            .catch((err: any) => {
-              this.hideLoadingWorkordersSpinnerOnError();
-              if (err.code === 'failed-precondition') {
-                this.loadingWorkordersIndexingError = `Loading workorders failed with error code IND-LW-01. Please report this error code to support to have it fixed.`;
-
-              }  else {
-                this.loadingWorkordersOtherError = `Loading workorders failed with error code LW-01. Please try reloading the page or report this error code to support to have it fixed.`;
-              }
-            });
-        }
-      }
-    );
-
-  }
-
-  // create modal forms
-  private createModalForms(): void {
-    this.rejectWorkorderForm = this.createRejectWorkorderForm();
-    this.changeTechniciansForm = this.createChangeTechniciansForm();
-    this.assignTechniciansForm = this.createAssignTechniciansForm();
-    this.supervisorsHandoverForm = this.createSupervisorsHandoverForm();
-
-    this.engTechniciansHandoverForm = this.createEngTechniciansHandoverForm();
-    this.storesTechniciansHandoverForm = this.createStoresTechniciansHandoverForm();
-
-    this.reviewWorkordersForm = this.createReviewWorkordersForm();
-    this.raiseConcernForm = this.createRaiseConcernForm();
+      );
 
   }
 
@@ -518,6 +508,14 @@ export class ListWorkordersComponent implements OnInit {
         this.engineeringSupervisors = users.filter(
           (user: IntUser) =>
             user.group === 'Supervisor' && user.supervisorGroup === 'Engineering'
+        );
+
+        this.supervisors = users.filter((user: IntUser) => user.group === 'Supervisor'
+        );
+
+        this.technicians = users.filter(
+          (user: IntUser) =>
+            user.group === 'Technician'
         );
 
         this.electricalTechnicians = users.filter(
@@ -559,155 +557,14 @@ export class ListWorkordersComponent implements OnInit {
 
   }
 
-  private showLoadingWorkordersSpinner(): void {
-    this.loadingWorkorders = true;
-    if (this.loadingWorkordersSpinner) {
-      this.loadingWorkordersSpinner.nativeElement.style.display = 'block';
-    }
-  }
-
   // create forms
-  private createForm(workorder: IntWorkorder): FormGroup {
-    return this.form = this.fb.group({
-      workorderUid: [workorder.workorder.uid],
-      workorderNumber: [workorder.workorder.number],
-      workorderType: [workorder.workorder.type],
-      workorderDescription: [workorder.workorder.description ? workorder.workorder.description :
-        'no description provided.'],
-      raiser: [workorder.raiser.fullName],
-      supervisor: [workorder.supervisor.fullName],
-      technician: [workorder.technician.fullName],
-      storesTechnician: [workorder.storesTechnician.fullName],
-      dateRaised: [this.formatDate(workorder.raised.dateTime)],
-      timeRaised: [this.formatTime(workorder.raised.dateTime)],
-      dateApproved: [this.formatDate(workorder.approved.dateTime)],
-      timeApproved: [this.formatTime(workorder.approved.dateTime)],
-      dateRejected: [this.formatDate(workorder.rejected.dateTime)],
-      timeRejected: [this.formatTime(workorder.rejected.dateTime)],
-      rejectionReason: [workorder.rejected.status ? workorder.rejected.reason : ''],
-      breakdownDate: [this.formatDate(workorder.breakdown.dateTime)],
-      breakdownTime: [this.formatTime(workorder.breakdown.dateTime)],
-      dateAcknowledged: [this.formatDate(workorder.acknowledged.dateTime)],
-      timeAcknowledged: [this.formatTime(workorder.acknowledged.dateTime)],
-      dateDone: [this.formatDate(workorder.done.dateTime)],
-      timeDone: [this.formatTime(workorder.done.dateTime)],
-      timeFromTimeRaised: [workorder.timeTaken.fromTimeRaised],
-      timeFromTimeApproved: [workorder.timeTaken.fromTimeApproved],
-      timeFromTimeAcknowledged: [workorder.timeTaken.fromTimeAcknowledged],
-      timeFromTimeMachineStopped: [workorder.timeTaken.fromTimeMachineStopped],
-      section: [workorder.section.name],
-      machine: [workorder.machine.name],
-      toolChangeFrom: [workorder.toolChange.from],
-      toolChangeTo: [workorder.toolChange.to],
-      moldNumber: [workorder.moldService.number],
-      amStep: [workorder.abnormalityCard.amStep],
-      sparesUsedStatus: [workorder.sparesUsed.status],
-      sparesUsedArray: this.fb.array(workorder.sparesUsed.status ?
-        [...this.getIssuedSpares(workorder.sparesUsed.spares)]
-        :
-        []),
-      totalSparesCost: [workorder.sparesUsed.totalCost]
-    });
-  }
-
-  private createRejectWorkorderForm(): FormGroup {
-    const form = this.fb.group({
-      reason: ['', Validators.required]
-    });
-
-    return form;
-  }
-
-  private createChangeTechniciansForm(): FormGroup {
-    const form = this.fb.group({
-      currentEngTechnician: [this.workorder?.technician?.fullName],
-      currentStoreTechnician: [
-        this.workorder?.storesTechnician?.fullName
-      ],
-      newEngTechnician: ['', Validators.required],
-      newStoreTechnician: ['', Validators.required]
-    });
-
-    return form;
-  }
-
-  private createAssignTechniciansForm(): FormGroup {
-    const form = this.fb.group({
-      engTechnician: ['', Validators.required],
-      storeTechnician: ['', Validators.required]
-    });
-
-    return form;
-  }
-
-  private createSupervisorsHandoverForm(): FormGroup {
-    const form = this.fb.group({
-      currentSupervisor: [this.workorder?.supervisor?.fullName],
-      newSupervisor: ['', Validators.required]
-    });
-
-    return form;
-  }
-
-  private createEngTechniciansHandoverForm(): FormGroup {
-    const form = this.fb.group(
-      {
-        currentTechnician: [this.workorder?.technician?.fullName],
-        newTechnician: ['', Validators.required]
-      });
-
-    return form;
-  }
-
-  private createStoresTechniciansHandoverForm(): FormGroup {
-    const form = this.fb.group({
-      currentTechnician: [this.workorder?.storesTechnician?.fullName],
-      newTechnician: ['', Validators.required]
-    });
-
-    return form;
-  }
-
-  private createReviewWorkordersForm(): FormGroup {
-    const form = this.fb.group({
-      dateRaisedFilter: ['']
-    });
-
-    return form;
-  }
-
-  private createRaiseConcernForm(): FormGroup {
-    const form = this.fb.group({
-      user: ['', Validators.required],
-      concern: ['', Validators.required]
-    });
-
-    return form;
-  }
-
-  // if any, get spares issued through the workorder
-  private getIssuedSpares(spares: IntSpareWithQuantities[]): FormGroup[] {
-    const sparesArray: FormGroup[] = [];
-    spares.map((spare: IntSpareWithQuantities) => {
-      const { code, quantity, totalCost } = spare;
-      const form = this.fb.group({
-        code,
-        quantity,
-        totalCost
-      });
-      sparesArray.push(form);
-    });
-
-    return sparesArray;
-  }
-
   // refresh all workorders
   private refreshWorkorders(uid: string, update: {}): void {
     this.workordersService.refreshWorkorders(uid, update)
       .then(() => {
-        this.workorder = this.workorders?.find((workorder: IntWorkorder) => workorder.workorder.uid === uid);
+        const workorder = this.workorders?.find((workorder: IntWorkorder) => workorder.workorder.uid === uid);
         console.log('THE WORKORDER', this.workorder);
-        if (this.workorder) { this.createForm(this.workorder); }
+        if (workorder) { this.workorder = workorder; }
 
         else {
           this.closeRightSidenav();
@@ -769,41 +626,6 @@ export class ListWorkordersComponent implements OnInit {
     }
     if (this.raiseConcernButtonSpinner)
       this.raiseConcernButtonSpinner.nativeElement.style.display = 'none'; { }
-  }
-
-  private closeOpenModal(): void {
-    if (this.closeRejectWorkorderModal) {
-      this.closeRejectWorkorderModal.nativeElement.click();
-    }
-    if (this.closeSupervisorHandoverModal) {
-      this.closeSupervisorHandoverModal.nativeElement.click();
-    }
-    if (this.closeChangeTechniciansModal) {
-      this.closeChangeTechniciansModal.nativeElement.click();
-    }
-    if (this.closeAssignTechniciansModal) {
-      this.closeAssignTechniciansModal.nativeElement.click();
-    }
-    if (this.closeEngineeringTechniciansHandoverModal) {
-      this.closeEngineeringTechniciansHandoverModal.nativeElement.click();
-    }
-    if (this.closeStoresTechniciansHandoverModal) {
-      this.closeStoresTechniciansHandoverModal.nativeElement.click();
-    }
-    if (this.closeReviewWorkordersModal) {
-      this.closeReviewWorkordersModal.nativeElement.click();
-    }
-    if (this.closeRaiseConcernModal) {
-      this.closeRaiseConcernModal.nativeElement.click();
-    }
-  }
-
-  private formatDate(dateTime: string): string {
-    return dayjs(dateTime).format('DD MMM, YYYY');
-  }
-
-  private formatTime(dateTime: string): string {
-    return dayjs(dateTime).format('HH:mm:ss');
   }
 
   private closeWorkorderByType(workorder: IntWorkorder): Promise<boolean> {
@@ -926,15 +748,11 @@ export class ListWorkordersComponent implements OnInit {
   }
 
   displayWorkorder(workorderNumber: string): IntWorkorder | undefined {
-    this.workorder = this.workordersToDisplay?.find((workorder: IntWorkorder) => workorder?.workorder.number === workorderNumber);
+    const workorder = this.workordersToDisplay?.find((workorder: IntWorkorder) => workorder?.workorder.number === workorderNumber);
 
-    if (this.workorder) {
+    if (workorder) {
+      this.workorder = workorder;
       this.workorderUid = this.workorder.workorder.uid;
-      this.usersToSendConcernsTo.push(this.workorder.raiser,
-        this.workorder.technician,
-        this.workorder.storesTechnician,
-        this.workorder.supervisor);
-      this.createForm(this.workorder);
 
       // technician has opened the workorder
       const viewedByTechnician = this.workorder.viewedByTechnician.status;
@@ -1046,9 +864,6 @@ export class ListWorkordersComponent implements OnInit {
       ) {
         this.getUsers();
       }
-
-      this.createModalForms();
-
     }
   }
 
@@ -1111,221 +926,6 @@ export class ListWorkordersComponent implements OnInit {
              Approving workorder ${workorderNumber} failed with error WL-04. Please try again, or report the error code to support if the issue persists.`,
             { duration: 8000, id: 'error-code-WL-04' });
         });
-    }
-  }
-
-  reject(): void {
-    const {
-      reason
-    } = this.rejectWorkorderForm?.value;
-
-    if (reason === '') {
-      return this.rejectWorkorderForm?.get('reason')?.setErrors({
-        required: true
-      });
-    }
-    else if (this.rejectWorkorderForm.invalid) {
-      this.toast.close();
-      this.toast.error(`Error: Ensure the reason for rejecting the workorder is not blank or invalid`, {
-        id: 'reject-error'
-      });
-
-    } else {
-      if (this.workorder) {
-        this.rejectWorkorderLoading = true;
-
-
-        const workorderUid = this.workorder.workorder.uid;
-        const workorderNumber = this.workorder.workorder.number;
-        const now = dayjs().format();
-
-        const workorderUpdateData = {
-          approved: {
-            status: false,
-            dateTime: now
-          },
-          rejected: {
-            status: true,
-            dateTime: now,
-            reason
-          }
-
-        };
-
-        this.workordersService.updateWorkorder(workorderUid, workorderUpdateData)
-          .then(() => {
-            this.closeOpenModal();
-            this.closeButtonSpinners();
-            this.refreshWorkorders(workorderUid, workorderUpdateData);
-
-            this.toast.success(`Success.
-             Workorder ${workorderNumber} rejected successfully.`, { id: 'reject-success' });
-
-          })
-          .catch(() => {
-            this.closeButtonSpinners();
-            this.toast.error(`Failed:
-             Rejecting workorder ${workorderNumber} failed with error code LW-RW-01.
-              Please try again, or report the error code to support for assistance if the issue persists.`, { autoClose: false, id: 'error-code-WL-05' });
-          });
-
-      }
-
-    }
-  }
-
-  supervisorsHandover(): void {
-    const {
-      newSupervisor
-    } = this.supervisorsHandoverForm?.value;
-    if (newSupervisor === '') {
-      return this.supervisorsHandoverForm?.get('newSupervisor')?.setErrors({ required: true });
-    }
-    else if (!this.supervisorsHandoverForm.valid) {
-      this.toast.close();
-
-      this.toast.error(`Error. Ensure a new supervisor has been selected.`, { id: 'supervisor-handover-error' });
-    } else {
-      if (this.workorder) {
-        const workorder = this.workorder;
-        this.supervisorHandoverLoading = true;
-
-        const workorderNumber = this.workorder.workorder.number;
-        const workorderUid = this.workorder.workorder.uid;
-        const workorderUpdateData = {
-          supervisor: newSupervisor
-        };
-
-        this.workordersService.updateWorkorder
-          (workorderUid,
-            workorderUpdateData)
-          .then(() => {
-            this.closeButtonSpinners();
-            this.closeOpenModal();
-            this.refreshWorkorders(workorderUid,
-              workorderUpdateData);
-
-            this.toast.success(`Success.
-             Workorder ${workorderNumber} delegated successfully.`, { id: 'supervisor-handover-success' });
-          })
-          .catch(() => {
-            this.closeButtonSpinners();
-
-            this.toast.error(`Failed:
-             Delegating workorder ${workorderNumber} failed with error code LW-SH-01. Please try again or report this error code to support for assistance if the issue persists.`,
-              { autoClose: false, id: 'error-code-WL-06' });
-          });
-      }
-    }
-
-  }
-
-  changeTechnicians(): void {
-    const {
-      newEngTechnician,
-      newStoreTechnician
-    } = this.changeTechniciansForm?.value;
-
-    if (newEngTechnician === ''
-    ) {
-
-      return this.changeTechniciansForm?.get('newEngTechnician')?.setErrors({ required: true });
-    }
-    else if (newStoreTechnician === '') {
-      return this.changeTechniciansForm?.get('newStoreTechnician')?.setErrors({ required: true });
-    }
-    else if (!this.changeTechniciansForm?.valid) {
-      this.toast.close();
-
-      this.toast.error(`Error: Ensure new technicians have been selected, or click cancel to abort changing technicians. Note: you can pick the sexisting technician if you do not want to change him.`,
-        { duration: 8000, id: 'change-technicians-error' });
-    } else {
-      if (this.workorder) {
-        this.changeTechniciansLoading = true;
-        const workorderNumber = this.workorder.workorder.number;
-        const workorderUid = this.workorder.workorder.uid;
-
-        const { technician, storesTechnician } = this.workorder;
-
-        const now = dayjs().format();
-
-        const workorderUpdateData = {
-          approved: { status: true, dateTime: now },
-          rejected: { status: false, dateTime: now },
-          technician: newEngTechnician.fullName ? newEngTechnician : technician,
-          storesTechnician: newStoreTechnician.fullName ? newStoreTechnician : storesTechnician,
-        };
-
-        this.workordersService.updateWorkorder(workorderUid, workorderUpdateData)
-          .then(() => {
-            this.closeButtonSpinners();
-            this.closeOpenModal();
-            this.refreshWorkorders(workorderUid,
-              workorderUpdateData);
-
-            this.toast.success(`Success. Technicians on workorder ${workorderNumber} changed successfully.`);
-          })
-          .catch(() => {
-            this.closeButtonSpinners();
-            this.toast.error(`Failed:
-              Changing technicians on workorder ${workorderNumber} failed with error code LW-CT-01. Please try again or report this error code to support for assistance if the issue persists.`,
-              { autoClose: false, id: 'error-code-WL-07' });
-
-          });
-      }
-    }
-  }
-
-  assignTechnicians(): void {
-    const {
-      engTechnician,
-      storeTechnician
-    } = this.assignTechniciansForm?.value;
-
-    if (engTechnician === '') {
-      return this.assignTechniciansForm?.get('engTechnician')?.setErrors({ required: true });
-    }
-
-    else if (storeTechnician === '') {
-      return this.assignTechniciansForm?.get('storeTechnician')?.setErrors({ required: true });
-    }
-
-    else if (!this.assignTechniciansForm?.valid) {
-      this.toast.close();
-
-      this.toast.error(`Error: Ensure engineering and store technicians have been selected.`,
-        { duration: 5000, id: 'assign-technicians-error' });
-    } else {
-      if (this.workorder) {
-        this.assignTechniciansLoading = true;
-        const now = dayjs().format();
-        const workorderUid = this.workorder.workorder.uid;
-        const workorderNumber = this.workorder.workorder.number;
-
-        const workorderUpdateData = {
-          approved: { status: true, dateTime: now },
-          rejected: { status: false, dateTime: now },
-          technician: engTechnician,
-          storesTechnician: storeTechnician
-        };
-
-        this.workordersService.updateWorkorder(workorderUid, workorderUpdateData)
-          .then(() => {
-            this.closeButtonSpinners();
-            this.closeOpenModal();
-            this.refreshWorkorders(workorderUid,
-              workorderUpdateData);
-
-            this.toast.success(`Success. Technicians assigned to workorder ${workorderNumber} successfully.`, { id: 'assign-technicians-success' });
-          })
-          .catch(() => {
-            this.closeButtonSpinners();
-            this.toast.error(`Failed:
-              Assigning technicians to workorder ${workorderNumber} failed with error code LW-AT-01. Please try again or report this error code to support for assistance if the issue persists.`,
-              { autoClose: false, id: 'error-code-WL-08' });
-          });
-
-      }
     }
   }
 
@@ -1412,86 +1012,6 @@ export class ListWorkordersComponent implements OnInit {
     this.closeWorkorderByType(workorder);
   }
 
-  engTechnicianHandover(): void {
-    const {
-      newTechnician
-    } = this.engTechniciansHandoverForm?.value;
-
-    if (newTechnician === '') {
-      return this.engTechniciansHandoverForm?.get('newTechnician')?.setErrors({ required: true });
-    }
-    else if (this.engTechniciansHandoverForm.invalid) {
-      this.toast.close();
-
-      this.toast.error(`Error: Ensure a new technician has been picked, or click on cancel to abort the handover.`, { id: 'eng-technician-handover-error' });
-    } else {
-      if (this.workorder) {
-        this.engTechnicianHandoverLoading = true;
-
-        const workorderUid = this.workorder.workorder.uid;
-        const workorderNumber = this.workorder.workorder.number;
-        const workorderUpdateData = {
-          technician: newTechnician
-        };
-
-        this.workordersService.updateWorkorder(workorderUid, workorderUpdateData)
-          .then(() => {
-            this.closeButtonSpinners();
-            this.closeOpenModal();
-            this.refreshWorkorders(workorderUid,
-              workorderUpdateData);
-            this.toast.success(`Success. Workorder ${workorderNumber} handed over successfully.`,
-              { id: 'eng-technician-handover-success' });
-          })
-          .catch(() => {
-            this.closeButtonSpinners();
-            this.toast.error(`Failed. Handing over workorder ${workorderNumber} failed with error code LW-ETH-01. Please try again or report this error code to support for assistance if the issue persists.`, {
-              autoClose: false, id: 'error-code-WL-11'
-            });
-          });
-      }
-    }
-  }
-
-  storesTechnicianHandover(): void {
-    const {
-      newTechnician
-    } = this.storesTechniciansHandoverForm?.value;
-    if (newTechnician === '') {
-      return this.storesTechniciansHandoverForm?.get('newTechnician')?.setErrors({ required: true });
-    }
-    else if (this.storesTechniciansHandoverForm.invalid) {
-      this.toast.close();
-
-      this.toast.error(`Error: Please ensure a new technician has been picked, or click on cancel to abort the handover.`, { id: 'stores-technician-handover-error' });
-    } else {
-      if (this.workorder) {
-        this.storesTechnicianHandoverLoading = true;
-
-        const workorderUid = this.workorder.workorder.uid;
-        const workorderNumber = this.workorder.workorder.number;
-        const workorderUpdateData = {
-          storesTechnician: newTechnician
-        };
-
-        this.workordersService.updateWorkorder(workorderUid, workorderUpdateData)
-          .then(() => {
-            this.closeButtonSpinners();
-            this.closeOpenModal();
-            this.refreshWorkorders(workorderUid,
-              workorderUpdateData);
-            this.toast.success(`Success. Workorder ${workorderNumber} handed over successfully.`,
-              { id: 'stores-technician-handover-success' });
-          })
-          .catch(() => {
-            this.closeButtonSpinners();
-            this.toast.error(`Failed. Handing over workorder ${workorderNumber} failed with error code LW-STH-01. Please try again or report this error code to support for assistance if the issue persists.`, {
-              autoClose: false, id: 'error-code-WL-12'
-            });
-          });
-      }
-    }
-  }
 
   // ENG MANAGER ACTIONS
   reviewWorkorder(): void {
@@ -1523,153 +1043,9 @@ export class ListWorkordersComponent implements OnInit {
     }
   }
 
-  reviewWorkorders(): void {
-    const { dateRaisedFilter } = this.reviewWorkordersForm?.value;
-
-    if (dateRaisedFilter === '') {
-      return this.reviewWorkordersForm?.get('dateRaisedFilter')?.setErrors({
-        required: true
-      });
-    }
-
-    else if (this.reviewWorkordersForm?.invalid) {
-      this.toast.close();
-      this.toast.error(`An error occured while submitting your form. Please try again.`, { id: 'review-wokrorders-error-1' });
-    }
-
-    else {
-      this.reviewingWorkorders = true;
-
-      const workordersToReview = this.workorders.filter(
-        (workorder: IntWorkorder) => {
-          const reviewStatus = workorder.review.status;
-          const date = workorder.raised.dateTime;
-          if (reviewStatus === '') {
-            if (dateRaisedFilter === 'All') {
-              return true;
-            }
-            else if (dateRaisedFilter === 'Today') {
-              return this.filterTodaysWorkorders(date);
-            }
-            else if (dateRaisedFilter === 'Yesterday') {
-              return this.filterYesterdaysWorkorders(date);
-            }
-            else if (dateRaisedFilter === 'This Week') {
-              return this.filterThisWeeksWorkorders(date);
-            }
-            else if (dateRaisedFilter === 'Last Week') {
-              return this.filterLastWeeksWorkorders(date);
-            }
-            else if (dateRaisedFilter === 'This Month') {
-              return this.filterThisMonthsWorkorders(date);
-            }
-            else if (dateRaisedFilter === 'Last Month') {
-              return this.filterLastMonthsWorkorders(date);
-            } else {
-              return false;
-            }
-          }
-          return false;
-        }
-      );
-
-      const totalWorkordersToReview = workordersToReview.length;
-      if (totalWorkordersToReview) {
-        workordersToReview.forEach(
-          (workorder: IntWorkorder, index) => {
-            const workorderUid = workorder.workorder.uid;
-            const now = dayjs().format();
-
-            const workorderUpdateData = {
-              review: {
-                status: 'reviewed',
-                dateTime: now,
-                concern: {}
-              }
-            };
-
-            this.workordersService.updateWorkorder(workorderUid, workorderUpdateData)
-              .then(() => {
-                if (index + 1 === totalWorkordersToReview) {
-                  this.closeButtonSpinners();
-                  this.closeOpenModal();
-                  this.refreshWorkorders(workorderUid,
-                    workorderUpdateData);
-                  this.toast.success(`Success. ${totalWorkordersToReview} workorder(s) reviewed successfully.`,
-                    { duration: 8000, id: 'review-workorders-success' });
-                }
-              })
-              .catch(() => {
-                this.closeButtonSpinners();
-                this.toast.error(
-                  `Error: Reviewing multiple workorders failed with error code LW-RMW-01. Please report this error code to support to have the error fixed.`,
-                  { autoClose: false, id: 'review-workorders-error-2' });
-              });
-
-          }
-        );
-      }
-      else {
-        this.closeButtonSpinners();
-        this.toast.info(`No workorders raised ${dateRaisedFilter
-          } were found. Consider changing the selected option in order to review multiple workorders.`,
-          { duration: 10000, id: 'date-raised-filter-info' });
-
-      }
-    }
-  }
-
-  raiseConcern(): void {
-    const { user, concern } = this.raiseConcernForm?.value;
-
-    if (user === '') {
-      this.raiseConcernForm?.get('user')?.setErrors({
-        required: true
-      });
-    }
-
-    else if (concern === '') {
-      this.raiseConcernForm?.get('concern')?.setErrors({
-        required: true
-      });
-    }
-
-    else if (this.raiseConcernForm?.invalid) {
-      this.toast.error(`Error: Ensure user and concern fields are not blank or invalid.`, { duration: 5000, id: 'raise-concern-invalid-form' });
-    }
-
-    else {
-      if (this.workorder) {
-        this.raisingConcern = true;
-        const workorderUid = this.workorder.workorder.uid;
-        const workorderNumber = this.workorder.workorder.number;
-        const workorderUpdateData = {
-          review: {
-            status: 'reviewed',
-            dateTime: dayjs().format(),
-            concern: {
-              user,
-              message: concern
-            }
-          }
-        };
-
-        this.workordersService.updateWorkorder(workorderUid, workorderUpdateData)
-          .then(() => {
-            this.closeButtonSpinners();
-            this.closeOpenModal();
-            this.refreshWorkorders(workorderUid,
-              workorderUpdateData);
-
-            this.toast.success(`Success. Concern on workorder ${workorderNumber
-              } raised successfully.`, { duration: 6000, id: 'raise-concern-success' });
-          })
-          .catch(() => {
-            this.closeButtonSpinners();
-            this.toast.error(`Failed. Raising concern on workorder ${workorderNumber
-              } failed with error code LW-RC-01. Please try again or report ths error code to support for assistance.`, { id: 'raise-concern-error-2', autoClose: false });
-          });
-      }
-    }
+  closeHelpModal(event: any): boolean {
+    console.log('ACTIATED event');
+    console.log(event);
+    return this.showHelpModal = false;
   }
 }

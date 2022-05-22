@@ -1,0 +1,530 @@
+<div class="form-header-container">
+  <h2 class="text-center" *ngIf="workorder.workorder.type === 'Breakdown'">
+    Breakdown Workorder
+  </h2>
+  <h2
+    class="text-center"
+    *ngIf="workorder.workorder.type === 'Corrective Maintenance'"
+  >
+    Corrective Maintenance Workorder
+  </h2>
+  <h2 class="text-center" *ngIf="workorder.workorder.type === 'Mold Service'">
+    Mold Service Workorder
+  </h2>
+  <h2 class="text-center" *ngIf="workorder.workorder.type === 'Tool Change'">
+    Tool Change Workorder
+  </h2>
+  <h2
+    class="text-center"
+    *ngIf="workorder.workorder.type === 'Abnormality Card'"
+  >
+    Abnormality Card Workorder
+  </h2>
+  <h2 class="text-center" *ngIf="workorder.workorder.type === 'AM'">
+    AM Workorder
+  </h2>
+  <h2 class="text-center" *ngIf="workorder.workorder.type === 'PM'">
+    PM Workorder
+  </h2>
+  <h2 class="text-center" *ngIf="workorder.workorder.type === 'Service'">
+    Service Workorder
+  </h2>
+  <h2 class="text-center" *ngIf="workorder.workorder.type === 'Project'">
+    Project Workorder
+  </h2>
+  <h2 class="text-center" *ngIf="workorder.workorder.type === 'Kaizen Card'">
+    Kaizen Card
+  </h2>
+</div>
+
+<form [formGroup]="form">
+  <!-- workorder number -->
+  <ng-container class="workorder-number" *ngIf="workorder.workorder.number">
+    <mat-form-field>
+      <mat-label>Workorder Number</mat-label>
+      <input
+        type="text"
+        readonly
+        matInput
+        class=""
+        formControlName="workorderNumber"
+      />
+    </mat-form-field>
+  </ng-container>
+
+  <!-- raiser fullName -->
+  <ng-container class="raised-by" *ngIf="workorder.raiser.fullName">
+    <mat-form-field>
+      <mat-label>Raised By</mat-label>
+      <input
+        type="text"
+        readonly
+        matInput
+        class="text-capitalize"
+        formControlName="raiser"
+      />
+    </mat-form-field>
+  </ng-container>
+
+  <!-- supervisor -->
+  <ng-container class="supevisor" *ngIf="workorder.supervisor.fullName">
+    <mat-form-field>
+      <mat-label>Supervisor</mat-label>
+
+      <input
+        type="text"
+        readonly
+        matInput
+        class="text-capitalize"
+        formControlName="supervisor"
+      />
+    </mat-form-field>
+  </ng-container>
+
+  <!-- technician -->
+  <ng-container class="technician" *ngIf="workorder.technician.fullName">
+    <mat-form-field>
+      <mat-label>Eng. Technician</mat-label>
+      <input
+        type="text"
+        readonly
+        matInput
+        class="text-capitalize"
+        formControlName="technician"
+      />
+    </mat-form-field>
+  </ng-container>
+
+  <!-- stores technician -->
+  <ng-container
+    class="storesTechnician"
+    *ngIf="workorder.storesTechnician.fullName"
+  >
+    <mat-form-field>
+      <mat-label>Store Technician</mat-label>
+
+      <input
+        type="text"
+        readonly
+        matInput
+        class="text-capitalize"
+        formControlName="storesTechnician"
+      />
+    </mat-form-field>
+  </ng-container>
+
+  <!-- workorder type -->
+  <ng-container class="workorderType" *ngIf="workorder.workorder.type">
+    <mat-form-field>
+      <mat-label>Workorder Type</mat-label>
+      <input
+        type="text"
+        readonly
+        matInput
+        class="text-capitalize"
+        formControlName="workorderType"
+      />
+    </mat-form-field>
+  </ng-container>
+
+  <!-- breakdown date and time -->
+  <ng-container class="breakdown-date" *ngIf="workorder.breakdown.status">
+    <div>
+      <mat-form-field class="shareWidth">
+        <mat-label>M/c Stopped On</mat-label>
+        <input
+          type="text"
+          readonly
+          matInput
+          class=""
+          formControlName="breakdownDate"
+        />
+      </mat-form-field>
+
+      <mat-form-field class="shareWidth">
+        <mat-label>M/c Stopped At</mat-label>
+        <input
+          type="text"
+          readonly
+          matInput
+          class=""
+          formControlName="breakdownTime"
+        />
+      </mat-form-field>
+    </div>
+  </ng-container>
+
+  <!-- raised date and time -->
+  <ng-container class="date-time-raised" *ngIf="workorder.raised.dateTime">
+    <div>
+      <mat-form-field class="shareWidth">
+        <mat-label>Raised On</mat-label>
+
+        <input
+          type="text"
+          readonly
+          matInput
+          class=""
+          formControlName="dateRaised"
+        />
+      </mat-form-field>
+
+      <mat-form-field class="shareWidth">
+        <mat-label>Raised At</mat-label>
+
+        <input
+          type="text"
+          readonly
+          matInput
+          class=""
+          formControlName="timeRaised"
+        />
+      </mat-form-field>
+    </div>
+  </ng-container>
+
+  <!--approved date and time -->
+  <ng-container
+    class="date-time-approved"
+    *ngIf="workorder.approved.status && workorder.approved.dateTime"
+  >
+    <div>
+      <mat-form-field class="shareWidth">
+        <mat-label>Approved On</mat-label>
+        <input
+          type="text"
+          readonly
+          matInput
+          class=""
+          formControlName="dateApproved"
+        />
+      </mat-form-field>
+
+      <mat-form-field class="shareWidth">
+        <mat-label>Approved At</mat-label>
+
+        <input
+          type="text"
+          readonly
+          matInput
+          class=""
+          formControlName="timeApproved"
+        />
+      </mat-form-field>
+    </div>
+  </ng-container>
+
+  <!-- rejected date and time -->
+  <ng-container
+    class="date-time-rejected"
+    *ngIf="workorder.rejected.status && workorder.rejected.dateTime"
+  >
+    <div>
+      <mat-form-field class="shareWidth">
+        <mat-label>Rejected On</mat-label>
+        <input
+          type="text"
+          readonly
+          matInput
+          class=""
+          formControlName="dateRejected"
+        />
+      </mat-form-field>
+
+      <mat-form-field class="shareWidth">
+        <mat-label>Rejected At</mat-label>
+
+        <input
+          type="text"
+          readonly
+          matInput
+          class=""
+          formControlName="timeRejected"
+        />
+      </mat-form-field>
+    </div>
+    <mat-form-field>
+      <mat-label>Rejection Reason</mat-label>
+
+      <input
+        type="text"
+        readonly
+        matInput
+        class="text-capitalize"
+        formControlName="rejectionReason"
+      />
+    </mat-form-field>
+  </ng-container>
+
+  <!-- acknowledged date and time -->
+  <ng-container
+    class="date-time-acknowledged"
+    *ngIf="workorder.acknowledged.status"
+  >
+    <div class="shareWidth">
+      <mat-form-field class="shareWidth">
+        <mat-label>Acknowledged On</mat-label>
+        <input
+          type="text"
+          readonly
+          matInput
+          class=""
+          formControlName="dateAcknowledged"
+        />
+      </mat-form-field>
+
+      <mat-form-field class="shareWidth">
+        <mat-label>Acknowledged At</mat-label>
+        <input
+          type="text"
+          readonly
+          matInput
+          class=""
+          formControlName="timeAcknowledged"
+        />
+      </mat-form-field>
+    </div>
+  </ng-container>
+
+  <!-- done date and time -->
+  <ng-container class="date-time-acknowledged" *ngIf="workorder.done.status">
+    <div>
+      <mat-form-field class="shareWidth">
+        <mat-label>Marked Done On</mat-label>
+
+        <input
+          type="text"
+          readonly
+          matInput
+          class=""
+          formControlName="dateDone"
+        />
+      </mat-form-field>
+
+      <mat-form-field class="shareWidth">
+        <mat-label>Marked Done At</mat-label>
+
+        <input
+          type="text"
+          readonly
+          matInput
+          class=""
+          formControlName="timeDone"
+        />
+      </mat-form-field>
+    </div>
+  </ng-container>
+
+  <!-- time taken -->
+  <ng-container *ngIf="workorder.done.status">
+    <mat-label>Total Time Taken (min)</mat-label>
+    <!-- from time machine stopped -->
+    <mat-form-field *ngIf="workorder.timeTaken.fromTimeMachineStopped">
+      <mat-label>From Time M/c Stopped</mat-label>
+      <input
+        type="text"
+        matInput
+        readonly
+        formControlName="timeFromTimeMachineStopped"
+      />
+    </mat-form-field>
+
+    <!-- from time raised -->
+    <mat-form-field *ngIf="workorder.timeTaken.fromTimeRaised">
+      <mat-label>From Time Raised</mat-label>
+      <input
+        type="text"
+        matInput
+        readonly
+        formControlName="timeFromTimeRaised"
+      />
+    </mat-form-field>
+
+    <!-- from time approved -->
+    <mat-form-field *ngIf="workorder.timeTaken.fromTimeApproved">
+      <mat-label>From Time Approved</mat-label>
+      <input
+        type="text"
+        matInput
+        readonly
+        formControlName="timeFromTimeApproved"
+      />
+    </mat-form-field>
+
+    <!-- from time acknowledged -->
+    <mat-form-field *ngIf="workorder.timeTaken.fromTimeAcknowledged >= '0'">
+      <mat-label>From Time Acknowledged</mat-label>
+      <input
+        type="text"
+        matInput
+        readonly
+        formControlName="timeFromTimeAcknowledged"
+      />
+    </mat-form-field>
+  </ng-container>
+
+  <!-- section -->
+  <ng-container class="section" *ngIf="workorder.section.name">
+    <mat-form-field>
+      <mat-label>Section</mat-label>
+
+      <input
+        type="text"
+        readonly
+        matInput
+        class="text-capitalize"
+        formControlName="section"
+      />
+    </mat-form-field>
+  </ng-container>
+
+  <!-- machine -->
+  <ng-container class="machine" *ngIf="workorder.machine.name">
+    <mat-form-field>
+      <mat-label>Machine</mat-label>
+
+      <input
+        type="text"
+        readonly
+        matInput
+        class="text-capitalize"
+        formControlName="machine"
+      />
+    </mat-form-field>
+  </ng-container>
+
+  <!-- am-step abnormality card -->
+  <ng-container
+    class="abnormality-card am-step"
+    *ngIf="workorder.abnormalityCard.status"
+  >
+    <mat-form-field>
+      <mat-label>AM Step</mat-label>
+      <input type="text" readonly matInput formControlName="amStep" />
+    </mat-form-field>
+  </ng-container>
+
+  <!-- tool change -->
+  <ng-container
+    class="tool-change"
+    *ngIf="workorder.toolChange.from && workorder.toolChange.to"
+  >
+    <mat-form-field>
+      <mat-label>Tool Change From</mat-label>
+      <input
+        type="text"
+        readonly
+        matInput
+        class=""
+        formControlName="toolChangeFrom"
+      />
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>Tool Change To</mat-label>
+
+      <input
+        type="text"
+        readonly
+        matInput
+        class=""
+        formControlName="toolChangeTo"
+      />
+    </mat-form-field>
+  </ng-container>
+
+  <!-- mold service -->
+  <ng-container class="mold-number" *ngIf="workorder.moldService.number">
+    <mat-form-field>
+      <mat-label>Mold Number</mat-label>
+
+      <input
+        type="text"
+        readonly
+        matInput
+        class=""
+        formControlName="moldNumber"
+      />
+    </mat-form-field>
+  </ng-container>
+
+  <!-- workorder description -->
+  <ng-container class="workorderDescription">
+    <mat-form-field>
+      <mat-label>Problem Description</mat-label>
+
+      <textarea
+        formControlName="workorderDescription"
+        class="text-capitalize"
+        type="text"
+        matInput
+        readonly
+        cdkTextareaAutosize
+        cdkAutosizeMinRows="4"
+        cdkAutosizeMaxRows="30"
+      >
+      </textarea>
+    </mat-form-field>
+  </ng-container>
+
+  <!-- spares issued -->
+  <ng-container
+    *ngIf="userCanSeeSpareCosts()"
+  >
+    <ng-container
+      *ngIf="workorder.sparesUsed.status"
+      formArrayName="sparesUsedArray"
+    >
+      <mat-label class="fw-bold mx-auto">Issued Spares</mat-label>
+      <!-- spare fields labels -->
+      <ng-container *ngIf="sparesUsedArray?.length !== 0">
+        <div class="spare-form-header-row">
+          <div class="code-label">
+            <span>code</span>
+          </div>
+          <div class="quantity-label">
+            <span>qty</span>
+          </div>
+          <div class="total-cost-label">
+            <span>total cost</span>
+          </div>
+        </div>
+
+        <!-- issued spares -->
+        <ng-container *ngFor="let spareForm of sparesUsedArray.controls">
+          <div class="spare-form-row" [formGroup]="spareForm">
+            <mat-form-field class="code">
+              <input type="text" matInput readonly formControlName="code" />
+            </mat-form-field>
+            <mat-form-field class="quantity">
+              <input type="text" matInput readonly formControlName="quantity" />
+            </mat-form-field>
+            <mat-form-field class="total-cost">
+              <input
+                type="text"
+                matInput
+                readonly
+                formControlName="totalCost"
+              />
+            </mat-form-field>
+          </div>
+        </ng-container>
+
+        <!-- spares cost -->
+        <div class="total-spares-cost-row">
+          <div class="spares-cost-tag">
+            <div>
+              <span><strong>Total Spares Cost</strong></span>
+            </div>
+          </div>
+          <div class="spares-cost-value">
+            <div>
+              <span
+                ><strong>{{ getTotalSparesCost }}</strong></span
+              >
+            </div>
+          </div>
+        </div>
+      </ng-container>
+    </ng-container>
+  </ng-container>
+</form>

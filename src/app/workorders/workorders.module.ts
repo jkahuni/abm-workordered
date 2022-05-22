@@ -6,12 +6,11 @@ import {
   WorkordersRoutingModule,
   raiseWorkorderComponents,
   closeWorkorderComponents,
-  workordersComponents
+  workordersComponents,
+  exportableComponents
 } from '@workorders/workorders-routing.module';
 
 import { CurrencyPipe } from '@angular/common';
-
-
 
 // pipes and directives
 import { FormatWorkorderNumberPipe } from '@workorders/directives/format-workorder-number/format-workorder-number.pipe';
@@ -30,12 +29,15 @@ import { ValidateMixedFormatDirective } from '@workorders/directives/validate-mi
     raiseWorkorderComponents,
     closeWorkorderComponents,
     workordersComponents,
+    exportableComponents
   ],
   imports: [
     CommonModule,
     WorkordersRoutingModule,
     SharedModule,
   ],
-  providers: [CurrencyPipe]
+  providers: [CurrencyPipe],
+  exports: [
+    exportableComponents]
 })
 export class WorkordersModule { }

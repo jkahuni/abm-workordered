@@ -1,0 +1,100 @@
+<div
+  class="modal fade"
+  id="rejectWorkorderModal"
+  tabindex="-1"
+  aria-labelledby="rejectWorkorderModalLabel"
+  aria-hiden="true"
+  data-bs-backdrop="static"
+>
+  <div
+    class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-sm"
+  >
+    <div class="modal-content bg-light">
+      <div class="modal-header text-dark">
+        <h3 class="modal-title m-0" id="rejectWorkorderModalLabel">
+          <strong>W/o No. {{ workorder?.workorder?.number }}</strong>
+        </h3>
+        <button
+          #closeRejectWorkorderModal
+          class="btn-close border border-success border-2"
+          type="button"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+          (click)="closeModal()"
+        ></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-container mat-elevation-z5">
+          <div class="form-header-container">
+            <h2>Reject Workorder</h2>
+          </div>
+          <form
+            [formGroup]="form"
+            (ngSubmit)="reject()"
+            id="rejectWorkorder"
+            #formReference
+            autocomplete="off"
+          >
+            <ng-container class="reason-for-rejecting">
+              <mat-form-field>
+                <mat-label>Reason To Reject</mat-label>
+                <textarea
+                  matInput
+                  appValidateSentenceFormat
+                  type="text"
+                  formControlName="reason"
+                  class="text-capitalize"
+                  maxlength="500"
+                  cdkTextareaAutosize
+                  cdkAutosizeMinRows="1"
+                  cdkAutosizeMaxRows="7"
+                >
+                </textarea>
+
+                <mat-error
+                  *ngIf="form.controls['reason']?.errors?.['required']"
+                  >This field is required.
+                </mat-error>
+                <mat-error
+                  *ngIf="form.controls['reason']?.errors
+                      ?.['invalidSentenceFormat']
+                  "
+                >
+                  {{
+                    form.controls['reason']?.errors
+                      ?.['invalidSentenceFormat']?.value
+                  }}
+                </mat-error>
+              </mat-form-field>
+            </ng-container>
+          </form>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <div *ngIf="!rejectingWorkorder">
+          <button
+            type="submit"
+            class="btn btn-primary"
+            form="rejectWorkorder"
+            (click)="formReference?.['ngSubmit']?.emit()"
+          >
+            Reject
+          </button>
+        </div>
+        <div *ngIf="rejectingWorkorder">
+          <button type="button" class="btn btn-success" disabled>
+            <span
+              #buttonSpinner
+              class="spinner-border spinner-border-sm"
+              role="status"
+              aria-hidden="true"
+            ></span>
+            Rejecting...
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

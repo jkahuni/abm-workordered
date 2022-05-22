@@ -1,0 +1,151 @@
+<div
+  class="modal fade"
+  id="guidelinesModal"
+  tabindex="-1"
+  aria-labelledby="actionButtonsGuidelines"
+  aria-hiden="true"
+  data-bs-backdrop="static"
+>
+  <div
+    class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-sm"
+  >
+    <div class="modal-content">
+      <div class="modal-header text-dark">
+        <h3 class="modal-title m-0" id="actionButtonsGuidelines">
+          <strong>Actions Explained</strong>
+        </h3>
+        <button
+          class="btn-close border border-success border-2"
+          type="button"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+
+      <div class="modal-body">
+        <!-- SUPERVISORS ACTIONS -->
+        <div *ngIf="userType === 'supervisor'">
+          <p class="">
+            <strong>Approve:- </strong> The workorder looks okay and you want to
+            notify the one who raised and the technician named that they can
+            proceed to resolve the issue.
+          </p>
+
+          <p class="mt-2">
+            <strong>Reject:- </strong> The workorder is either unnecessary or
+            was not raised properly. You will be required to provide a reason
+            for rejecting it. The raiser will then be notified of this reason.
+          </p>
+
+          <p class="mt-2">
+            <strong>Delegate:- </strong> You are unavailable to oversee the
+            resolution of the issue raised or there is another supervisor better
+            suited to follow up on the workorder. The raiser and the new
+            supervisor will be notified. The new supervisor will then be
+            responsible for approving or rejecting the workorder.
+          </p>
+
+          <p class="mt-2">
+            <strong>Change Technicians:- </strong> You want to change either one
+            or both the engineering and stores technicians named in the
+            workorder. You can select the same technician if you do not want to
+            change him. This will automatically treat the workorder as approved.
+            The raiser and the new technicians will then be notified.
+          </p>
+
+          <p class="mt-2" *ngIf="workorder?.abnormalityCard?.status">
+            <strong>Assign Technicians:- </strong> You want to assign
+            engineering and stores technicians to handle the abnormality raised.
+            This will automatically treat the workorder as approved. The raiser
+            and technicians will then be notified.
+          </p>
+        </div>
+
+        <!-- TECHNICIANS ACTIONS -->
+        <!-- engineering -->
+        <div *ngIf="userType === 'engineering'">
+          <p class="">
+            <strong>Acknowledge:- </strong> Notify the supervisor and workorder
+            raiser that you have seen the workorder and will work on the issue
+            raised. Once you acknowledge, you cannot handover the workorder to
+            another technician.
+          </p>
+          <p class="mt-2">
+            <strong>Mark Done:- </strong> You have attended to the issue raised,
+            the m/c has been tested and is working okay. Time taken on the
+            workorder stops counting when you mark workorder done. You can then
+            close the workorder within 12 hours from the time it was approved.
+            You can only mark w/o as done after it has been acknowledged. The
+            supervisor and the one who raised the workoder will be updated.
+          </p>
+          <p class="mt-2">
+            <strong>Close:- </strong> You are ready to close the workorder off,
+            giving a brief or detailed analysis of the issue faced, and the
+            corrective actions taken to resolve.
+          </p>
+          <p class="mt-2">
+            <strong>Handover:- </strong> Delegate the workorder to another
+            technician who is either on duty and/or can attend to the issue
+            raised. This should be done before acknowledging the workorder or
+            marking it as done. The supervisor who approved and the one who
+            raised the workorder will be notified of the handover.
+          </p>
+        </div>
+
+        <!-- stores -->
+        <div *ngIf="userType === 'stores'">
+          <p class="">
+            <strong>Issue Spares:- </strong> The issue raised in the workorder
+            requires spares from the engineering store for it to be resolved.
+            Clicking this will allow you to specify the names/codes and
+            quantities of the spares that you issued. Issuing spares will only
+            update the spares used on the workorder, and the
+            electrical/mechanical technician named will be responsible for
+            closing the workorder.
+          </p>
+
+          <p class="mt-2">
+            <strong>Handover:- </strong> Delegate the workorder to another
+            stores technician who is on duty and can follow up on the issuance
+            of spares.
+          </p>
+        </div>
+
+        <!-- manager -->
+        <div *ngIf="userType === 'manager'">
+          <p>
+            <strong>Mark Reviewed: </strong> The workorder you selected is okay
+            and you are satisfied with it.
+          </p>
+          <p class="mt-2">
+            <strong>Mark All Reviewed: </strong> Mark more than one workorder as
+            reviewed. You will select the group of workorders to mark as
+            reviewed from a predefined list.
+          </p>
+          <p class="mt-2">
+            <strong>Raise Concern: </strong> The workorder does not look okay,
+            or you require further clarification about the workorder. You will
+            select the person to whom the concern is raised, and then provide
+            the concern itself. This individual will be notified with the
+            concern.
+          </p>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-success" data-bs-dismiss="modal">
+          Understood
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<button
+  #openModalButton
+  [hidden]="true"
+  type="button"
+  class="action-button btn btn-link shadow-none"
+  data-bs-toggle="modal"
+  data-bs-target="#guidelinesModal"
+></button>

@@ -1,0 +1,23 @@
+form.review-workorders-form {
+  display: flex;
+  flex-flow: column wrap;
+  justify-content: flex-start; // left-right alignment
+  width: 100%;
+
+  .invalid-date-raised-filter {
+    color: red;
+  }
+}
+
+.toggle-workorders-to-review-button-group {
+    display: flex;
+    // justify-content: flex-start;
+    align-items: flex-start;
+    flex-direction: column;
+    margin: 10px 0px 15px;
+}
+
+.toggle-date-raised-button {
+    margin: 5px;
+}
+

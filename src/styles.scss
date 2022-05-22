@@ -33,7 +33,6 @@ form:not(.review-workorders-form) {
   }
 }
 
-
 a.router-link {
   cursor: pointer;
   text-decoration: none;
@@ -65,16 +64,16 @@ a.router-link {
   }
 }
 
-// for mgrs review workorders form
-form.review-workorders-form {
-  display: flex;
-  flex-flow: column wrap;
-  justify-content: flex-start; // left-right alignment
-  width: 100%;
-
-  .invalid-date-raised-filter {
-    color: red;
-  }
+// for modals select fields behavior
+.cdk-global-overlay-wrapper,
+.cdk-overlay-container {
+  z-index: 99999 !important;
 }
 
-
+// // for modals select fields behavior
+// ::ng-deep {
+//     .cdk-global-overlay-wrapper,
+//     .cdk-overlay-container {
+//         z-index: 99999 !important;
+//     }
+// }

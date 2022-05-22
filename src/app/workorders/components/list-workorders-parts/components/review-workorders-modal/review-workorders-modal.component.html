@@ -1,0 +1,148 @@
+<div
+  class="modal fade"
+  id="reviewWorkordersModal"
+  tabindex="-1"
+  aria-labelledby="reviewWorkordersModalLabel"
+  aria-hiden="true"
+  data-bs-backdrop="static"
+>
+  <div
+    class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-sm"
+  >
+    <div class="modal-content bg-light">
+      <div class="modal-header text-dark">
+        <h3 class="modal-title m-0" id="reviewWorkordersModalLabel">
+          <strong>Review Multiple Workorders</strong>
+        </h3>
+        <button
+          #closeReviewWorkordersModal
+          class="btn-close border border-success border-2"
+          type="button"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+          (click)="closeModal()"
+        ></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-container mat-elevation-z5">
+          <div class="form-header-container">
+            <h2>Select Workorders</h2>
+          </div>
+
+          <form
+            [formGroup]="form"
+            (ngSubmit)="reviewWorkorders()"
+            id="reviewWorkorders"
+            #formReference
+            autocomplete="off"
+            class="review-workorders-form"
+          >
+            <div>
+              <mat-label
+                class="fw-bold"
+                [ngClass]="{'invalid-date-raised-filter': form.controls['dateRaisedFilter']?.errors?.['required']}"
+                >Date Raised</mat-label
+              >
+
+              <mat-radio-group
+                class="toggle-workorders-to-review-button-group"
+                aria-labelledby="toggle workorders to review"
+                formControlName="dateRaisedFilter"
+              >
+                <mat-radio-button
+                  class="toggle-date-raised-button"
+                  type="button"
+                  value="All"
+                >
+                  All
+                </mat-radio-button>
+                <mat-radio-button
+                  class="toggle-date-raised-button"
+                  type="button"
+                  value="Today"
+                >
+                  Today
+                </mat-radio-button>
+                <mat-radio-button
+                  class="toggle-date-raised-button"
+                  type="button"
+                  value="Yesterday"
+                >
+                  Yesterday
+                </mat-radio-button>
+                <mat-radio-button
+                  class="toggle-date-raised-button"
+                  type="button"
+                  value="This Week"
+                >
+                  This Week
+                </mat-radio-button>
+                <mat-radio-button
+                  class="toggle-date-raised-button"
+                  type="button"
+                  value="Last Week"
+                >
+                  Last Week
+                </mat-radio-button>
+                <mat-radio-button
+                  class="toggle-date-raised-button"
+                  type="button"
+                  value="This Month"
+                >
+                  This Month
+                </mat-radio-button>
+                <mat-radio-button
+                  class="toggle-date-raised-button"
+                  type="button"
+                  value="Last Month"
+                >
+                  Last Month
+                </mat-radio-button>
+              </mat-radio-group>
+              <mat-error
+                *ngIf="form.controls['dateRaisedFilter']?.errors?.['required']"
+                >Please select one option.</mat-error
+              >
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <div *ngIf="!reviewingWorkorders">
+          <button
+            type="button"
+            class="btn btn-secondary me-2"
+            data-bs-dismiss="modal"
+            (click)="closeModal()"
+          >
+            Cancel
+          </button>
+
+          <button
+            type="submit"
+            class="btn btn-primary"
+            form="reviewWorkorders"
+            (click)="formReference?.['ngSubmit']?.emit()"
+          >
+            Review Workorders
+          </button>
+        </div>
+
+        <div *ngIf="reviewingWorkorders">
+          <button type="button" class="btn btn-success" disabled>
+            <span
+              #buttonSpinner
+              class="spinner-border spinner-border-sm"
+              role="status"
+              aria-hidden="true"
+            >
+            </span>
+            Reviewing Workorders...
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
