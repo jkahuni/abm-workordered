@@ -17,12 +17,23 @@ export class RejectWorkorderModalComponent implements OnInit {
     private fb: FormBuilder,
     private workordersService: WorkordersService,
     private toast: HotToastService,
-  ) { }
+  ) {
+    setTimeout(() => {
+      if (this.openModalButton) {
+        this.openModalButton.nativeElement.click();
+      }
+    });
+  }
 
   @Input()
   workorder!: IntWorkorder;
 
-  @ViewChild('closeRejectWorkorderModal') closeRejectWorkorderModal!: ElementRef;
+  // output
+  @Output()
+  close: EventEmitter<string> = new EventEmitter<string>();
+
+  @ViewChild('openModalButton') openModalButton!: ElementRef;
+  @ViewChild('closeModalButton') closeModalButton!: ElementRef;
   @ViewChild('buttonSpinner') buttonSpinner!: ElementRef;
 
   form!: FormGroup;
@@ -49,8 +60,9 @@ export class RejectWorkorderModalComponent implements OnInit {
   }
 
   closeModal(): void {
-    if (this.closeRejectWorkorderModal) {
-      this.closeRejectWorkorderModal.nativeElement.click();
+    if (this.closeModalButton) {
+      this.closeModalButton.nativeElement.click();
+      this.close.emit('close');
     }
 
   }

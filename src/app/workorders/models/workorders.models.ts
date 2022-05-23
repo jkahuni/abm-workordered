@@ -93,6 +93,7 @@ export interface IntWorkorder {
     workorder: IntWorkorderSummary;
     review: IntWorkorderReview;
     viewedByTechnician: WorkorderViewed;
+    escalated?: IntEscalation;
 
 }
 
@@ -134,4 +135,11 @@ export interface IntWorkorderReview {
 export interface IntConcern {
     user: IntUser;
     message: string;
+}
+
+export interface IntEscalation {
+    status: boolean;
+    dateTime: string;
+    technicianNotified: boolean;
+
 }

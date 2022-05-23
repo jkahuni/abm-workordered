@@ -1,4 +1,3 @@
-
 <div
   class="modal fade"
   id="engineeringTechnicianHandoverModal"
@@ -19,7 +18,7 @@
           <strong>W/o No. {{ workorder?.workorder?.number }}</strong>
         </h3>
         <button
-          #closeEngineeringTechniciansHandoverModal
+          #closeModalButton
           class="btn-close border border-success border-2"
           type="button"
           data-bs-dismiss="modal"
@@ -132,3 +131,11 @@
     </div>
   </div>
 </div>
+
+<button
+  #openModalButton
+  [hidden]="true"
+  type="button"
+  data-bs-toggle="modal"
+  data-bs-target="#engineeringTechnicianHandoverModal"
+></button>

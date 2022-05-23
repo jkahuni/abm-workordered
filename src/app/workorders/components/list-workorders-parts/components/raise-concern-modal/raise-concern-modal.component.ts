@@ -1,4 +1,4 @@
-import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HotToastService } from '@ngneat/hot-toast';
 import { IntWorkorder, IntUser } from '@workorders/models/workorders.models';
@@ -16,13 +16,23 @@ export class RaiseConcernModalComponent implements OnInit {
     private workordersService: WorkordersService,
     private toast: HotToastService,
     private fb: FormBuilder
-  ) { }
+  ) {
+    setTimeout(() => {
+      if (this.openModalButton) {
+        this.openModalButton.nativeElement.click();
+      }
+    });
+  }
 
   @Input()
   workorder!: IntWorkorder;
 
+  // output
+  @Output()
+  close: EventEmitter<string> = new EventEmitter<string>();
 
-  @ViewChild('closeRaiseConcernModal') closeRaiseConcernModal!: ElementRef;
+  @ViewChild('openModalButton') openModalButton!: ElementRef;
+  @ViewChild('closeModalButton') closeModalButton!: ElementRef;
   @ViewChild('buttonSpinner') buttonSpinner!: ElementRef;
 
 
@@ -66,7 +76,10 @@ export class RaiseConcernModalComponent implements OnInit {
 
 
   closeModal(): void {
-    if (this.closeRaiseConcernModal) { this.closeRaiseConcernModal.nativeElement.click(); }
+    if (this.closeModalButton) {
+      this.closeModalButton.nativeElement.click();
+      this.close.emit('close');
+    }
   }
 
   raiseConcern(): void {

@@ -23,11 +23,16 @@ export class HelpModalComponent implements OnInit {
   @Input('user')
   userType!: string | null;
 
-  @Output('close')
-  closeHelpModal: EventEmitter<boolean> = new EventEmitter<boolean>();
+  // output
+  @Output()
+  close: EventEmitter<string> = new EventEmitter<string>();
 
   @ViewChild('openModalButton') openModalButton!: ElementRef;
 
   ngOnInit(): void {
+  }
+
+  closeModal(): void {
+    this.close.emit('close');
   }
 }

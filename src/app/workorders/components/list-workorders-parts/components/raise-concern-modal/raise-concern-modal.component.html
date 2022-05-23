@@ -15,7 +15,7 @@
           <strong>W/o No. {{ workorder?.workorder?.number }}</strong>
         </h3>
         <button
-          #closeRaiseConcernModal
+          #closeModalButton
           class="btn-close border border-success border-2"
           type="button"
           data-bs-dismiss="modal"
@@ -48,8 +48,7 @@
                   >{{ user.fullName }}</mat-option
                 >
               </mat-select>
-              <mat-error
-                *ngIf="form.controls['user']?.errors?.['required']"
+              <mat-error *ngIf="form.controls['user']?.errors?.['required']"
                 >Please select a user.</mat-error
               >
             </mat-form-field>
@@ -69,8 +68,7 @@
                 cdkAutosizeMaxRows="15"
               >
               </textarea>
-              <mat-error
-                *ngIf="form.controls['concern']?.errors?.['required']"
+              <mat-error *ngIf="form.controls['concern']?.errors?.['required']"
                 >Please provide a concern message.</mat-error
               >
               <mat-error
@@ -125,3 +123,13 @@
     </div>
   </div>
 </div>
+
+<button
+  #openModalButton
+  [hidden]="true"
+  type="button"
+  data-bs-toggle="modal"
+  data-bs-target="#raiseConcernModal"
+>
+  Raise Concern
+</button>

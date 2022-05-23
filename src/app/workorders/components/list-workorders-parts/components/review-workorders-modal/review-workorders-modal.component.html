@@ -15,7 +15,7 @@
           <strong>Review Multiple Workorders</strong>
         </h3>
         <button
-          #closeReviewWorkordersModal
+          #closeModalButton
           class="btn-close border border-success border-2"
           type="button"
           data-bs-dismiss="modal"
@@ -146,3 +146,11 @@
     </div>
   </div>
 </div>
+
+<button
+  #openModalButton
+  [hidden]="true"
+  type="button"
+  data-bs-toggle="modal"
+  data-bs-target="#reviewWorkordersModal"
+></button>

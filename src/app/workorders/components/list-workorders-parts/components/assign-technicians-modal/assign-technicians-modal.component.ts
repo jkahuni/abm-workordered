@@ -1,4 +1,4 @@
-import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HotToastService } from '@ngneat/hot-toast';
 import { IntWorkorder, IntUser } from '@workorders/models/workorders.models';
@@ -16,7 +16,13 @@ export class AssignTechniciansModalComponent implements OnInit {
     private workordersService: WorkordersService,
     private toast: HotToastService,
     private fb: FormBuilder
-  ) { }
+  ) {
+    setTimeout(() => {
+      if (this.openModalButton) {
+        this.openModalButton.nativeElement.click();
+      }
+    });
+  }
 
   // inputs
   @Input()
@@ -25,9 +31,12 @@ export class AssignTechniciansModalComponent implements OnInit {
   technicians!: IntUser[];
 
   // output
+  @Output()
+  close: EventEmitter<string> = new EventEmitter<string>();
 
   // template refs
-  @ViewChild('closeAssignTechniciansModal') closeAssignTechniciansModal!: ElementRef;
+  @ViewChild('openModalButton') openModalButton!: ElementRef;
+  @ViewChild('closeModalButton') closeModalButton!: ElementRef;
   @ViewChild('buttonSpinner') buttonSpinner!: ElementRef;
 
 
@@ -74,8 +83,9 @@ export class AssignTechniciansModalComponent implements OnInit {
   }
 
   closeModal(): void {
-    if (this.closeAssignTechniciansModal) {
-      this.closeAssignTechniciansModal.nativeElement.click();
+    if (this.closeModalButton) {
+      this.closeModalButton.nativeElement.click();
+      this.close.emit('close');
     }
   }
 

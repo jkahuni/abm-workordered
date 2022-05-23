@@ -1,17 +1,9 @@
 import { Component, OnInit, ElementRef, ViewChild, OnDestroy } from '@angular/core';
-import { Router, ActivatedRoute } from '@angular/router';
-import { FormGroup, FormBuilder, Validators, AbstractControl, FormArray } from '@angular/forms';
-import { MatSelect } from '@angular/material/select';
+import { ActivatedRoute } from '@angular/router';
+import { FormGroup } from '@angular/forms';
 
 // rxjs
 import { takeUntil, Subject } from 'rxjs';
-
-// firestore imports
-import {
-  DocumentData,
-  Firestore, collection,
-  CollectionReference
-} from '@angular/fire/firestore';
 
 // services
 import { WorkordersService } from '@workorders/services/workorders.service';
@@ -39,8 +31,6 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
 
   constructor(
     private route: ActivatedRoute,
-    private router: Router,
-    private firestore: Firestore,
     private workordersService: WorkordersService,
     private toast: HotToastService,
   ) { }
@@ -48,24 +38,6 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
 
   // template refs
   @ViewChild('loadingWorkordersSpinner') loadingWorkordersSpinner!: ElementRef;
-
-  // button spinners
-  @ViewChild('appprovingWorkorderLoadingSpinner') appprovingWorkorderLoadingSpinner!: ElementRef;
-  @ViewChild('rejectWorkorderButtonSpinner') rejectWorkorderButtonSpinner!: ElementRef;
-  @ViewChild('delegateSupervisorButtonSpinner') delegateSupervisorButtonSpinner!: ElementRef;
-  @ViewChild('changeTechniciansButtonSpinner') changeTechniciansButtonSpinner!: ElementRef;
-  @ViewChild('assignTechniciansButtonSpinner') assignTechniciansButtonSpinner!: ElementRef;
-  @ViewChild('acknowledgeWorkorderLoadingButtonSpinner') acknowledgeWorkorderLoadingButtonSpinner!: ElementRef;
-  @ViewChild('markWorkorderDoneLoadingButtonSpinner') markWorkorderDoneLoadingButtonSpinner!: ElementRef;
-  @ViewChild('updateEngineeringTechniciansButtonSpinner') updateEngineeringTechniciansButtonSpinner!: ElementRef;
-  @ViewChild('updateStoresTechniciansButtonSpinner') updateStoresTechniciansButtonSpinner !: ElementRef;
-  @ViewChild('reviewWorkorderButtonSpinner') reviewWorkorderButtonSpinner!: ElementRef;
-  @ViewChild('reviewWorkordersButtonSpinner') reviewWorkordersButtonSpinner!: ElementRef;
-  @ViewChild('raiseConcernButtonSpinner') raiseConcernButtonSpinner!: ElementRef;
-
-  // filter workorders options
-  @ViewChild('filterWorkordersOptionsField') filterWorkordersOptionsField!: MatSelect;
-
 
   // route params
   userType!: string | null;
@@ -79,26 +51,10 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
 
   // form groups
   form!: FormGroup;
-  rejectWorkorderForm!: FormGroup;
-  changeTechniciansForm!: FormGroup;
-  supervisorsHandoverForm!: FormGroup;
-  assignTechniciansForm!: FormGroup;
-  engTechniciansHandoverForm!: FormGroup;
-  storesTechniciansHandoverForm!: FormGroup;
-  reviewWorkordersForm!: FormGroup;
-  raiseConcernForm!: FormGroup;
 
   // for handover templates
-  electricalTechnicians!: IntUser[];
-  mechanicalTechnicians!: IntUser[];
-  storeTechnicians!: IntUser[];
-  productionSupervisors!: IntUser[];
-  engineeringSupervisors!: IntUser[];
   supervisors!: IntUser[];
   technicians!: IntUser[];
-
-  // showing spares to engineering supervisors
-  isEngineeringSupervisor = false;
 
   // when to show right-sidenav
   workorderHasActions = false;
@@ -107,10 +63,7 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
   showLeftSidenav = true;
   showRightSidenav = false;
 
-  // for filtering workorders
-  showWorkordersFilterOptions = false;
-
-  // loading spinners
+  // loading spinner
   loadingWorkorders = true;
   loadingWorkordersFailed = false;
   loadingWorkordersIndexingError!: string;
@@ -118,25 +71,11 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
   loadingWorkordersDefaultError: string = `
   Loading workorders failed with error code ULW-01. Try reloading the page or report the error code to support to have it fixed.`;
 
-
-  // toggle button spinner conditions
-  approveWorkorderLoading = false;
-  rejectWorkorderLoading = false;
-  supervisorHandoverLoading = false;
-  changeTechniciansLoading = false;
-  assignTechniciansLoading = false;
-  acknowledgeWorkorderLoading = false;
-  markWorkorderDoneLoading = false;
-  engTechnicianHandoverLoading = false;
-  storesTechnicianHandoverLoading = false;
-  reviewingWorkorder = false;
-  reviewingWorkorders = false;
-  raisingConcern = false;
-
-  // for showing the filter option
+  // filter workorders
+  showWorkordersFilterOptions = false;
   filterOption!: string;
 
-  // FOR THE UPDATES
+  // show/hide
   showHelpModal = false;
   showRejectWorkorderModal = false;
   showSupervisorsHandoverModal = false;
@@ -163,7 +102,6 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
 
   // create query
   private filterWorkordersByUser(workorders: IntWorkorder[]): IntWorkorder[] | undefined {
-    const workordersColRef: CollectionReference<DocumentData> = collection(this.firestore, 'workorders');
     if (
       this.userType &&
       this.workordersType &&
@@ -468,7 +406,6 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
             if (filteredWorkorders) {
               this.workorders = filteredWorkorders;
               this.workordersToDisplay = this.workorders;
-              console.log('INSIDE LW METHOD SUBSCRIBE', this.workorders);
 
               this.hideLoadingWorkordersSpinner();
             } else {
@@ -501,15 +438,6 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
   private getUsers(): void {
     this.workordersService.getUsers()
       .then((users: IntUser[]) => {
-        this.productionSupervisors = users.filter(
-          (user: IntUser) =>
-            user.group === 'Supervisor' && user.supervisorGroup === 'Production'
-        );
-        this.engineeringSupervisors = users.filter(
-          (user: IntUser) =>
-            user.group === 'Supervisor' && user.supervisorGroup === 'Engineering'
-        );
-
         this.supervisors = users.filter((user: IntUser) => user.group === 'Supervisor'
         );
 
@@ -517,24 +445,6 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
           (user: IntUser) =>
             user.group === 'Technician'
         );
-
-        this.electricalTechnicians = users.filter(
-          (user: IntUser) =>
-            user.group === 'Technician' && user.technicianGroup === 'Electrical');
-        this.mechanicalTechnicians = users.filter(
-          (user: IntUser) =>
-            user.group === 'Technician' && user.technicianGroup === 'Mechanical');
-        this.storeTechnicians = users.filter(
-          (user: IntUser) => user.group === 'Technician' && user.technicianGroup === 'Eng. Store'
-            || user.technicianGroup === 'PM Planning'
-        );
-
-        const engineeringSupervisor = this.engineeringSupervisors.find((user: IntUser) => user.uid === this.userUid);
-
-        if (engineeringSupervisor !== undefined) {
-          this.isEngineeringSupervisor = true;
-        }
-
       })
       .catch(() => {
         this.toast.close();
@@ -555,86 +465,6 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
     this.loadingWorkordersFailed = true;
     this.hideLoadingWorkordersSpinner();
 
-  }
-
-  // create forms
-  // refresh all workorders
-  private refreshWorkorders(uid: string, update: {}): void {
-    this.workordersService.refreshWorkorders(uid, update)
-      .then(() => {
-        const workorder = this.workorders?.find((workorder: IntWorkorder) => workorder.workorder.uid === uid);
-        console.log('THE WORKORDER', this.workorder);
-        if (workorder) { this.workorder = workorder; }
-
-        else {
-          this.closeRightSidenav();
-          this.showLeftSidenav = true;
-        }
-
-      });
-
-  }
-
-  private closeButtonSpinners(): void {
-    this.toast.close();
-    this.approveWorkorderLoading = false;
-    this.rejectWorkorderLoading = false;
-    this.supervisorHandoverLoading = false;
-    this.changeTechniciansLoading = false;
-    this.assignTechniciansLoading = false;
-    this.acknowledgeWorkorderLoading = false;
-    this.markWorkorderDoneLoading = false;
-    this.engTechnicianHandoverLoading = false;
-    this.storesTechnicianHandoverLoading = false;
-    this.reviewingWorkorder = false;
-    this.reviewingWorkorders = false;
-    this.raisingConcern = false;
-
-    if (this.appprovingWorkorderLoadingSpinner) {
-      this.appprovingWorkorderLoadingSpinner.nativeElement.style.display = 'none';
-    }
-    if (this.rejectWorkorderButtonSpinner) {
-      this.rejectWorkorderButtonSpinner.nativeElement.style.display = 'none';
-    }
-    if (this.delegateSupervisorButtonSpinner) {
-      this.delegateSupervisorButtonSpinner.nativeElement.style.display = 'none';
-    }
-    if (this.changeTechniciansButtonSpinner) {
-      this.changeTechniciansButtonSpinner.nativeElement.style.display = 'none';
-    }
-    if (this.assignTechniciansButtonSpinner) {
-      this.assignTechniciansButtonSpinner.nativeElement.style.display = 'none';
-    }
-    if (this.acknowledgeWorkorderLoadingButtonSpinner) {
-      this.acknowledgeWorkorderLoadingButtonSpinner.nativeElement.style.display = 'none';
-    }
-    if (this.markWorkorderDoneLoadingButtonSpinner) {
-      this.markWorkorderDoneLoadingButtonSpinner.nativeElement.style.display = 'none';
-    }
-    if (this.updateEngineeringTechniciansButtonSpinner) {
-      this.updateEngineeringTechniciansButtonSpinner.nativeElement.style.display = 'none';
-    }
-    if (this.updateStoresTechniciansButtonSpinner) {
-      this.updateStoresTechniciansButtonSpinner.nativeElement.style.display = 'none';
-    }
-
-    if (this.reviewWorkorderButtonSpinner) {
-      this.reviewWorkorderButtonSpinner.nativeElement.style.display = 'none';
-    }
-    if (this.reviewWorkordersButtonSpinner) {
-      this.reviewWorkordersButtonSpinner.nativeElement.style.display = 'none';
-    }
-    if (this.raiseConcernButtonSpinner)
-      this.raiseConcernButtonSpinner.nativeElement.style.display = 'none'; { }
-  }
-
-  private closeWorkorderByType(workorder: IntWorkorder): Promise<boolean> {
-    const type = workorder.workorder.type;
-    const workorderType = type
-      .trim()
-      .toLocaleLowerCase()
-      .replace(/\s/g, '-');
-    return this.router.navigate([`close-workorder/${workorderType}/${this.userUid}/${this.workorderUid}`]);
   }
 
   // filter workorder fns
@@ -691,47 +521,6 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
     return yearsDifference === 0 && monthsDifference === -1 ? true : false;
   }
 
-  private updateWorkorderViewStatus(workorder: IntWorkorder) {
-    const workorderUid = workorder.workorder.uid;
-    const now = dayjs().format();
-    // allowed seconds
-    const allowedTime = 180;
-    const workorderUpdateData = {
-      viewedByTechnician: {
-        status: true,
-        dateTime: now
-      }
-    };
-
-    this.workordersService.updateWorkorder(workorderUid, workorderUpdateData)
-      .then(() => {
-        this.refreshWorkorders(workorderUid, workorderUpdateData);
-        this.toast.info('Acknowledge or handover the workorder within 3 minutes, failure to which the workorder will be escalated to the supervisor. Please note that once you acknowledge you cannot handover.', { duration: 15000, id: 'workorder-opened' });
-        setTimeout(() => {
-          if (this.workorder) {
-            if (!this.workorder.acknowledged.status) {
-              this.toast.error('You have exceeded the allowed time to acknowledge or handover the workorder. The workorder has been escalated to the supervisor.', { autoClose: false, id: 'viewed-but-not-updated' });
-            }
-          }
-
-        }, 1000 * allowedTime);
-      })
-      .catch();
-  }
-
-  // form getters
-  get f(): { [key: string]: AbstractControl } {
-    return this.form?.controls;
-  }
-
-  get sparesUsedArray(): any {
-    return this.form?.get('sparesUsedArray') as FormArray;
-  }
-
-  get getTotalSparesCost(): string {
-    return this.form?.get('totalSparesCost')?.value;
-  }
-
   // public functions
   createWorkordersHeader(): string {
     return this.workordersType?.replace(/-/g, '') + ' workorders';
@@ -748,17 +537,10 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
   }
 
   displayWorkorder(workorderNumber: string): IntWorkorder | undefined {
-    const workorder = this.workordersToDisplay?.find((workorder: IntWorkorder) => workorder?.workorder.number === workorderNumber);
+    this.workorder = this.workordersToDisplay?.find((workorder: IntWorkorder) => workorder?.workorder.number === workorderNumber);
 
-    if (workorder) {
-      this.workorder = workorder;
+    if (this.workorder) {
       this.workorderUid = this.workorder.workorder.uid;
-
-      // technician has opened the workorder
-      const viewedByTechnician = this.workorder.viewedByTechnician.status;
-      if (this.userType === 'engineering' && !viewedByTechnician) {
-        this.updateWorkorderViewStatus(this.workorder);
-      }
       if (this.workorderHasActions) {
         this.showLeftSidenav = false;
         this.showRightSidenav = true;
@@ -820,232 +602,56 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
       : null;
   }
 
-  // clear errors when modal is closed
-  resetForms(): void {
-    const forms: FormGroup[] = [
-      this.rejectWorkorderForm,
-      this.changeTechniciansForm,
-      this.supervisorsHandoverForm,
-      this.assignTechniciansForm,
-      this.engTechniciansHandoverForm,
-      this.storesTechniciansHandoverForm,
-      this.reviewWorkordersForm,
-      this.raiseConcernForm
-    ];
-
-    forms.forEach((form: FormGroup) => {
-      if (form) {
-        form.reset();
-        Object.keys(form?.controls).forEach(
-          (key: string) => {
-            if (key) {
-              form.get(key)?.setErrors(null);
-            }
-          }
-        );
-      }
-    });
-
-
+  closeAllModals(): void {
+    this.showHelpModal = false;
+    this.showRejectWorkorderModal = false;
+    this.showSupervisorsHandoverModal = false;
+    this.showChangeTechniciansModal = false;
+    this.showAssignTechniciansModal = false;
+    this.showEngTechnicianHandoverModal = false;
+    this.showStoreTechnicianHandoverModal = false;
+    this.showReviewWorkordersModal = false;
+    this.showRaiseConcernsModal = false;
   }
 
-  // refresh opened modal
-  refreshModals(): void {
-    if (this.workorder !== undefined) {
-      // this.resetForms();
-      this.workorder = this.workorder;
+  // from actions component
+  toggleModal(event: string): boolean | void {
+    console.log('IN LIST, ', event);
+    return event ?
+      event === 'help' ?
+        this.showHelpModal = true :
+        event === 'reject' ?
+          this.showRejectWorkorderModal = true
+          : event === 'supervisorHandover' ?
+            this.showSupervisorsHandoverModal = true
+            : event === 'changeTechnicians' ?
+              this.showChangeTechniciansModal = true
+              : event === 'assignTechnicians' ?
+                this.showAssignTechniciansModal = true
+                : event === 'techniciansHandover' ?
+                  this.showEngTechnicianHandoverModal = true
+                  : event === 'storesHandover' ?
+                    this.showStoreTechnicianHandoverModal = true
+                    : event === 'reviewWorkorders' ?
+                      this.showReviewWorkordersModal = true
+                      : event === 'raiseConcern' ?
+                        this.showRaiseConcernsModal = true
+                        : event === 'close' ?
+                          this.closeAllModals()
+                          : false
+      : false;
+  }
 
-      if (
-        !this.electricalTechnicians ||
-        !this.mechanicalTechnicians ||
-        !this.storeTechnicians ||
-        !this.productionSupervisors ||
-        !this.engineeringSupervisors
-      ) {
-        this.getUsers();
-      }
+  // updating the workorder
+  updateWorkorder(uid: string): any {
+    const workorder = this.workorders.find((workorder: IntWorkorder) => workorder.workorder.uid === uid);
+
+    if (workorder) {
+      this.workorder = workorder;
+    } else {
+      this.workorder = undefined;
+      this.showLeftSidenav = true;
+      this.showRightSidenav = false;
     }
-  }
-
-  // errors on workorder actions
-  markDoneBeforeAcknowledged(): void {
-    this.toast.close();
-    this.toast.info(`You cannnot mark the workorder done before you acknowledge it.`, { id: 'mark-done-before-acknowledged' });
-  }
-
-  closeBeforeAcknowledgedOrDone(): void {
-    this.toast.close();
-
-    this.toast.info(`You cannot close a workorder that has not been acknowledged and marked as done.`, { id: 'close-before-acknowledged-or-done' });
-  }
-
-  handoverAfterAcknowledged(): void {
-    this.toast.close();
-
-    this.toast.info(`You have already acknowledged this workorder. You cannot pass it on to someone else.`, { duration: 8000, id: 'handover-after-acknowledged' });
-  }
-
-  handoverAfterDone(): void {
-    this.toast.close();
-
-    this.toast.info(`You have already acknowledged and marked this workorder as done.
-     You cannot hand it over.`,
-      { id: 'handover-after-done' });
-  }
-
-  // workorder actions
-  // supervisors
-  approve(): void {
-    if (this.workorder) {
-      this.approveWorkorderLoading = true;
-
-      const now = dayjs().format();
-      const workorderUid = this.workorder.workorder.uid;
-      const workorderNumber = this.workorder.workorder.number;
-
-      const workorderUpdateData = {
-        approved: {
-          status: true,
-          dateTime: now
-        },
-        rejected: { status: false, dateTime: now }
-
-      };
-      this.workordersService.updateWorkorder(workorderUid, workorderUpdateData)
-        .then(() => {
-          this.closeButtonSpinners();
-          this.refreshWorkorders(workorderUid, workorderUpdateData);
-
-          this.toast.success(`Success. Workorder ${workorderNumber} approved successfully.`, { id: 'approve-workorder-success' });
-
-        })
-        .catch((err: any) => {
-          this.closeButtonSpinners();
-
-          this.toast.error(`Failed:
-             Approving workorder ${workorderNumber} failed with error WL-04. Please try again, or report the error code to support if the issue persists.`,
-            { duration: 8000, id: 'error-code-WL-04' });
-        });
-    }
-  }
-
-  // technicians
-  acknowledge(): void {
-    if (this.workorder) {
-      this.acknowledgeWorkorderLoading = true;
-      const workorderUid = this.workorder.workorder.uid;
-      const workorderNumber = this.workorder.workorder.number;
-      const now = dayjs().format();
-
-      const workorderUpdateData = {
-        acknowledged: {
-          status: true,
-          dateTime: now
-        }
-      };
-
-      this.workordersService.updateWorkorder(workorderUid, workorderUpdateData)
-        .then(() => {
-          this.closeButtonSpinners();
-          this.refreshWorkorders(workorderUid,
-            workorderUpdateData);
-          this.toast.success(`Success. Workorder ${workorderNumber} acknowledged successfully.`, { id: 'acknowledge-workorder-success' });
-        })
-        .catch(() => {
-          this.closeButtonSpinners();
-          this.toast.error(`Failed. Acknowleding workorder ${workorderNumber} failed with error code LW-AW-01. Please try again or report this error code to support for assistance if the issue persists.`, {
-            autoClose: false, id: 'error-code-WL-09'
-          });
-        });
-
-    }
-  }
-
-  markDone(): void {
-    if (this.workorder) {
-      this.markWorkorderDoneLoading = true;
-      const workorderNumber = this.workorder.workorder.number;
-      const workorderUid = this.workorder.workorder.uid;
-
-      const now = dayjs().format();
-      const datetimeRaised = dayjs(this.workorder.raised.dateTime);
-      const dateTimeApproved = dayjs(this.workorder.approved.dateTime);
-      const dateTimeAcknowledged = dayjs(this.workorder.acknowledged.dateTime);
-
-      // getting time differences
-      const fromTimeRaised = Math.round(dayjs(now).diff(datetimeRaised, 'minutes', true));
-      const fromTimeApproved = Math.round(dayjs(now).diff(dateTimeApproved, 'minutes', true));
-      const fromTimeAcknowledged = Math.round(dayjs(now).diff(dateTimeAcknowledged, 'minutes', true));
-      const fromTimeMachineStopped = this.workorder.breakdown.status ? Math.round(dayjs(now).diff(dayjs(this.workorder.breakdown.dateTime), 'minutes', true)) : '';
-
-      const workorderUpdateData = {
-        done: {
-          status: true,
-          dateTime: now
-        },
-        timeTaken: {
-          fromTimeMachineStopped,
-          fromTimeRaised,
-          fromTimeApproved,
-          fromTimeAcknowledged
-        }
-      };
-      this.workordersService.updateWorkorder(workorderUid, workorderUpdateData)
-        .then(() => {
-          this.closeButtonSpinners();
-          // this.refreshWorkorders();
-          this.refreshWorkorders(workorderUid,
-            workorderUpdateData);
-
-          this.toast.success(`Success. Workorder ${workorderNumber} marked as done. Click on the workorder to view the time taken.`, { id: 'mark-workorder-done-success' });
-        })
-        .catch(() => {
-          this.closeButtonSpinners();
-          this.toast.error(`Failed. Marking workorder ${workorderNumber} as done failed with error code LW-MWD-01. Please try again or report this error code to support for assistance if the issue persists.`, {
-            autoClose: false, id: 'error-code-WL-10'
-          });
-        });
-    }
-  }
-
-  close(workorder: IntWorkorder): void {
-    this.closeWorkorderByType(workorder);
-  }
-
-
-  // ENG MANAGER ACTIONS
-  reviewWorkorder(): void {
-    if (this.workorder) {
-      this.reviewingWorkorder = true;
-      const now = dayjs().format();
-      const workorderUid = this.workorder.workorder.uid;
-      const workorderNumber = this.workorder.workorder.number;
-      const workorderUpdateData = {
-        review: {
-          status: 'reviewed',
-          concerns: [],
-          dateTime: now
-
-        }
-      };
-
-      this.workordersService.updateWorkorder(workorderUid, workorderUpdateData)
-        .then(() => {
-          this.closeButtonSpinners();
-          this.refreshWorkorders(workorderUid,
-            workorderUpdateData);
-          this.toast.success(`Success. Workorder ${workorderNumber} reviewed successfully.`, { id: 'review-workorder-success' });
-        })
-        .catch(() => {
-          this.closeButtonSpinners();
-          this.toast.error(`Failed. Reviewing workorder ${workorderNumber} failed with error code LW-RSW-01. Please try again or report the error code to support to have the issue fixed.`, { autoClose: false, id: 'review-workorder-error' });
-        });
-    }
-  }
-
-  closeHelpModal(event: any): boolean {
-    console.log('ACTIATED event');
-    console.log(event);
-    return this.showHelpModal = false;
   }
 }

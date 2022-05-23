@@ -45,6 +45,9 @@ import { TechniciansHandoverModalComponent } from '@workorders/components/list-w
 import { StoreTechniciansHandoverModalComponent } from '@workorders/components/list-workorders-parts/components/store-technicians-handover-modal/store-technicians-handover-modal.component';
 import { ReviewWorkordersModalComponent } from '@workorders/components/list-workorders-parts/components/review-workorders-modal/review-workorders-modal.component';
 import { RaiseConcernModalComponent } from '@workorders/components/list-workorders-parts/components/raise-concern-modal/raise-concern-modal.component';
+import { WorkorderActionsComponent } from '@workorders/components/list-workorders-parts/components/workorder-actions/workorder-actions.component';
+import { WorkorderNumbersComponent } from '@workorders/components/list-workorders-parts/components/workorder-numbers/workorder-numbers.component';
+
 
 
 // firebase auth guards
@@ -219,5 +222,7 @@ export const exportableComponents = [
   TechniciansHandoverModalComponent,
   StoreTechniciansHandoverModalComponent,
   ReviewWorkordersModalComponent,
-  RaiseConcernModalComponent
+  RaiseConcernModalComponent,
+  WorkorderActionsComponent,
+  WorkorderNumbersComponent
 ];

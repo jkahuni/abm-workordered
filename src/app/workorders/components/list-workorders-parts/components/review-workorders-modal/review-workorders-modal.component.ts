@@ -1,4 +1,4 @@
-import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HotToastService } from '@ngneat/hot-toast';
 import { IntWorkorder, IntUser } from '@workorders/models/workorders.models';
@@ -25,13 +25,23 @@ export class ReviewWorkordersModalComponent implements OnInit {
     private workordersService: WorkordersService,
     private toast: HotToastService,
     private fb: FormBuilder
-  ) { }
+  ) {
+    setTimeout(() => {
+      if (this.openModalButton) {
+        this.openModalButton.nativeElement.click();
+      }
+    });
+   }
 
   @Input()
   workorders!: IntWorkorder[];
 
-
-  @ViewChild('closeReviewWorkordersModal') closeReviewWorkordersModal!: ElementRef;
+  // output
+  @Output()
+  close: EventEmitter<string> = new EventEmitter<string>();
+  
+  @ViewChild('openModalButton') openModalButton!: ElementRef;
+  @ViewChild('closeModalButton') closeModalButton!: ElementRef;
   @ViewChild('buttonSpinner') buttonSpinner!: ElementRef;
 
   form!: FormGroup;
@@ -116,8 +126,9 @@ export class ReviewWorkordersModalComponent implements OnInit {
   }
 
   closeModal(): void {
-    if (this.closeReviewWorkordersModal) {
-      this.closeReviewWorkordersModal.nativeElement.click();
+    if (this.closeModalButton) {
+      this.closeModalButton.nativeElement.click();
+      this.close.emit('close');
     }
   }
 

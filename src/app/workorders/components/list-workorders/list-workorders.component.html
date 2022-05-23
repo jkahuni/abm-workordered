@@ -462,405 +462,13 @@
     [(opened)]="showRightSidenav"
     (opened)="closeLeftSidenav()"
   >
-    <!-- sidenav header -->
-    <div class="sidenav-heading-container right-sidenav-heading">
-      <div class="sidenav-heading">
-        <h2>Actions</h2>
-      </div>
-    </div>
-
-    <div
-      *ngIf="
-        workorder &&
-        userType === 'engineering' &&
-        workorder.viewedByTechnician.status &&
-        !workorder.acknowledged.status
-      "
-      class="filter-field-value mb-4"
-    >
-      <div class="filter-value">W/O Opened</div>
-    </div>
-
-    <!-- no workorder selected -->
-    <div *ngIf="!workorder">
-      <div class="workorders-sidenav-text">
-        Select a workorder in the left pane to see available actions.
-      </div>
-    </div>
-
-    <!-- workorder selected -->
-    <div *ngIf="workorder">
-      <div class="display-workorder-actions">
-        <mat-action-list role="list">
-          <!-- SUPERVISOR ACTIONS -->
-          <div *ngIf="userType === 'supervisor'">
-            <!-- approve workorder -->
-            <mat-list-item role="listitem">
-              <div *ngIf="approveWorkorderLoading">
-                <button
-                  class="action-button btn btn-sm btn-success shadow-none"
-                  type="button"
-                  disabled
-                >
-                  <span
-                    #appprovingWorkorderLoadingSpinner
-                    class="spinner-border spinner-border-sm"
-                    role="status"
-                    aria-hidden="true"
-                  >
-                  </span>
-                  Approving...
-                </button>
-              </div>
-
-              <div *ngIf="!approveWorkorderLoading">
-                <button
-                  class="action-button btn btn-link shadow-none"
-                  type="button"
-                  (click)="approve()"
-                >
-                  Approve
-                </button>
-              </div>
-              <mat-divider></mat-divider>
-            </mat-list-item>
-
-            <!-- reject -->
-            <mat-list-item role="listitem">
-              <button
-                class="action-button btn btn-link shadow-none"
-                type="button"
-                (click)="refreshModals()"
-                data-bs-toggle="modal"
-                data-bs-target="#rejectWorkorderModal"
-              >
-                Reject
-              </button>
-              <mat-divider></mat-divider>
-            </mat-list-item>
-
-            <!-- supervisor handover -->
-            <mat-list-item role="listitem">
-              <button
-                class="action-button btn btn-link shadow-none"
-                type="button"
-                (click)="refreshModals()"
-                data-bs-toggle="modal"
-                data-bs-target="#supervisorHandoverModal"
-              >
-                Delegate
-              </button>
-              <mat-divider></mat-divider>
-            </mat-list-item>
-
-            <!-- change technicians -->
-            <mat-list-item role="listitem" class="long-button-text">
-              <button
-                class="action-button btn btn-link shadow-none"
-                type="button"
-                (click)="refreshModals()"
-                data-bs-toggle="modal"
-                data-bs-target="#changeTechniciansModal"
-              >
-                Change Technicians
-              </button>
-              <mat-divider></mat-divider>
-            </mat-list-item>
-
-            <!-- assign technicians -->
-            <div *ngIf="workorder.abnormalityCard.status">
-              <mat-list-item role="listitem" class="long-button-text">
-                <button
-                  class="action-button btn btn-link shadow-none"
-                  type="button"
-                  (click)="refreshModals()"
-                  data-bs-toggle="modal"
-                  data-bs-target="#assignTechniciansModal"
-                >
-                  Assign Technicians
-                </button>
-                <mat-divider></mat-divider>
-              </mat-list-item>
-            </div>
-          </div>
-
-          <!-- ENGINEERING ACTIONS -->
-          <div *ngIf="userType === 'engineering'">
-            <!-- acknowledge -->
-            <mat-list-item role="listitem">
-              <div *ngIf="!workorder.acknowledged.status">
-                <div *ngIf="acknowledgeWorkorderLoading">
-                  <button
-                    class="action-button btn btn-sm btn-success shadow-none"
-                    type="button"
-                    disabled
-                  >
-                    <span
-                      #acknowledgeWorkorderLoadingButtonSpinner
-                      class="spinner-border spinner-border-sm"
-                      role="status"
-                      aria-hidden="true"
-                    >
-                    </span>
-                    Updating...
-                  </button>
-                </div>
-
-                <div *ngIf="!acknowledgeWorkorderLoading">
-                  <button
-                    class="action-button btn btn-link shadow-none"
-                    type="button"
-                    (click)="acknowledge()"
-                  >
-                    Acknowledge
-                  </button>
-                </div>
-              </div>
-
-              <div *ngIf="workorder.acknowledged.status">
-                <button
-                  class="action-button btn btn-link shadow-none"
-                  type="button"
-                  disabled
-                >
-                  Acknowledged
-                </button>
-              </div>
-              <mat-divider></mat-divider>
-            </mat-list-item>
-
-            <!-- mark as done -->
-            <mat-list-item role="listitem">
-              <div *ngIf="!workorder.acknowledged.status">
-                <button
-                  class="action-button btn btn-link shadow-none"
-                  type="button"
-                  (click)="markDoneBeforeAcknowledged()"
-                >
-                  Mark Done
-                </button>
-              </div>
-
-              <div *ngIf="workorder.acknowledged.status">
-                <div *ngIf="!workorder.done.status">
-                  <div *ngIf="markWorkorderDoneLoading">
-                    <button
-                      class="action-button btn btn-sm btn-success shadow-none"
-                      type="button"
-                      disabled
-                    >
-                      <span
-                        #markWorkorderDoneLoadingButtonSpinner
-                        class="spinner-border spinner-border-sm"
-                        role="status"
-                        aria-hidden="true"
-                      >
-                      </span>
-                      Updating...
-                    </button>
-                  </div>
-
-                  <div *ngIf="!markWorkorderDoneLoading">
-                    <button
-                      class="action-button btn btn-link shadow-none"
-                      type="button"
-                      (click)="markDone()"
-                    >
-                      Mark Done
-                    </button>
-                  </div>
-                </div>
-
-                <div *ngIf="workorder?.done?.status">
-                  <button class="action-button btn" type="button" disabled>
-                    Done
-                  </button>
-                </div>
-              </div>
-              <mat-divider></mat-divider>
-            </mat-list-item>
-
-            <!-- close -->
-            <mat-list-item role="listitem">
-              <div
-                *ngIf="workorder.acknowledged.status && workorder.done.status"
-              >
-                <button
-                  type="button"
-                  class="action-button btn btn-link shadow-none"
-                  (click)="close(workorder)"
-                >
-                  Close
-                </button>
-              </div>
-
-              <div
-                *ngIf="!workorder.acknowledged.status || !workorder.done.status"
-              >
-                <button
-                  type="button"
-                  class="action-button btn btn-link shadow-none"
-                  (click)="closeBeforeAcknowledgedOrDone()"
-                >
-                  Close
-                </button>
-              </div>
-              <mat-divider></mat-divider>
-            </mat-list-item>
-
-            <!-- handover -->
-            <mat-list-item role="listitem">
-              <div
-                *ngIf="!workorder.acknowledged.status && !workorder.done.status"
-              >
-                <button
-                  type="button"
-                  class="action-button btn btn-link shadow-none"
-                  (click)="refreshModals()"
-                  data-bs-toggle="modal"
-                  data-bs-target="#engineeringTechnicianHandoverModal"
-                >
-                  Handover
-                </button>
-              </div>
-
-              <div
-                *ngIf="workorder.acknowledged.status && !workorder.done.status"
-              >
-                <button
-                  type="button"
-                  class="action-button btn btn-link shadow-none"
-                  (click)="handoverAfterAcknowledged()"
-                >
-                  Handover
-                </button>
-              </div>
-
-              <div
-                *ngIf="workorder.acknowledged.status && workorder.done.status"
-              >
-                <button
-                  type="button"
-                  class="action-button btn btn-link shadow-none"
-                  (click)="handoverAfterDone()"
-                >
-                  Handover
-                </button>
-              </div>
-              <mat-divider></mat-divider>
-            </mat-list-item>
-          </div>
-
-          <!-- STORES ACTIONS -->
-          <div *ngIf="userType === 'stores'">
-            <mat-list-item role="listitem">
-              <button
-                type="button"
-                class="action-button btn btn-link shadow-none"
-                [routerLink]="[
-                  '/issue-spares',
-                  workorderUid,
-                  userUid,
-                  workordersType
-                ]"
-              >
-                Issue Spares
-              </button>
-              <mat-divider></mat-divider>
-            </mat-list-item>
-
-            <mat-list-item role="listitem">
-              <button
-                type="button"
-                class="action-button btn btn-link shadow-none"
-                (click)="refreshModals()"
-                data-bs-toggle="modal"
-                data-bs-target="#storesTechnicianHandoverModal"
-              >
-                Handover
-              </button>
-              <mat-divider></mat-divider>
-            </mat-list-item>
-          </div>
-
-          <!-- ENG MANAGER ACTIONS -->
-          <div *ngIf="userType === 'manager'">
-            <!-- accept current workorder -->
-            <mat-list-item class="mt-2 mb-3">
-              <button
-                *ngIf="!reviewingWorkorder"
-                type="button"
-                class="action-button btn btn-link shadow-none"
-                (click)="reviewWorkorder()"
-              >
-                Mark Reviewed
-              </button>
-              <button
-                *ngIf="reviewingWorkorder"
-                type="button"
-                class="action-button btn btn-success shadow-none"
-                disabled
-              >
-                <span
-                  #reviewWorkorderButtonSpinner
-                  class="spinner-border spinner-border-sm"
-                  role="status"
-                  aria-hidden="true"
-                >
-                </span>
-                Updating...
-              </button>
-            </mat-list-item>
-
-            <!-- accept all workorders -->
-            <mat-list-item class="my-3">
-              <button
-                type="button"
-                class="action-button btn btn-link shadow-none"
-                (click)="refreshModals()"
-                data-bs-toggle="modal"
-                data-bs-target="#reviewWorkordersModal"
-              >
-                Mark All Reviewed
-              </button>
-            </mat-list-item>
-
-            <!-- raise-concerns -->
-            <mat-list-item class="my-3">
-              <button
-                type="button"
-                class="action-button btn btn-link shadow-none"
-                (click)="refreshModals()"
-                data-bs-toggle="modal"
-                data-bs-target="#raiseConcernModal"
-              >
-                Raise Concern
-              </button>
-            </mat-list-item>
-          </div>
-
-          <!-- common actions for all users -->
-          <mat-list-item role="listitem">
-            <!-- <button
-              type="button"
-              class="action-button btn btn-link shadow-none"
-              data-bs-toggle="modal"
-              data-bs-target="#guidelinesModal"
-              (click)="showHelpModal = !showHelpModal"
-            >
-              Help?
-            </button> -->
-            <button
-              type="button"
-              class="action-button btn btn-link shadow-none"
-              (click)="showHelpModal = !showHelpModal"
-            >
-              Help?
-            </button>
-          </mat-list-item>
-        </mat-action-list>
-      </div>
-    </div>
+    <app-workorder-actions
+      [selectedWorkorder]="workorder"
+      [userType]="userType"
+      [userUid]="userUid"
+      [workordersType]="workordersType"
+      (showModal)="toggleModal($event)"
+    ></app-workorder-actions>
   </mat-sidenav>
 
   <!-- main sidenav content -->
@@ -981,8 +589,9 @@
             <div class="display-workorder">
               <div class="form-container mat-elevation-z5">
                 <app-workorder
-                  [workorderToDisplay]="workorder"
+                  [workorder]="workorder"
                   [user]="userType"
+                  (updateWorkorder)="updateWorkorder($event)"
                 ></app-workorder>
               </div>
             </div>
@@ -995,7 +604,11 @@
 
 <!-- help modal -->
 <div *ngIf="showHelpModal && workorder">
-  <app-help-modal [user]="userType" [workorder]="workorder" (close)="closeHelpModal($event)">
+  <app-help-modal
+    [user]="userType"
+    [workorder]="workorder"
+    (close)="toggleModal($event)"
+  >
   </app-help-modal>
 </div>
 
@@ -1004,6 +617,7 @@
 <div *ngIf="showRejectWorkorderModal && workorder">
   <app-reject-workorder-modal
     [workorder]="workorder"
+    (close)="toggleModal($event)"
   ></app-reject-workorder-modal>
 </div>
 
@@ -1012,6 +626,7 @@
   <app-supervisors-handover-modal
     [workorder]="workorder"
     [supervisors]="supervisors"
+    (close)="toggleModal($event)"
   ></app-supervisors-handover-modal>
 </div>
 
@@ -1020,6 +635,7 @@
   <app-change-technicians-modal
     [workorder]="workorder"
     [technicians]="technicians"
+    (close)="toggleModal($event)"
   ></app-change-technicians-modal>
 </div>
 
@@ -1028,6 +644,7 @@
   <app-assign-technicians-modal
     [workorder]="workorder"
     [technicians]="technicians"
+    (close)="toggleModal($event)"
   ></app-assign-technicians-modal>
 </div>
 
@@ -1037,6 +654,7 @@
   <app-technicians-handover-modal
     [workorder]="workorder"
     [technicians]="technicians"
+    (close)="toggleModal($event)"
   ></app-technicians-handover-modal>
 </div>
 
@@ -1045,6 +663,7 @@
   <app-store-technicians-handover-modal
     [workorder]="workorder"
     [technicians]="technicians"
+    (close)="toggleModal($event)"
   ></app-store-technicians-handover-modal>
 </div>
 
@@ -1053,10 +672,14 @@
 <div *ngIf="showReviewWorkordersModal && workorders">
   <app-review-workorders-modal
     [workorders]="workorders"
+    (close)="toggleModal($event)"
   ></app-review-workorders-modal>
 </div>
 
 <!-- raise concerns -->
 <div *ngIf="showRaiseConcernsModal && workorder">
-  <app-raise-concern-modal [workorder]="workorder"></app-raise-concern-modal>
+  <app-raise-concern-modal
+    [workorder]="workorder"
+    (close)="toggleModal($event)"
+  ></app-raise-concern-modal>
 </div>

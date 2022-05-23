@@ -1,4 +1,3 @@
-
 <div
   class="modal fade"
   id="changeTechniciansModal"
@@ -16,7 +15,7 @@
           <strong>W/o No. {{ workorder?.workorder?.number }}</strong>
         </h3>
         <button
-          #closeChangeTechniciansModal
+          #closeModalButton
           class="btn-close border border-success border-2"
           type="button"
           data-bs-dismiss="modal"
@@ -200,7 +199,7 @@
             !workorder?.storesTechnician?.fullName
           "
         >
-          <div *ngIf="!changingTechnicians ">
+          <div *ngIf="!changingTechnicians">
             <button
               type="submit"
               class="btn btn-primary"
@@ -211,7 +210,7 @@
             </button>
           </div>
 
-          <div *ngIf="changingTechnicians ">
+          <div *ngIf="changingTechnicians">
             <button type="button" class="btn btn-success" disabled>
               <span
                 #buttonSpinner
@@ -228,3 +227,11 @@
     </div>
   </div>
 </div>
+
+<button
+  #openModalButton
+  [hidden]="true"
+  type="button"
+  data-bs-toggle="modal"
+  data-bs-target="#changeTechniciansModal"
+></button>

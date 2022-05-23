@@ -29,7 +29,7 @@ import { ValidateMixedFormatDirective } from '@workorders/directives/validate-mi
     raiseWorkorderComponents,
     closeWorkorderComponents,
     workordersComponents,
-    exportableComponents
+    exportableComponents,
   ],
   imports: [
     CommonModule,

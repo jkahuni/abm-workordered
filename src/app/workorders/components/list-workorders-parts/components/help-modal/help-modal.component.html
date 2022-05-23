@@ -19,6 +19,7 @@
           type="button"
           data-bs-dismiss="modal"
           aria-label="Close"
+          (click)="closeModal()"
         ></button>
       </div>
 
@@ -133,7 +134,12 @@
       </div>
 
       <div class="modal-footer">
-        <button type="button" class="btn btn-success" data-bs-dismiss="modal">
+        <button
+          type="button"
+          class="btn btn-success"
+          data-bs-dismiss="modal"
+          (click)="closeModal()"
+        >
           Understood
         </button>
       </div>

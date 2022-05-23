@@ -15,15 +15,26 @@ export class SupervisorsHandoverModalComponent implements OnInit {
     private workordersService: WorkordersService,
     private fb: FormBuilder,
     private toast: HotToastService,
-  ) { }
+  ) {
+    setTimeout(() => {
+      if (this.openModalButton) {
+        this.openModalButton.nativeElement.click();
+      }
+    });
+  }
 
   @Input()
   workorder!: IntWorkorder;
   @Input()
   supervisors!: IntUser[];
 
+  // output
+  @Output()
+  close: EventEmitter<string> = new EventEmitter<string>();
+
   // template references
-  @ViewChild('closeSupervisorHandoverModal') closeSupervisorHandoverModal!: ElementRef;
+  @ViewChild('openModalButton') openModalButton!: ElementRef;
+  @ViewChild('closeModalButton') closeModalButton!: ElementRef;
   @ViewChild('buttonSpinner') buttonSpinner!: ElementRef;
 
   form!: FormGroup;
@@ -70,8 +81,9 @@ export class SupervisorsHandoverModalComponent implements OnInit {
   }
 
   closeModal(): void {
-    if (this.closeSupervisorHandoverModal) {
-      this.closeSupervisorHandoverModal.nativeElement.click();
+    if (this.closeModalButton) {
+      this.closeModalButton.nativeElement.click();
+      this.close.emit('close');
     }
   }
 

@@ -1,0 +1,66 @@
+.sidenav-heading-container,
+.filter-field-value {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sidenav-heading,
+.filter-value {
+    margin: 16px 0 0;
+}
+
+.filter-value {
+    color: green;
+}
+
+.workorders-sidenav-text {
+    text-align: center;
+    padding: 45% 20px;
+}
+
+mat-divider.mat-divider {
+    border-top-width: 2px;
+    border-top-color: black;
+}
+
+::ng-deep {
+    span.mat-list-item-content {
+        padding: 0px;
+    }
+
+    h2 {
+        margin: 0px 0px 8px;
+    }
+}
+
+.action-button {
+    text-decoration: none;
+}
+
+.display-workorder-actions {
+    display: flex;
+    flex-direction: column;
+
+    mat-list-item {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    mat-list-item.long-button-text {
+        height: 60px;
+    }
+
+    ::ng-deep {
+        span.mat-list-item-content {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+    }
+}

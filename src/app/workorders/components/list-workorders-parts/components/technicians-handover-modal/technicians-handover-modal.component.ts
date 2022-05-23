@@ -1,4 +1,4 @@
-import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, Input, OnInit, ViewChild, Output, EventEmitter } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HotToastService } from '@ngneat/hot-toast';
 import { IntWorkorder, IntUser } from '@workorders/models/workorders.models';
@@ -17,14 +17,24 @@ export class TechniciansHandoverModalComponent implements OnInit {
     private workordersService: WorkordersService,
     private toast: HotToastService,
     private fb: FormBuilder
-  ) { }
+  ) {
+    setTimeout(() => {
+      if (this.openModalButton) {
+        this.openModalButton.nativeElement.click();
+      }
+    });
+   }
 
   @Input()
   workorder!: IntWorkorder;
   @Input()
   technicians!: IntUser[];
 
-  @ViewChild('closeEngineeringTechniciansHandoverModal') closeEngineeringTechniciansHandoverModal!: ElementRef;
+  @Output()
+  close: EventEmitter<string> = new EventEmitter<string>();
+
+  @ViewChild('openModalButton') openModalButton!: ElementRef;
+  @ViewChild('closeModalButton') closeModalButton!: ElementRef;
   @ViewChild('buttonSpinner') buttonSpinner!: ElementRef;
 
   form!: FormGroup;
@@ -66,8 +76,9 @@ export class TechniciansHandoverModalComponent implements OnInit {
   }
 
   closeModal(): void {
-    if (this.closeEngineeringTechniciansHandoverModal) {
-      this.closeEngineeringTechniciansHandoverModal.nativeElement.click();
+    if (this.closeModalButton) {
+      this.closeModalButton.nativeElement.click();
+      this.close.emit('close');
     }
   }
 
