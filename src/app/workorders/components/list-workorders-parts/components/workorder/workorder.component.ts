@@ -19,7 +19,6 @@ export class WorkorderComponent implements OnInit, OnChanges {
     private workordersService: WorkordersService
   ) { }
 
-
   @Input()
   workorder!: IntWorkorder;
 
@@ -31,6 +30,8 @@ export class WorkorderComponent implements OnInit, OnChanges {
   allowedUsers: string[] = ['engineering', 'stores', 'supervisor', 'manager'];
 
   form!: FormGroup;
+  workorders!: IntWorkorder[];
+  workorderEscalationTimeouts: any = {};
 
   ngOnInit(): void {
     // this.updateWorkorderViewStatus(this.workorder);
@@ -111,24 +112,23 @@ export class WorkorderComponent implements OnInit, OnChanges {
     return dayjs(dateTime).format('HH:mm:ss');
   }
 
+  private updateWorkordersArray(uid: string, update: {}): void {
+    this.workordersService.refreshWorkorders(uid, update)
+      .then(() => this.updateWorkorder.emit(uid));
+  }
+
   private updateWorkorderViewStatus(workorder: IntWorkorder): void {
-    const allowedTime: number = 3;
-    const workorderUid = workorder.workorder.uid;
-    const workorderType = workorder.workorder.type;
-    const workorderNumber = workorder.workorder.number;
-
-    const viewed = workorder.viewedByTechnician.status;
-    const escalated = workorder.escalated?.status;
-
-    const now = dayjs().format();
-
-    const viewedTime = dayjs(workorder.viewedByTechnician.dateTime);
-
-    const timeDifference = dayjs(now).diff(viewedTime, 'minutes', false);
-
-    const acknowledged = workorder.acknowledged.status;
-
     if (this.userType === 'engineering') {
+      const workorderUid = workorder.workorder.uid;
+      const workorderType = workorder.workorder.type;
+      const workorderNumber = workorder.workorder.number;
+      const escalated = workorder.escalated?.status;
+
+      const viewed = workorder.viewedByTechnician.status;
+
+      const now = dayjs().format();
+      const acknowledged = workorder.acknowledged.status;
+
       // update view status first
       if (!viewed) {
         const workorderUpdateData = {
@@ -140,62 +140,61 @@ export class WorkorderComponent implements OnInit, OnChanges {
 
         this.workordersService.updateWorkorder(workorderUid, workorderUpdateData)
           .then(() => {
-            this.refreshWorkorders(workorderUid, workorderUpdateData);
+            this.updateWorkordersArray(workorderUid, workorderUpdateData);
             this.toast.info(`Acknowledge or handover <b>${workorderType}</b> workorder <b>${workorderNumber
               }</b> within 3 minutes, failure to which the workorder will be escalated to the supervisor. Please note that once you acknowledge you cannot handover.`, { duration: 60000 });
           });
 
       }
+      else if (viewed) {
+        if (!acknowledged && !this.workorderEscalationTimeouts[workorderUid] && !escalated) {
+          this.scheduleWorkorderEscalation(workorder);
+        }
 
-      else if (viewed && !acknowledged) {
-        if (!escalated) {
-          if (timeDifference > allowedTime) {
-            setTimeout(() => {
-              const workorderUpdateData = {
-                escalated: {
-                  status: true,
-                  dateTime: dayjs().format(),
-                  technicianNotified: true
-                }
-              };
+        else if (!acknowledged && this.workorderEscalationTimeouts[workorderUid] && escalated) {
+          delete (this.workorderEscalationTimeouts[workorderUid]);
+        }
 
-              this.workordersService.updateWorkorder(workorderUid, workorderUpdateData)
-                .then(() => {
-                  this.refreshWorkorders(workorderUid, workorderUpdateData);
-                  this.toast.error(`You have exceeded the allowed time to acknowledge or handover <b>${workorderType
-                    }</b> workorder <b>${workorderNumber
-                    }</b>. The workorder has been escalated to the supervisor.`, { autoClose: false });
-                });
-            });
-          }
-
-          else if (timeDifference < allowedTime) {
-            setTimeout(() => {
-              const workorderUpdateData = {
-                escalated: {
-                  status: true,
-                  dateTime: dayjs().format(),
-                  technicianNotified: true
-                }
-              };
-
-              this.workordersService.updateWorkorder(workorderUid, workorderUpdateData)
-                .then(() => {
-                  this.refreshWorkorders(workorderUid, workorderUpdateData);
-                  this.toast.error(`You have exceeded the allowed time to acknowledge or handover <b>${workorderType
-                    }</b> workorder <b>${workorderNumber
-                    }</b>. The workorder has been escalated to the supervisor.`, { autoClose: false });
-                });
-            }, 1000 * 60 * (allowedTime - timeDifference));
-          }
+        else if (acknowledged && this.workorderEscalationTimeouts[workorderUid]) {
+          clearTimeout(this.workorderEscalationTimeouts[workorderUid]);
+          delete (this.workorderEscalationTimeouts[workorderUid]);
         }
       }
+
     }
   }
 
-  private refreshWorkorders(uid: string, update: {}): void {
-    this.workordersService.refreshWorkorders(uid, update)
-      .then(() => this.updateWorkorder.emit(uid));
+  private scheduleWorkorderEscalation(workorder: IntWorkorder): any {
+    const allowedTime: number = 3;
+    const workorderUid = workorder.workorder.uid;
+    const workorderType = workorder.workorder.type;
+    const workorderNumber = workorder.workorder.number;
+
+    const now = dayjs().format();
+
+    const viewedTime = dayjs(workorder.viewedByTechnician.dateTime);
+
+    const timeDifference = dayjs(now).diff(viewedTime, 'minutes', false);
+
+    const delay = timeDifference < allowedTime ? 1000 * 60 * (allowedTime - timeDifference) : 0;
+
+    this.workorderEscalationTimeouts[workorderUid] = setTimeout(() => {
+      const workorderUpdateData = {
+        escalated: {
+          status: true,
+          dateTime: dayjs().format(),
+          technicianNotified: true
+        }
+      };
+
+      this.workordersService.updateWorkorder(workorderUid, workorderUpdateData)
+        .then(() => {
+          this.updateWorkordersArray(workorderUid, workorderUpdateData);
+          this.toast.error(`You have exceeded the allowed time to acknowledge or handover <b>${workorderType
+            }</b> workorder <b>${workorderNumber
+            }</b>. The workorder has been escalated to the supervisor.`, { autoClose: false });
+        });
+    }, delay);
   }
 
   // form getters

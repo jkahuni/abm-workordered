@@ -24,6 +24,7 @@ export class WorkorderActionsComponent implements OnInit, OnChanges {
   @Input() workordersType!: string | null;
 
   @Output() showModal: EventEmitter<string> = new EventEmitter<string>()
+  @Output() updateWorkorder: EventEmitter<string> = new EventEmitter<string>();
 
   @ViewChild('appprovingWorkorderButtonSpinner') appprovingWorkorderButtonSpinner!: ElementRef;
   @ViewChild('acknowledgingWorkorderButtonSpinner') acknowledgingWorkorderButtonSpinner!: ElementRef;
@@ -60,6 +61,7 @@ export class WorkorderActionsComponent implements OnInit, OnChanges {
   }
 
   private closeButtonSpinners(): void {
+    this.toast.close();
     this.approvingWorkorder = false;
     this.acknowledgingWorkorder = false;
     this.markingDone = false;
@@ -76,10 +78,10 @@ export class WorkorderActionsComponent implements OnInit, OnChanges {
   }
   }
 
-  private updateWorkorders(uid: string, update: {}): void {
+  private updateWorkordersArray(uid: string, update: {}): void {
     this.workordersService.refreshWorkorders(
       uid, update
-    );
+    ).then(() => this.updateWorkorder.emit(uid));
   }
 
   openModal(type: string): any {
@@ -132,16 +134,16 @@ export class WorkorderActionsComponent implements OnInit, OnChanges {
       this.workordersService.updateWorkorder(workorderUid, workorderUpdateData)
         .then(() => {
           this.closeButtonSpinners();
-          this.updateWorkorders(workorderUid, workorderUpdateData);
+          this.updateWorkordersArray(workorderUid, workorderUpdateData);
 
-          this.toast.success(`Success. Workorder ${workorderNumber} approved successfully.`, { id: 'approve-workorder-success' });
+          this.toast.success(`Success. Workorder <b>${workorderNumber}</b> approved successfully.`, { id: 'approve-workorder-success' });
 
         })
         .catch(() => {
           this.closeButtonSpinners();
 
           this.toast.error(`Failed:
-             Approving workorder ${workorderNumber} failed with error LW-AW-04. Please try again, or report the error code to support if the issue persists.`,
+             Approving workorder <b>${workorderNumber}</b> failed with error code <b>LW-ApW-04</b>. Please try again, or report the error code to support if the issue persists.`,
             { autoClose: false, id: 'error-code-WL-04' });
         });
     }
@@ -164,12 +166,12 @@ export class WorkorderActionsComponent implements OnInit, OnChanges {
       this.workordersService.updateWorkorder(workorderUid, workorderUpdateData)
         .then(() => {
           this.closeButtonSpinners();
-          this.updateWorkorders(workorderUid, workorderUpdateData);
-          this.toast.success(`Success. Workorder ${workorderNumber} acknowledged successfully.`, { id: 'acknowledge-workorder-success' });
+          this.updateWorkordersArray(workorderUid, workorderUpdateData);
+          this.toast.success(`Success. Workorder <b>${workorderNumber}</b> acknowledged successfully.`, { id: 'acknowledge-workorder-success' });
         })
         .catch(() => {
           this.closeButtonSpinners();
-          this.toast.error(`Failed. Acknowleding workorder ${workorderNumber} failed with error code LW-AckW-01. Please try again or report this error code to support for assistance if the issue persists.`, {
+          this.toast.error(`Failed. Acknowleding workorder <b>${workorderNumber}</b> failed with error code <b>LW-AckW-01</b>. Please try again or report this error code to support for assistance if the issue persists.`, {
             autoClose: false, id: 'error-code-WL-09'
           });
         });
@@ -209,12 +211,12 @@ export class WorkorderActionsComponent implements OnInit, OnChanges {
       this.workordersService.updateWorkorder(workorderUid, workorderUpdateData)
         .then(() => {
           this.closeButtonSpinners();
-          this.updateWorkorders(workorderUid, workorderUpdateData);
-          this.toast.success(`Success. Workorder ${workorderNumber} marked as done. Click on the workorder to view the time taken.`, { id: 'mark-workorder-done-success' });
+          this.updateWorkordersArray(workorderUid, workorderUpdateData);
+          this.toast.success(`Success. Workorder <b>${workorderNumber}</b> marked as done. Click on the workorder to view the time taken.`, { id: 'mark-workorder-done-success' });
         })
         .catch(() => {
           this.closeButtonSpinners();
-          this.toast.error(`Failed. Marking workorder ${workorderNumber} as done failed with error code LW-MWD-01. Please try again or report this error code to support for assistance if the issue persists.`, {
+          this.toast.error(`Failed. Marking workorder <b>${workorderNumber}</b> as done failed with error code <b>LW-MWD-01</b>. Please try again or report this error code to support for assistance if the issue persists.`, {
             autoClose: false, id: 'error-code-WL-10'
           });
         });
@@ -244,12 +246,12 @@ export class WorkorderActionsComponent implements OnInit, OnChanges {
       this.workordersService.updateWorkorder(workorderUid, workorderUpdateData)
         .then(() => {
           this.closeButtonSpinners();
-          this.updateWorkorders(workorderUid, workorderUpdateData);
-          this.toast.success(`Success. Workorder ${workorderNumber} reviewed successfully.`, { id: 'review-workorder-success' });
+          this.updateWorkordersArray(workorderUid, workorderUpdateData);
+          this.toast.success(`Success. Workorder <b>${workorderNumber}</b> reviewed successfully.`, { id: 'review-workorder-success' });
         })
         .catch(() => {
           this.closeButtonSpinners();
-          this.toast.error(`Failed. Reviewing workorder ${workorderNumber} failed with error code LW-RSW-01. Please try again or report the error code to support to have the issue fixed.`, { autoClose: false, id: 'review-workorder-error' });
+          this.toast.error(`Failed. Reviewing workorder <b>${workorderNumber}</b> failed with error code <b>LW-RSW-01</b>. Please try again or report the error code to support to have the issue fixed.`, { autoClose: false, id: 'review-workorder-error' });
         });
     }
   }

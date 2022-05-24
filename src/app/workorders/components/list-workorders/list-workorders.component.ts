@@ -642,7 +642,7 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
       : false;
   }
 
-  // updating the workorder
+  // $event = uid
   updateWorkorder(uid: string): any {
     const workorder = this.workorders.find((workorder: IntWorkorder) => workorder.workorder.uid === uid);
 
