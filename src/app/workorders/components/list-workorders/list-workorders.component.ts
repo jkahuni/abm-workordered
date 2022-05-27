@@ -98,10 +98,6 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
 
   largeScreen!: boolean;
 
-  workordersWithActions: string[] = [
-    'open', 'approved', 'unverified', 'un-reviewed'
-  ];
-
   ngOnDestroy(): void {
     this.stopAllListeners.next();
     this.stopAllListeners.complete();
@@ -488,21 +484,23 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
 
   // get all users
   private getUsers(): void {
-    this.workordersService.getUsers()
-      .then((users: IntUser[]) => {
-        this.supervisors = users.filter((user: IntUser) => user.group === 'Supervisor'
-        );
+    if (this.workorderHasActions) {
+      this.workordersService.getUsers()
+        .then((users: IntUser[]) => {
+          this.supervisors = users.filter((user: IntUser) => user.group === 'Supervisor'
+          );
 
-        this.technicians = users.filter(
-          (user: IntUser) =>
-            user.group === 'Technician'
-        );
-      })
-      .catch(() => {
-        this.toast.close();
-        this.toast.error(`Error: A crucial operation failed with error code LW-GU-01. Please reload the page or report the error code to support to have it fixed.`,
-          { autoClose: false, id: 'error-code-WL-03' });
-      });
+          this.technicians = users.filter(
+            (user: IntUser) =>
+              user.group === 'Technician'
+          );
+        })
+        .catch(() => {
+          this.toast.close();
+          this.toast.error(`Error: A crucial operation failed with error code LW-GU-01. Please reload the page or report the error code to support to have it fixed.`,
+            { autoClose: false, id: 'error-code-WL-03' });
+        });
+    }
   }
 
   // hide spinners
@@ -525,13 +523,11 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
   }
 
   closeLeftSidenav(): boolean {
-    console.log('called 1');
-    return this.largeScreen && this.workorderHasActions ? this.showLeftSidenav = true : this.showLeftSidenav = false;
+    return this.showLeftSidenav = this.largeScreen && this.workorderHasActions ? true : false;
   }
 
   closeRightSidenav(): boolean {
-    console.log('called 2');
-    return this.largeScreen && this.workorderHasActions ? this.showRightSidenav = true : this.showRightSidenav = false;
+    return this.showRightSidenav = this.largeScreen && this.workorderHasActions ? true : false;
   }
 
   closeAllModals(): void {
@@ -552,6 +548,7 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
     if (workorders.length === 0) {
       this.workorder = undefined;
     }
+    
   }
 
   displayCurrentWorkorder(workorder: IntWorkorder): any {

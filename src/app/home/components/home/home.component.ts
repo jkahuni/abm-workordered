@@ -215,12 +215,10 @@ export class HomeComponent implements OnInit {
 
   // get all wokrorders first
   private getAllWorkorders(): void {
-    console.log('HOME METHOD CALLED');
     this.workordersService.$allWorkorders.subscribe(
       (workorders: IntWorkorder[] | null) => {
         if (workorders) {
           this.workorders = workorders;
-          console.log('INSIDE HOME METHOD SUBSCRIBE', this.workorders);
         } else {
           this.workordersService.getAllWorkorders()
             .catch((err: any) => {
