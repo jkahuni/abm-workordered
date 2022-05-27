@@ -34,8 +34,6 @@ export class WorkorderComponent implements OnInit, OnChanges {
   workorderEscalationTimeouts: any = {};
 
   ngOnInit(): void {
-    // this.updateWorkorderViewStatus(this.workorder);
-    this.createForm(this.workorder);
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -68,6 +66,8 @@ export class WorkorderComponent implements OnInit, OnChanges {
       timeAcknowledged: [this.formatTime(workorder.acknowledged.dateTime)],
       dateDone: [this.formatDate(workorder.done.dateTime)],
       timeDone: [this.formatTime(workorder.done.dateTime)],
+      dateEscalated: [this.formatDate(workorder.escalated?.dateTime)],
+      timeEscalated: [this.formatTime(workorder.escalated?.dateTime)],
       timeFromTimeRaised: [workorder.timeTaken.fromTimeRaised],
       timeFromTimeApproved: [workorder.timeTaken.fromTimeApproved],
       timeFromTimeAcknowledged: [workorder.timeTaken.fromTimeAcknowledged],
@@ -104,11 +104,11 @@ export class WorkorderComponent implements OnInit, OnChanges {
     return sparesArray;
   }
 
-  private formatDate(dateTime: string): string {
+  private formatDate(dateTime: string | undefined): string {
     return dayjs(dateTime).format('DD MMM, YYYY');
   }
 
-  private formatTime(dateTime: string): string {
+  private formatTime(dateTime: string | undefined): string {
     return dayjs(dateTime).format('HH:mm:ss');
   }
 

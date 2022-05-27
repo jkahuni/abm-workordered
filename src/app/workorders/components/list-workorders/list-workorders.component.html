@@ -15,442 +15,14 @@
     [(opened)]="showLeftSidenav"
     (opened)="closeRightSidenav()"
   >
-    <!-- filter workorders -->
-    <div class="filter-workorders">
-      <div class="filter-workorders-text-and-icon">
-        <div class="filter-workorders-text fw-bold">Filter</div>
-        <div class="filter-workorders-icon">
-          <mat-icon
-            (click)="showWorkordersFilterOptions = !showWorkordersFilterOptions"
-            >filter_list</mat-icon
-          >
-        </div>
-      </div>
-      <div
-        *ngIf="showWorkordersFilterOptions"
-        class="filter-workorders-options"
-      >
-        <mat-form-field>
-          <mat-label>Filter Options</mat-label>
-          <mat-select
-            #filterWorkordersOptionsField
-            (selectionChange)="
-              filterWorkordersByDateRaised(filterWorkordersOptionsField.value)
-            "
-          >
-            <mat-option value="None">None</mat-option>
-            <mat-option value="Today">Today</mat-option>
-            <mat-option value="Yesterday">Yesterday</mat-option>
-            <mat-option value="This Week">This Week</mat-option>
-            <mat-option value="Last Week">Last Week</mat-option>
-            <mat-option value="This Month">This Month</mat-option>
-            <mat-option value="Last Month">Last Month</mat-option>
-          </mat-select>
-        </mat-form-field>
-      </div>
-    </div>
-
-    <!-- filter value -->
-    <div
-      *ngIf="filterOption && filterOption !== 'None'"
-      class="filter-field-value"
+    <app-workorder-numbers
+      [workorders]="workorders"
+      [loadingAllWorkorders]="loadingWorkorders"
+      [loadingAllWorkordersFailed]="loadingWorkordersFailed"
+      (workordersFiltered)="workordersFiltered($event)"
+      (displayCurrentWorkorder)="displayCurrentWorkorder($event)"
     >
-      <div class="filter-value" style="text-decoration: underline">
-        {{ filterOption }}'s W/o's
-      </div>
-    </div>
-
-    <!-- sidenav header -->
-    <div class="sidenav-heading-container left-sidenav-heading">
-      <div class="sidenav-heading">
-        <h2>Workorders</h2>
-      </div>
-    </div>
-
-    <!-- loading workorders -->
-    <div *ngIf="loadingWorkorders">
-      <div class="workorders-sidenav-text-container">
-        <div class="loading-workorders workorders-sidenav-text">
-          Loading workorders...
-        </div>
-      </div>
-    </div>
-
-    <!-- loading workorders failed -->
-    <div *ngIf="!loadingWorkorders && loadingWorkordersFailed">
-      <div class="workorders-sidenav-text-container">
-        <div
-          class="loading-workorders workorders-sidenav-text"
-          style="color: red"
-        >
-          Loading workorders failed.
-        </div>
-      </div>
-    </div>
-
-    <!-- workorders loaded -->
-    <div
-      *ngIf="
-        !loadingWorkorders && !loadingWorkordersFailed && workordersToDisplay
-      "
-    >
-      <!-- no pending workorders -->
-      <div *ngIf="workordersToDisplay.length === 0">
-        <div class="workorders-sidenav-text-container">
-          <div class="workorders-sidenav-text">No workorders to display.</div>
-        </div>
-      </div>
-
-      <!-- pending workorders -->
-      <div *ngIf="workordersToDisplay.length !== 0">
-        <div class="display-workorder-numbers">
-          <mat-action-list role="list">
-            <!-- corrective maintenance workorders -->
-            <div
-              *ngIf="
-                filterWorkordersByType(
-                  'Corrective Maintenance'
-                ) as correctiveMaintenanceWorkorders
-              "
-            >
-              <div *ngIf="correctiveMaintenanceWorkorders.length !== 0">
-                <div class="workorder-numbers">
-                  <div mat-subheader class="workorders-subheader">
-                    Corrective Mtnc
-                  </div>
-                </div>
-                <mat-list-item
-                  role="listitem"
-                  *ngFor="
-                    let workorder of correctiveMaintenanceWorkorders;
-                    let last = last
-                  "
-                >
-                  <button
-                    type="button"
-                    class="action-button btn btn-link shadow-none"
-                    (click)="displayWorkorder(workorder.workorder.number)"
-                  >
-                    <span
-                      class="d-inline-block text-truncate"
-                      style="max-width: 100px"
-                      >{{
-                        workorder.raised.dateTime | formatWorkorderNumber
-                      }}</span
-                    >
-                  </button>
-                  <mat-divider *ngIf="!last"></mat-divider>
-                </mat-list-item>
-                <mat-divider class="mb-2"></mat-divider>
-              </div>
-            </div>
-
-            <!-- breakdown workorders -->
-            <div
-              *ngIf="filterWorkordersByType('Breakdown') as breakdownWorkorders"
-            >
-              <div *ngIf="breakdownWorkorders.length !== 0">
-                <div class="workorder-numbers">
-                  <div mat-subheader class="workorders-subheader">
-                    Breakdown
-                  </div>
-                </div>
-                <mat-list-item
-                  role="listitem"
-                  *ngFor="let workorder of breakdownWorkorders; let last = last"
-                >
-                  <button
-                    type="button"
-                    class="action-button btn btn-link shadow-none"
-                    (click)="displayWorkorder(workorder.workorder.number)"
-                  >
-                    <span
-                      class="d-inline-block text-truncate"
-                      style="max-width: 100px"
-                      >{{
-                        workorder.raised.dateTime | formatWorkorderNumber
-                      }}</span
-                    >
-                  </button>
-                  <mat-divider *ngIf="!last"></mat-divider>
-                </mat-list-item>
-                <mat-divider class="mb-2"></mat-divider>
-              </div>
-            </div>
-
-            <!-- tool change workorders -->
-            <div
-              *ngIf="
-                filterWorkordersByType('Tool Change') as toolChangeWorkorders
-              "
-            >
-              <div *ngIf="toolChangeWorkorders.length !== 0">
-                <div class="workorder-numbers">
-                  <div mat-subheader class="workorders-subheader">
-                    Tool Change
-                  </div>
-                </div>
-                <mat-list-item
-                  role="listitem"
-                  *ngFor="
-                    let workorder of toolChangeWorkorders;
-                    let last = last
-                  "
-                >
-                  <button
-                    type="button"
-                    class="action-button btn btn-link shadow-none"
-                    (click)="displayWorkorder(workorder.workorder.number)"
-                  >
-                    <span
-                      class="d-inline-block text-truncate"
-                      style="max-width: 100px"
-                      >{{
-                        workorder.raised.dateTime | formatWorkorderNumber
-                      }}</span
-                    >
-                  </button>
-                  <mat-divider *ngIf="!last"></mat-divider>
-                </mat-list-item>
-                <mat-divider class="mb-2"></mat-divider>
-              </div>
-            </div>
-
-            <!-- am workorders -->
-            <div *ngIf="filterWorkordersByType('AM') as amWorkorders">
-              <div *ngIf="amWorkorders.length !== 0">
-                <div class="workorder-numbers">
-                  <div mat-subheader class="workorders-subheader">AM</div>
-                </div>
-                <mat-list-item
-                  role="listitem"
-                  *ngFor="let workorder of amWorkorders; let last = last"
-                >
-                  <button
-                    type="button"
-                    class="action-button btn btn-link shadow-none"
-                    (click)="displayWorkorder(workorder.workorder.number)"
-                  >
-                    <span
-                      class="d-inline-block text-truncate"
-                      style="max-width: 100px"
-                      >{{
-                        workorder.raised.dateTime | formatWorkorderNumber
-                      }}</span
-                    >
-                  </button>
-                  <mat-divider *ngIf="!last"></mat-divider>
-                </mat-list-item>
-                <mat-divider class="mb-2"></mat-divider>
-              </div>
-            </div>
-
-            <!-- pm workorders -->
-            <div *ngIf="filterWorkordersByType('PM') as pmWorkorders">
-              <div *ngIf="pmWorkorders.length !== 0">
-                <div class="workorder-numbers">
-                  <div mat-subheader class="workorders-subheader">PM</div>
-                </div>
-                <mat-list-item
-                  role="listitem"
-                  *ngFor="let workorder of pmWorkorders; let last = last"
-                >
-                  <button
-                    type="button"
-                    class="action-button btn btn-link shadow-none"
-                    (click)="displayWorkorder(workorder.workorder.number)"
-                  >
-                    <span
-                      class="d-inline-block text-truncate"
-                      style="max-width: 100px"
-                      >{{
-                        workorder.raised.dateTime | formatWorkorderNumber
-                      }}</span
-                    >
-                  </button>
-                  <mat-divider *ngIf="!last"></mat-divider>
-                </mat-list-item>
-                <mat-divider class="mb-2"></mat-divider>
-              </div>
-            </div>
-
-            <!-- abnormality card workorders -->
-            <div
-              *ngIf="
-                filterWorkordersByType(
-                  'Abnormality Card'
-                ) as abnormalityCardWorkorders
-              "
-            >
-              <div *ngIf="abnormalityCardWorkorders.length !== 0">
-                <div class="workorder-numbers">
-                  <div mat-subheader class="workorders-subheader">
-                    Abnormality Card
-                  </div>
-                </div>
-                <mat-list-item
-                  role="listitem"
-                  *ngFor="
-                    let workorder of abnormalityCardWorkorders;
-                    let last = last
-                  "
-                >
-                  <button
-                    type="button"
-                    class="action-button btn btn-link shadow-none"
-                    (click)="displayWorkorder(workorder.workorder.number)"
-                  >
-                    <span
-                      class="d-inline-block text-truncate"
-                      style="max-width: 100px"
-                      >{{
-                        workorder.raised.dateTime | formatWorkorderNumber
-                      }}</span
-                    >
-                  </button>
-                  <mat-divider *ngIf="!last"></mat-divider>
-                </mat-list-item>
-                <mat-divider class="mb-2"></mat-divider>
-              </div>
-            </div>
-
-            <!-- mold service workorders -->
-            <div
-              *ngIf="
-                filterWorkordersByType('Mold Service') as moldServiceWorkorders
-              "
-            >
-              <div *ngIf="moldServiceWorkorders.length !== 0">
-                <div class="workorder-numbers">
-                  <div mat-subheader class="workorders-subheader">
-                    Mold Service
-                  </div>
-                </div>
-                <mat-list-item
-                  role="listitem"
-                  *ngFor="
-                    let workorder of moldServiceWorkorders;
-                    let last = last
-                  "
-                >
-                  <button
-                    type="button"
-                    class="action-button btn btn-link shadow-none"
-                    (click)="displayWorkorder(workorder.workorder.number)"
-                  >
-                    <span
-                      class="d-inline-block text-truncate"
-                      style="max-width: 100px"
-                      >{{
-                        workorder.raised.dateTime | formatWorkorderNumber
-                      }}</span
-                    >
-                  </button>
-                  <mat-divider *ngIf="!last"></mat-divider>
-                </mat-list-item>
-                <mat-divider class="mb-2"></mat-divider>
-              </div>
-            </div>
-
-            <!-- service workorders -->
-            <div *ngIf="filterWorkordersByType('Service') as serviceWorkorders">
-              <div *ngIf="serviceWorkorders.length !== 0">
-                <div class="workorder-numbers">
-                  <div mat-subheader class="workorders-subheader">Service</div>
-                </div>
-                <mat-list-item
-                  role="listitem"
-                  *ngFor="let workorder of serviceWorkorders; let last = last"
-                >
-                  <button
-                    type="button"
-                    class="action-button btn btn-link shadow-none"
-                    (click)="displayWorkorder(workorder.workorder.number)"
-                  >
-                    <span
-                      class="d-inline-block text-truncate"
-                      style="max-width: 100px"
-                      >{{
-                        workorder.raised.dateTime | formatWorkorderNumber
-                      }}</span
-                    >
-                  </button>
-                  <mat-divider *ngIf="!last"></mat-divider>
-                </mat-list-item>
-                <mat-divider class="mb-2"></mat-divider>
-              </div>
-            </div>
-
-            <!-- kaizen card workorders -->
-            <div
-              *ngIf="
-                filterWorkordersByType('Kaizen Card') as kaizenCardWorkorders
-              "
-            >
-              <div *ngIf="kaizenCardWorkorders.length !== 0">
-                <div class="workorder-numbers">
-                  <div mat-subheader class="workorders-subheader">
-                    Kaizen Card
-                  </div>
-                </div>
-                <mat-list-item
-                  role="listitem"
-                  *ngFor="
-                    let workorder of kaizenCardWorkorders;
-                    let last = last
-                  "
-                >
-                  <button
-                    type="button"
-                    class="action-button btn btn-link shadow-none"
-                    (click)="displayWorkorder(workorder.workorder.number)"
-                  >
-                    <span
-                      class="d-inline-block text-truncate"
-                      style="max-width: 100px"
-                      >{{
-                        workorder.raised.dateTime | formatWorkorderNumber
-                      }}</span
-                    >
-                  </button>
-                  <mat-divider *ngIf="!last"></mat-divider>
-                </mat-list-item>
-                <mat-divider class="mb-2"></mat-divider>
-              </div>
-            </div>
-
-            <!-- project workorders -->
-            <div *ngIf="filterWorkordersByType('Project') as projectWorkorders">
-              <div *ngIf="projectWorkorders.length !== 0">
-                <div class="workorder-numbers">
-                  <div mat-subheader class="workorders-subheader">Project</div>
-                </div>
-                <mat-list-item
-                  role="listitem"
-                  *ngFor="let workorder of projectWorkorders; let last = last"
-                >
-                  <button
-                    type="button"
-                    class="action-button btn btn-link shadow-none"
-                    (click)="displayWorkorder(workorder.workorder.number)"
-                  >
-                    <span
-                      class="d-inline-block text-truncate"
-                      style="max-width: 100px"
-                      >{{
-                        workorder.raised.dateTime | formatWorkorderNumber
-                      }}</span
-                    >
-                  </button>
-                  <mat-divider *ngIf="!last"></mat-divider>
-                </mat-list-item>
-                <mat-divider class="mb-2"></mat-divider>
-              </div>
-            </div>
-          </mat-action-list>
-        </div>
-      </div>
-    </div>
+    </app-workorder-numbers>
   </mat-sidenav>
 
   <!-- right sidenav -->
@@ -462,14 +34,16 @@
     [(opened)]="showRightSidenav"
     (opened)="closeLeftSidenav()"
   >
-    <app-workorder-actions
-      [selectedWorkorder]="workorder"
-      [userType]="userType"
-      [userUid]="userUid"
-      [workordersType]="workordersType"
-      (showModal)="toggleModal($event)"
-      (updateWorkorder)="updateWorkorder($event)"
-    ></app-workorder-actions>
+    <div>
+      <app-workorder-actions
+        [selectedWorkorder]="workorder"
+        [userType]="userType"
+        [userUid]="userUid"
+        [workordersType]="workordersType"
+        (showModal)="toggleModal($event)"
+        (updateWorkorder)="updateWorkorder($event)"
+      ></app-workorder-actions>
+    </div>
   </mat-sidenav>
 
   <!-- main sidenav content -->
@@ -619,6 +193,7 @@
   <app-reject-workorder-modal
     [workorder]="workorder"
     (close)="toggleModal($event)"
+    (updateWorkorder)="updateWorkorder($event)"
   ></app-reject-workorder-modal>
 </div>
 
@@ -628,6 +203,7 @@
     [workorder]="workorder"
     [supervisors]="supervisors"
     (close)="toggleModal($event)"
+    (updateWorkorder)="updateWorkorder($event)"
   ></app-supervisors-handover-modal>
 </div>
 
@@ -637,6 +213,7 @@
     [workorder]="workorder"
     [technicians]="technicians"
     (close)="toggleModal($event)"
+    (updateWorkorder)="updateWorkorder($event)"
   ></app-change-technicians-modal>
 </div>
 
@@ -646,6 +223,7 @@
     [workorder]="workorder"
     [technicians]="technicians"
     (close)="toggleModal($event)"
+    (updateWorkorder)="updateWorkorder($event)"
   ></app-assign-technicians-modal>
 </div>
 
@@ -656,6 +234,7 @@
     [workorder]="workorder"
     [technicians]="technicians"
     (close)="toggleModal($event)"
+    (updateWorkorder)="updateWorkorder($event)"
   ></app-technicians-handover-modal>
 </div>
 
@@ -665,6 +244,7 @@
     [workorder]="workorder"
     [technicians]="technicians"
     (close)="toggleModal($event)"
+    (updateWorkorder)="updateWorkorder($event)"
   ></app-store-technicians-handover-modal>
 </div>
 
@@ -674,6 +254,7 @@
   <app-review-workorders-modal
     [workorders]="workorders"
     (close)="toggleModal($event)"
+    (updateWorkorder)="updateWorkorder($event)"
   ></app-review-workorders-modal>
 </div>
 
@@ -682,5 +263,6 @@
   <app-raise-concern-modal
     [workorder]="workorder"
     (close)="toggleModal($event)"
+    (updateWorkorder)="updateWorkorder($event)"
   ></app-raise-concern-modal>
 </div>

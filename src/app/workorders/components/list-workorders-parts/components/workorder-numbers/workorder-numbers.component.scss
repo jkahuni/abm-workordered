@@ -1,0 +1,89 @@
+.sidenav-heading-container,
+.mat-subheader.workorders-subheader,
+.workorders-sidenav-text-container,
+.filter-workorders-text-and-icon,
+.filter-workorders-options,
+.filter-workorders-text,
+.filter-workorders-icon,
+.filter-field-value {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.filter-workorders {
+    margin: 8px 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+
+    .filter-workorders-text,
+    .filter-workorders-icon {
+        width: 50%;
+    }
+
+    .filter-workorders-options {
+        width: 100%;
+        padding: 5px;
+
+        mat-form-field {
+            width: 100%;
+        }
+    }
+
+    .filter-workorders-text-and-icon {
+        width: 100%;
+    }
+}
+
+.sidenav-heading {
+    margin: 16px 0 0;
+}
+
+.filter-field-value {
+    margin: 5px 2px 0;
+    padding: 5px 0px;
+    border: 1px solid green;
+
+    .filter-value {
+        color: green;
+    }
+}
+
+.workorders-sidenav-text {
+    text-align: center;
+    padding: 45% 20px;
+}
+
+mat-divider.mat-divider {
+    border-top-width: 2px;
+    border-top-color: black;
+}
+
+:host {
+    ::ng-deep {
+        h2 {
+            margin: 0px 0px 8px;
+        }
+
+        .mat-list-base {
+            .mat-list-item .mat-list-item-content {
+                justify-content: center;
+                padding: 0px;
+            }
+            .mat-subheader {
+                color: green;
+                padding: 0px;
+                margin: 10px 0px 0px !important;
+                height: 24px;
+                line-height: 1.6;
+            }
+        }
+    }
+}
+
+.action-button {
+    text-decoration: none;
+    padding: 1px 6px;
+}

@@ -1,4 +1,4 @@
-import { Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild, OnChanges, SimpleChanges } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HotToastService } from '@ngneat/hot-toast';
 import { IntWorkorder, IntUser } from '@workorders/models/workorders.models';
@@ -10,7 +10,7 @@ import * as dayjs from 'dayjs';
   templateUrl: './raise-concern-modal.component.html',
   styleUrls: ['./raise-concern-modal.component.scss']
 })
-export class RaiseConcernModalComponent implements OnInit {
+export class RaiseConcernModalComponent implements OnInit, OnChanges {
 
   constructor(
     private workordersService: WorkordersService,
@@ -23,13 +23,15 @@ export class RaiseConcernModalComponent implements OnInit {
       }
     });
   }
+  
 
-  @Input()
-  workorder!: IntWorkorder;
+  @Input('workorder')
+  selectedWorkorder!: IntWorkorder;
 
   // output
   @Output()
   close: EventEmitter<string> = new EventEmitter<string>();
+  @Output() updateWorkorder: EventEmitter<string> = new EventEmitter<string>();
 
   @ViewChild('openModalButton') openModalButton!: ElementRef;
   @ViewChild('closeModalButton') closeModalButton!: ElementRef;
@@ -37,11 +39,21 @@ export class RaiseConcernModalComponent implements OnInit {
 
 
   form!: FormGroup;
+
+  workorder!: IntWorkorder;
+
   users: IntUser[] = [];
 
   raisingConcern = false;
 
   ngOnInit(): void {
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    const workorder = changes['selectedWorkorder']?.currentValue;
+
+    this.workorder = workorder;
+
     this.createForm();
     this.getUsers();
   }
@@ -72,6 +84,12 @@ export class RaiseConcernModalComponent implements OnInit {
     if (this.buttonSpinner) {
       this.buttonSpinner.nativeElement.style.display = 'none';
     }
+  }
+
+  private updateWorkordersArray(uid: string, update: {}): void {
+    this.workordersService.refreshWorkorders(
+      uid, update
+    ).then(() => this.updateWorkorder.emit(uid));
   }
 
 
@@ -106,6 +124,7 @@ export class RaiseConcernModalComponent implements OnInit {
         this.raisingConcern = true;
         const workorderUid = this.workorder.workorder.uid;
         const workorderNumber = this.workorder.workorder.number;
+        const workorderType = this.workorder.workorder.type;
         const workorderUpdateData = {
           review: {
             status: 'reviewed',
@@ -121,13 +140,14 @@ export class RaiseConcernModalComponent implements OnInit {
           .then(() => {
             this.closeButtonSpinner();
             this.closeModal();
-            this.toast.success(`Success. Concern on workorder ${workorderNumber
-              } raised successfully.`, { duration: 6000, id: 'raise-concern-success' });
+            this.updateWorkordersArray(workorderUid, workorderUpdateData);
+            this.toast.success(`Success. Concern on <b>${workorderType
+              }</b> workorder <b>${workorderNumber}</b> raised successfully.`, { duration: 6000, id: 'raise-concern-success' });
           })
           .catch(() => {
             this.closeButtonSpinner();
-            this.toast.error(`Failed. Raising concern on workorder ${workorderNumber
-              } failed with error code LW-RC-01. Please try again or report ths error code to support for assistance.`, { id: 'raise-concern-error-2', autoClose: false });
+            this.toast.error(`Failed. Raising concern on <b>${workorderType
+              }</b> workorder <b>${workorderNumber}</b> failed with error code LW-RC-01. Please try again or report ths error code to support for assistance.`, { id: 'raise-concern-error-2', autoClose: false });
           });
       }
     }

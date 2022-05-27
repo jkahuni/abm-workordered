@@ -1,4 +1,4 @@
-import { Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild, OnChanges, SimpleChanges } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HotToastService } from '@ngneat/hot-toast';
 import { IntWorkorder, IntUser } from '@workorders/models/workorders.models';
@@ -9,7 +9,7 @@ import { WorkordersService } from '@workorders/services/workorders.service';
   templateUrl: './store-technicians-handover-modal.component.html',
   styleUrls: ['./store-technicians-handover-modal.component.scss']
 })
-export class StoreTechniciansHandoverModalComponent implements OnInit {
+export class StoreTechniciansHandoverModalComponent implements OnInit, OnChanges {
 
   constructor(
     private workordersService: WorkordersService,
@@ -21,30 +21,45 @@ export class StoreTechniciansHandoverModalComponent implements OnInit {
         this.openModalButton.nativeElement.click();
       }
     });
-   }
+  }
 
-  @Input()
-  workorder!: IntWorkorder;
-  @Input()
-  technicians!: IntUser[];
+  @Input('workorder')
+  selectedWorkorder!: IntWorkorder;
+  @Input('technicians')
+  allTechnicians!: IntUser[];
 
   // output
   @Output()
   close: EventEmitter<string> = new EventEmitter<string>();
+  @Output() updateWorkorder: EventEmitter<string> = new EventEmitter<string>();
 
   @ViewChild('openModalButton') openModalButton!: ElementRef;
   @ViewChild('closeModalButton') closeModalButton!: ElementRef;
   @ViewChild('buttonSpinner') buttonSpinner!: ElementRef;
 
   form!: FormGroup;
+
+  workorder!: IntWorkorder;
+  technicians!: IntUser[];
+
   storeTechnicians!: IntUser[];
 
   handingOver = false;
 
 
   ngOnInit(): void {
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    const workorder = changes['selectedWorkorder']?.currentValue;
+    const technicians = changes['allTechnicians']?.currentValue;
+
+    this.workorder = workorder;
+    this.technicians = technicians;
+
     this.createForm();
     this.filterTechnicians();
+
   }
 
   private createForm(): FormGroup {
@@ -62,7 +77,7 @@ export class StoreTechniciansHandoverModalComponent implements OnInit {
         (user: IntUser) => user.technicianGroup === 'Eng. Store'
           || user.technicianGroup === 'PM Planning'
       );
-     }
+    }
   }
 
   private closeButtonSpinner(): void {
@@ -71,6 +86,12 @@ export class StoreTechniciansHandoverModalComponent implements OnInit {
     if (this.buttonSpinner) {
       this.buttonSpinner.nativeElement.style.display = 'none';
     }
+  }
+
+  private updateWorkordersArray(uid: string, update: {}): void {
+    this.workordersService.refreshWorkorders(
+      uid, update
+    ).then(() => this.updateWorkorder.emit(uid));
   }
 
   closeModal(): void {
@@ -97,6 +118,7 @@ export class StoreTechniciansHandoverModalComponent implements OnInit {
 
         const workorderUid = this.workorder.workorder.uid;
         const workorderNumber = this.workorder.workorder.number;
+        const workorderType = this.workorder.workorder.type;
         const workorderUpdateData = {
           storesTechnician: newTechnician
         };
@@ -105,12 +127,15 @@ export class StoreTechniciansHandoverModalComponent implements OnInit {
           .then(() => {
             this.closeButtonSpinner();
             this.closeModal();
-            this.toast.success(`Success. Workorder ${workorderNumber} handed over successfully.`,
+            this.updateWorkordersArray(workorderUid, workorderUpdateData);
+            this.toast.success(`Success. <b>${workorderType
+              }</b> workorder <b>${workorderNumber}</b> handed over successfully.`,
               { id: 'stores-technician-handover-success' });
           })
           .catch(() => {
             this.closeButtonSpinner();
-            this.toast.error(`Failed. Handing over workorder ${workorderNumber} failed with error code LW-STH-01. Please try again or report this error code to support for assistance if the issue persists.`, {
+            this.toast.error(`Failed. Handing over <b>${workorderType
+              }</b> workorder <b>${workorderNumber}</b> failed with error code LW-STH-01. Please try again or report this error code to support for assistance if the issue persists.`, {
               autoClose: false, id: 'error-code-WL-12'
             });
           });

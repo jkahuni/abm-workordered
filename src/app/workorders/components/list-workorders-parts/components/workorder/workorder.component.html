@@ -214,6 +214,37 @@
     </div>
   </ng-container>
 
+  <!-- escalated date and time -->
+  <ng-container
+    class="date-time-escalated"
+    *ngIf="workorder.escalated?.status && workorder.escalated?.dateTime"
+  >
+    <div>
+      <mat-form-field class="shareWidth">
+        <mat-label>Escalated On</mat-label>
+        <input
+          type="text"
+          readonly
+          matInput
+          class=""
+          formControlName="dateEscalated"
+        />
+      </mat-form-field>
+
+      <mat-form-field class="shareWidth">
+        <mat-label>Escalated At</mat-label>
+
+        <input
+          type="text"
+          readonly
+          matInput
+          class=""
+          formControlName="timeEscalated"
+        />
+      </mat-form-field>
+    </div>
+  </ng-container>
+
   <!-- rejected date and time -->
   <ng-container
     class="date-time-rejected"

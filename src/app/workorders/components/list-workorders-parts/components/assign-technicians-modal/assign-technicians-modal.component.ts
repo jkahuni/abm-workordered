@@ -1,4 +1,4 @@
-import { Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild, OnChanges, SimpleChanges } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HotToastService } from '@ngneat/hot-toast';
 import { IntWorkorder, IntUser } from '@workorders/models/workorders.models';
@@ -10,7 +10,7 @@ import * as dayjs from 'dayjs';
   templateUrl: './assign-technicians-modal.component.html',
   styleUrls: ['./assign-technicians-modal.component.scss']
 })
-export class AssignTechniciansModalComponent implements OnInit {
+export class AssignTechniciansModalComponent implements OnInit, OnChanges {
 
   constructor(
     private workordersService: WorkordersService,
@@ -25,14 +25,14 @@ export class AssignTechniciansModalComponent implements OnInit {
   }
 
   // inputs
-  @Input()
-  workorder!: IntWorkorder;
-  @Input()
-  technicians!: IntUser[];
+  @Input('workorder')
+  selectedWorkorder!: IntWorkorder;
+  @Input('technicians')
+  allTechnicians!: IntUser[];
 
-  // output
   @Output()
   close: EventEmitter<string> = new EventEmitter<string>();
+  @Output() updateWorkorder: EventEmitter<string> = new EventEmitter<string>();
 
   // template refs
   @ViewChild('openModalButton') openModalButton!: ElementRef;
@@ -41,6 +41,10 @@ export class AssignTechniciansModalComponent implements OnInit {
 
 
   form!: FormGroup;
+
+  workorder!: IntWorkorder;
+  technicians!: IntUser[];
+
   electricalTechnicians!: IntUser[];
   mechanicalTechnicians!: IntUser[];
   storeTechnicians!: IntUser[];
@@ -48,6 +52,15 @@ export class AssignTechniciansModalComponent implements OnInit {
   assigningTechnicians = false;
 
   ngOnInit(): void {
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    const workorder = changes['selectedWorkorder']?.currentValue;
+    const technicians = changes['allTechnicians']?.currentValue;
+
+    this.workorder = workorder;
+    this.technicians = technicians;
+
     this.createForm();
     this.filterTechnicians();
   }
@@ -82,6 +95,12 @@ export class AssignTechniciansModalComponent implements OnInit {
     }
   }
 
+  private updateWorkordersArray(uid: string, update: {}): void {
+    this.workordersService.refreshWorkorders(
+      uid, update
+    ).then(() => this.updateWorkorder.emit(uid));
+  }
+
   closeModal(): void {
     if (this.closeModalButton) {
       this.closeModalButton.nativeElement.click();
@@ -114,6 +133,7 @@ export class AssignTechniciansModalComponent implements OnInit {
         const now = dayjs().format();
         const workorderUid = this.workorder.workorder.uid;
         const workorderNumber = this.workorder.workorder.number;
+        const workorderType = this.workorder.workorder.type;
 
         const workorderUpdateData = {
           approved: { status: true, dateTime: now },
@@ -126,13 +146,16 @@ export class AssignTechniciansModalComponent implements OnInit {
           .then(() => {
             this.closeButtonSpinner();
             this.closeModal();
+            this.updateWorkordersArray(workorderUid, workorderUpdateData);
 
-            this.toast.success(`Success. Technicians assigned to workorder ${workorderNumber} successfully.`, { id: 'assign-technicians-success' });
+            this.toast.success(`Success. Technicians assigned to <b>${workorderType
+              }</b> workorder <b>${workorderNumber}</b> successfully.`, { id: 'assign-technicians-success' });
           })
           .catch(() => {
             this.closeButtonSpinner();
             this.toast.error(`Failed:
-              Assigning technicians to workorder ${workorderNumber} failed with error code LW-AT-01. Please try again or report this error code to support for assistance if the issue persists.`,
+              Assigning technicians to <b>${workorderType
+              }</b> workorder <b>${workorderNumber}</b> failed with error code LW-AT-01. Please try again or report this error code to support for assistance if the issue persists.`,
               { autoClose: false, id: 'error-code-WL-08' });
           });
 

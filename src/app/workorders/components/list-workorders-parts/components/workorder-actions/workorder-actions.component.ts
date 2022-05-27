@@ -50,7 +50,6 @@ export class WorkorderActionsComponent implements OnInit, OnChanges {
     const workorder = changes['selectedWorkorder']?.currentValue as IntWorkorder;
     this.workorder = workorder;
     this.workorderUid = workorder ? workorder.workorder.uid : '';
-
   }
 
   private closeWorkorderByType(workorder: IntWorkorder): Promise<boolean> {
@@ -85,7 +84,6 @@ export class WorkorderActionsComponent implements OnInit, OnChanges {
   }
 
   openModal(type: string): any {
-    console.log('TYPE in ACTIONS', type);
     return type && type !== '' ?
       this.showModal.emit(type) :
       this.showModal.emit('none');
@@ -121,6 +119,7 @@ export class WorkorderActionsComponent implements OnInit, OnChanges {
 
       const now = dayjs().format();
       const workorderUid = this.workorder.workorder.uid;
+      const workorderType = this.workorder.workorder.type;
       const workorderNumber = this.workorder.workorder.number;
 
       const workorderUpdateData = {
@@ -136,14 +135,14 @@ export class WorkorderActionsComponent implements OnInit, OnChanges {
           this.closeButtonSpinners();
           this.updateWorkordersArray(workorderUid, workorderUpdateData);
 
-          this.toast.success(`Success. Workorder <b>${workorderNumber}</b> approved successfully.`, { id: 'approve-workorder-success' });
+          this.toast.success(`Success. <b>${workorderType}</b> workorder <b>${workorderNumber}</b> approved successfully.`, { id: 'approve-workorder-success' });
 
         })
         .catch(() => {
           this.closeButtonSpinners();
 
           this.toast.error(`Failed:
-             Approving workorder <b>${workorderNumber}</b> failed with error code <b>LW-ApW-04</b>. Please try again, or report the error code to support if the issue persists.`,
+             Approving <b>${workorderType}</b> workorder <b>${workorderNumber}</b> failed with error code <b>LW-ApW-04</b>. Please try again, or report the error code to support if the issue persists.`,
             { autoClose: false, id: 'error-code-WL-04' });
         });
     }
@@ -154,6 +153,7 @@ export class WorkorderActionsComponent implements OnInit, OnChanges {
       this.acknowledgingWorkorder = true;
       const workorderUid = this.workorder.workorder.uid;
       const workorderNumber = this.workorder.workorder.number;
+      const workorderType = this.workorder.workorder.type;
       const now = dayjs().format();
 
       const workorderUpdateData = {
@@ -167,11 +167,11 @@ export class WorkorderActionsComponent implements OnInit, OnChanges {
         .then(() => {
           this.closeButtonSpinners();
           this.updateWorkordersArray(workorderUid, workorderUpdateData);
-          this.toast.success(`Success. Workorder <b>${workorderNumber}</b> acknowledged successfully.`, { id: 'acknowledge-workorder-success' });
+          this.toast.success(`Success. <b>${workorderType}</b> workorder <b>${workorderNumber}</b> acknowledged successfully.`, { id: 'acknowledge-workorder-success' });
         })
         .catch(() => {
           this.closeButtonSpinners();
-          this.toast.error(`Failed. Acknowleding workorder <b>${workorderNumber}</b> failed with error code <b>LW-AckW-01</b>. Please try again or report this error code to support for assistance if the issue persists.`, {
+          this.toast.error(`Failed. Acknowleding <b>${workorderType}</b> workorder <b>${workorderNumber}</b> failed with error code <b>LW-AckW-01</b>. Please try again or report this error code to support for assistance if the issue persists.`, {
             autoClose: false, id: 'error-code-WL-09'
           });
         });
@@ -184,6 +184,7 @@ export class WorkorderActionsComponent implements OnInit, OnChanges {
       this.markingDone = true;
       const workorderNumber = this.workorder.workorder.number;
       const workorderUid = this.workorder.workorder.uid;
+      const workorderType = this.workorder.workorder.type;
 
       const now = dayjs().format();
       const datetimeRaised = dayjs(this.workorder.raised.dateTime);
@@ -212,11 +213,11 @@ export class WorkorderActionsComponent implements OnInit, OnChanges {
         .then(() => {
           this.closeButtonSpinners();
           this.updateWorkordersArray(workorderUid, workorderUpdateData);
-          this.toast.success(`Success. Workorder <b>${workorderNumber}</b> marked as done. Click on the workorder to view the time taken.`, { id: 'mark-workorder-done-success' });
+          this.toast.success(`Success. <b>${workorderType}</b> workorder <b>${workorderNumber}</b> marked as done. Click on the workorder to view the time taken.`, { duration: 12000, id: 'mark-workorder-done-success' });
         })
         .catch(() => {
           this.closeButtonSpinners();
-          this.toast.error(`Failed. Marking workorder <b>${workorderNumber}</b> as done failed with error code <b>LW-MWD-01</b>. Please try again or report this error code to support for assistance if the issue persists.`, {
+          this.toast.error(`Failed. Marking <b>${workorderType}</b> workorder <b>${workorderNumber}</b> as done failed with error code <b>LW-MWD-01</b>. Please try again or report this error code to support for assistance if the issue persists.`, {
             autoClose: false, id: 'error-code-WL-10'
           });
         });
@@ -234,6 +235,7 @@ export class WorkorderActionsComponent implements OnInit, OnChanges {
       const now = dayjs().format();
       const workorderUid = this.workorder.workorder.uid;
       const workorderNumber = this.workorder.workorder.number;
+      const workorderType = this.workorder.workorder.type;
       const workorderUpdateData = {
         review: {
           status: 'reviewed',
@@ -247,11 +249,11 @@ export class WorkorderActionsComponent implements OnInit, OnChanges {
         .then(() => {
           this.closeButtonSpinners();
           this.updateWorkordersArray(workorderUid, workorderUpdateData);
-          this.toast.success(`Success. Workorder <b>${workorderNumber}</b> reviewed successfully.`, { id: 'review-workorder-success' });
+          this.toast.success(`Success. <b>${workorderType}</b> workorder <b>${workorderNumber}</b> reviewed successfully.`, { id: 'review-workorder-success' });
         })
         .catch(() => {
           this.closeButtonSpinners();
-          this.toast.error(`Failed. Reviewing workorder <b>${workorderNumber}</b> failed with error code <b>LW-RSW-01</b>. Please try again or report the error code to support to have the issue fixed.`, { autoClose: false, id: 'review-workorder-error' });
+          this.toast.error(`Failed. Reviewing <b>${workorderType}</b> workorder <b>${workorderNumber}</b> failed with error code <b>LW-RSW-01</b>. Please try again or report the error code to support to have the issue fixed.`, { autoClose: false, id: 'review-workorder-error' });
         });
     }
   }

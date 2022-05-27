@@ -1,16 +1,29 @@
 .sidenav-heading-container,
-.filter-field-value {
+.workorder-status-wrapper {
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-.sidenav-heading,
-.filter-value {
+.sidenav-heading {
     margin: 16px 0 0;
 }
 
-.filter-value {
+.workorder-status-wrapper {
+    margin: 12px 3px;
+    padding: 10px 0;
+}
+.workorder-status-wrapper {
+    border: 1px solid rgba(100%, 0, 0, 0.5);
+}
+.workorder-status-wrapper:not(.escalated) {
+    border: 1px solid green;
+}
+
+.workorder-status {
+    color: red;
+}
+.workorder-status:not(.escalated) {
     color: green;
 }
 
@@ -24,13 +37,15 @@ mat-divider.mat-divider {
     border-top-color: black;
 }
 
-::ng-deep {
-    span.mat-list-item-content {
-        padding: 0px;
-    }
+:host {
+    ::ng-deep {
+        span.mat-list-item-content {
+            padding: 0px;
+        }
 
-    h2 {
-        margin: 0px 0px 8px;
+        h2 {
+            margin: 0px 0px 8px;
+        }
     }
 }
 
@@ -56,6 +71,7 @@ mat-divider.mat-divider {
 
     ::ng-deep {
         span.mat-list-item-content {
+            padding: 0px;
             width: 100%;
             display: flex;
             flex-direction: column;

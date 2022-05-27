@@ -1,4 +1,4 @@
-import { Component, ElementRef, Input, OnInit, ViewChild, Output, EventEmitter } from '@angular/core';
+import { Component, ElementRef, Input, OnInit, ViewChild, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HotToastService } from '@ngneat/hot-toast';
 import { IntWorkorder, IntUser } from '@workorders/models/workorders.models';
@@ -11,7 +11,7 @@ import * as dayjs from 'dayjs';
   templateUrl: './technicians-handover-modal.component.html',
   styleUrls: ['./technicians-handover-modal.component.scss']
 })
-export class TechniciansHandoverModalComponent implements OnInit {
+export class TechniciansHandoverModalComponent implements OnInit, OnChanges {
 
   constructor(
     private workordersService: WorkordersService,
@@ -23,27 +23,41 @@ export class TechniciansHandoverModalComponent implements OnInit {
         this.openModalButton.nativeElement.click();
       }
     });
-   }
+  }
 
-  @Input()
-  workorder!: IntWorkorder;
-  @Input()
-  technicians!: IntUser[];
+  @Input('workorder')
+  selectedWorkorder!: IntWorkorder;
+  @Input('technicians')
+  allTechnicians!: IntUser[];
 
   @Output()
   close: EventEmitter<string> = new EventEmitter<string>();
+  @Output() updateWorkorder: EventEmitter<string> = new EventEmitter<string>();
 
   @ViewChild('openModalButton') openModalButton!: ElementRef;
   @ViewChild('closeModalButton') closeModalButton!: ElementRef;
   @ViewChild('buttonSpinner') buttonSpinner!: ElementRef;
 
   form!: FormGroup;
+
+  workorder!: IntWorkorder;
+  technicians!: IntUser[];
+
   electricalTechnicians!: IntUser[];
   mechanicalTechnicians!: IntUser[];
 
   handingOver = false;
 
   ngOnInit(): void {
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    const workorder = changes['selectedWorkorder']?.currentValue;
+    const technicians = changes['allTechnicians']?.currentValue;
+
+    this.workorder = workorder;
+    this.technicians = technicians;
+
     this.createForm();
     this.filterTechnicians();
   }
@@ -68,11 +82,18 @@ export class TechniciansHandoverModalComponent implements OnInit {
   }
 
   private closeButtonSpinner(): void {
+    this.toast.close();
     this.handingOver = false;
 
     if (this.buttonSpinner) {
       this.buttonSpinner.nativeElement.style.display = 'none';
     }
+  }
+
+  private updateWorkordersArray(uid: string, update: {}): void {
+    this.workordersService.refreshWorkorders(
+      uid, update
+    ).then(() => this.updateWorkorder.emit(uid));
   }
 
   closeModal(): void {
@@ -100,6 +121,7 @@ export class TechniciansHandoverModalComponent implements OnInit {
 
         const workorderUid = this.workorder.workorder.uid;
         const workorderNumber = this.workorder.workorder.number;
+        const workorderType = this.workorder.workorder.type;
         const workorderUpdateData = {
           technician: newTechnician
         };
@@ -108,13 +130,16 @@ export class TechniciansHandoverModalComponent implements OnInit {
           .then(() => {
             this.closeButtonSpinner();
             this.closeModal();
-            
-            this.toast.success(`Success. Workorder ${workorderNumber} handed over successfully.`,
+            this.updateWorkordersArray(workorderUid, workorderUpdateData);
+
+            this.toast.success(`Success. <b>${workorderType
+              }</b> workorder <b>${workorderNumber}</b> handed over successfully.`,
               { id: 'eng-technician-handover-success' });
           })
           .catch(() => {
             this.closeButtonSpinner();
-            this.toast.error(`Failed. Handing over workorder ${workorderNumber} failed with error code LW-ETH-01. Please try again or report this error code to support for assistance if the issue persists.`, {
+            this.toast.error(`Failed. Handing over <b>${workorderType
+              }</b> workorder <b>${workorderNumber}</b> failed with error code LW-ETH-01. Please try again or report this error code to support for assistance if the issue persists.`, {
               autoClose: false, id: 'error-code-WL-11'
             });
           });

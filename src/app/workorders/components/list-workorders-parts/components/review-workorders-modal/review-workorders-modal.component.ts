@@ -1,4 +1,4 @@
-import { Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild, OnChanges, SimpleChanges } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HotToastService } from '@ngneat/hot-toast';
 import { IntWorkorder, IntUser } from '@workorders/models/workorders.models';
@@ -19,7 +19,7 @@ dayjs.extend(isYesterday);
   templateUrl: './review-workorders-modal.component.html',
   styleUrls: ['./review-workorders-modal.component.scss']
 })
-export class ReviewWorkordersModalComponent implements OnInit {
+export class ReviewWorkordersModalComponent implements OnInit, OnChanges {
 
   constructor(
     private workordersService: WorkordersService,
@@ -32,25 +32,33 @@ export class ReviewWorkordersModalComponent implements OnInit {
       }
     });
    }
+  
 
-  @Input()
-  workorders!: IntWorkorder[];
+  @Input('workorders')
+  allWorkorders!: IntWorkorder[];
 
   // output
   @Output()
   close: EventEmitter<string> = new EventEmitter<string>();
+  @Output() updateWorkorder: EventEmitter<string> = new EventEmitter<string>();
   
   @ViewChild('openModalButton') openModalButton!: ElementRef;
   @ViewChild('closeModalButton') closeModalButton!: ElementRef;
   @ViewChild('buttonSpinner') buttonSpinner!: ElementRef;
 
   form!: FormGroup;
-
+  workorders!: IntWorkorder[];
 
   reviewingWorkorders = false;
-  
 
   ngOnInit(): void {
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    const workorders = changes['allWorkorders']?.currentValue;
+
+    this.workorders = workorders;
+
     this.createForm();
   }
 
@@ -123,6 +131,12 @@ export class ReviewWorkordersModalComponent implements OnInit {
     const monthsDifference = dateRaised.month() - now.month();
 
     return yearsDifference === 0 && monthsDifference === -1 ? true : false;
+  }
+
+  private updateWorkordersArray(uid: string, update: {}): void {
+    this.workordersService.refreshWorkorders(
+      uid, update
+    ).then(() => this.updateWorkorder.emit(uid));
   }
 
   closeModal(): void {
@@ -199,11 +213,10 @@ export class ReviewWorkordersModalComponent implements OnInit {
 
             this.workordersService.updateWorkorder(workorderUid, workorderUpdateData)
               .then(() => {
+                this.updateWorkordersArray(workorderUid, workorderUpdateData);
                 if (index + 1 === totalWorkordersToReview) {
                   this.closeButtonSpinner();
                   this.closeModal();
-                  // this.refreshWorkorders(workorderUid,
-                  //   workorderUpdateData);
                   this.toast.success(`Success. ${totalWorkordersToReview} workorder(s) reviewed successfully.`,
                     { duration: 8000, id: 'review-workorders-success' });
                 }

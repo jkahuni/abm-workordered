@@ -11,9 +11,14 @@
   >
     <div class="modal-content bg-light">
       <div class="modal-header text-dark">
-        <h3 class="modal-title m-0" id="assignTechniciansModalLabel">
-          <strong>W/o No. {{ workorder?.workorder?.number }}</strong>
-        </h3>
+        <div class="modal-title m-0" id="assignTechniciansModalLabel">
+          <h3 class="workorder-type">
+            {{ workorder?.workorder?.type }}
+          </h3>
+          <h3 class="workorder-number">
+            W/o No: {{ workorder?.workorder?.number }}
+          </h3>
+        </div>
         <button
           #closeModalButton
           class="btn-close border border-success border-2"
@@ -126,6 +131,7 @@
           </div>
         </div>
       </div>
+      
       <div class="modal-footer">
         <!-- w/o not abnormality -->
         <div *ngIf="workorder?.workorder?.type !== 'Abnormality Card'">
@@ -142,6 +148,14 @@
         <!-- w/o is an abnormality card -->
         <div [hidden]="workorder?.workorder?.type !== 'Abnormality Card'">
           <div *ngIf="!assigningTechnicians">
+            <button
+              type="button"
+              class="btn btn-secondary me-3"
+              data-bs-dismiss="modal"
+              (click)="closeModal()"
+            >
+              Cancel
+            </button>
             <button
               type="submit"
               class="btn btn-primary"

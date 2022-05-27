@@ -47,6 +47,7 @@ export class HomeComponent implements OnInit {
   unverifiedWorkorders!: IntWorkorder[];
   approvedWorkorders!: IntWorkorder[];
   rejectedWorkorders!: IntWorkorder[];
+  escalatedWorkorders!: IntWorkorder[];
   engTechnicianOpenWorkorders!: IntWorkorder[];
   engTechnicianClosedWorkorders!: IntWorkorder[];
   storesTechnicianOpenWorkorders!: IntWorkorder[];
@@ -154,6 +155,7 @@ export class HomeComponent implements OnInit {
           this.filterUnverifiedWorkorders();
           this.filterApprovedWorkorders();
           this.filterRejectedWorkorders();
+          this.filterEscalatedWorkorders();
           this.isSupervisor = true;
           this.hideSpinnerOnSuccess();
         }
@@ -307,6 +309,18 @@ export class HomeComponent implements OnInit {
         }
       );
       return this.rejectedWorkorders;
+    }
+
+    return null;
+  }
+
+  private filterEscalatedWorkorders(): IntWorkorder[] | null {
+    if (this.workorders) {
+      this.escalatedWorkorders = this.workorders.filter(
+        (workorder: IntWorkorder) => workorder.escalated?.status
+      );
+
+      return this.escalatedWorkorders;
     }
 
     return null;

@@ -1,4 +1,4 @@
-import { Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild, OnChanges, SimpleChanges } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HotToastService } from '@ngneat/hot-toast';
 import { IntUser, IntWorkorder } from '@workorders/models/workorders.models';
@@ -10,7 +10,7 @@ import * as dayjs from 'dayjs';
   templateUrl: './change-technicians-modal.component.html',
   styleUrls: ['./change-technicians-modal.component.scss']
 })
-export class ChangeTechniciansModalComponent implements OnInit {
+export class ChangeTechniciansModalComponent implements OnInit, OnChanges {
 
   constructor(
     private workordersService: WorkordersService,
@@ -25,14 +25,15 @@ export class ChangeTechniciansModalComponent implements OnInit {
     });
   }
 
-  @Input()
-  workorder!: IntWorkorder;
-  @Input()
-  technicians!: IntUser[];
+  @Input('workorder')
+  selectedWorkorder!: IntWorkorder;
+  @Input('technicians')
+  allTechnicians!: IntUser[];
 
   // output
   @Output()
   close: EventEmitter<string> = new EventEmitter<string>();
+  @Output() updateWorkorder: EventEmitter<string> = new EventEmitter<string>();
 
   // template refs
   @ViewChild('closeModalButton') closeModalButton!: ElementRef;
@@ -42,6 +43,9 @@ export class ChangeTechniciansModalComponent implements OnInit {
 
   form!: FormGroup;
 
+  workorder!: IntWorkorder;
+  technicians!: IntUser[];
+
   electricalTechnicians!: IntUser[];
   mechanicalTechnicians!: IntUser[];
   storeTechnicians!: IntUser[];
@@ -49,8 +53,19 @@ export class ChangeTechniciansModalComponent implements OnInit {
   changingTechnicians = false;
 
   ngOnInit(): void {
+
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    const workorder = changes['selectedWorkorder']?.currentValue;
+    const technicians = changes['allTechnicians']?.currentValue;
+
+    this.workorder = workorder;
+    this.technicians = technicians;
+
     this.createForm();
     this.filterTechnicians();
+
   }
 
   private createForm(): FormGroup {
@@ -90,6 +105,12 @@ export class ChangeTechniciansModalComponent implements OnInit {
     }
   }
 
+  private updateWorkordersArray(uid: string, update: {}): void {
+    this.workordersService.refreshWorkorders(
+      uid, update
+    ).then(() => this.updateWorkorder.emit(uid));
+  }
+
   closeModal(): void {
     if (this.closeModalButton) {
       this.closeModalButton.nativeElement.click();
@@ -121,6 +142,7 @@ export class ChangeTechniciansModalComponent implements OnInit {
         this.changingTechnicians = true;
         const workorderNumber = this.workorder.workorder.number;
         const workorderUid = this.workorder.workorder.uid;
+        const workorderType = this.workorder.workorder.type;
 
         const { technician, storesTechnician } = this.workorder;
 
@@ -137,13 +159,16 @@ export class ChangeTechniciansModalComponent implements OnInit {
           .then(() => {
             this.closeButtonSpinner();
             this.closeModal();
+            this.updateWorkordersArray(workorderUid, workorderUpdateData);
 
-            this.toast.success(`Success. Technicians on workorder ${workorderNumber} changed successfully.`);
+            this.toast.success(`Success. Technicians on <b>${workorderType
+              }</b> workorder <b>${workorderNumber}</b> changed successfully.`);
           })
           .catch(() => {
             this.closeButtonSpinner();
             this.toast.error(`Failed:
-              Changing technicians on workorder ${workorderNumber} failed with error code LW-CT-01. Please try again or report this error code to support for assistance if the issue persists.`,
+              Changing technicians on <b>${workorderType
+              }</b> workorder <b>${workorderNumber}</b> failed with error code LW-CT-01. Please try again or report this error code to support for assistance if the issue persists.`,
               { autoClose: false, id: 'error-code-WL-07' });
 
           });

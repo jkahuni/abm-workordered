@@ -111,6 +111,17 @@
                 </a>
               </div>
 
+              <!-- escalated workorders -->
+              <div>
+                <a
+                  type="button"
+                  class="btn btn-outline-danger home-nav-button shadow-none"
+                  [routerLink]="['/workorders/supervisor/escalated', userUid]"
+                  >Escalated Workorders - (
+                  {{ escalatedWorkorders ? escalatedWorkorders.length : 0 }} )
+                </a>
+              </div>
+
               <!-- raised workorders -->
               <div>
                 <a

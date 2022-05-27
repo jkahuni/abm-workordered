@@ -11,9 +11,14 @@
   >
     <div class="modal-content bg-light">
       <div class="modal-header text-dark">
-        <h3 class="modal-title m-0" id="rejectWorkorderModalLabel">
-          <strong>W/o No. {{ workorder?.workorder?.number }}</strong>
-        </h3>
+        <div class="modal-title m-0" id="rejectWorkorderModalLabel">
+          <h3 class="workorder-type">
+            {{ workorder?.workorder?.type }}
+          </h3>
+          <h3 class="workorder-number">
+            W/o No: {{ workorder?.workorder?.number }}
+          </h3>
+        </div>
         <button
           #closeModalButton
           class="btn-close border border-success border-2"
@@ -73,9 +78,9 @@
 
       <div class="modal-footer">
         <div *ngIf="!rejectingWorkorder">
-        <button
+          <button
             type="button"
-            class="btn btn-secondary me-2"
+            class="btn btn-secondary me-3"
             data-bs-dismiss="modal"
             (click)="closeModal()"
           >
@@ -112,5 +117,4 @@
   type="button"
   data-bs-toggle="modal"
   data-bs-target="#rejectWorkorderModal"
->
-</button>
+></button>

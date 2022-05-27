@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { LayoutModule } from '@angular/cdk/layout';
 import { SharedModule } from '@shared/shared.module';
 
 import {
@@ -33,6 +34,7 @@ import { ValidateMixedFormatDirective } from '@workorders/directives/validate-mi
   ],
   imports: [
     CommonModule,
+    LayoutModule,
     WorkordersRoutingModule,
     SharedModule,
   ],

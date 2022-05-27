@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, Output, EventEmitter, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, ViewChild, ElementRef, SimpleChanges, OnChanges } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HotToastService } from '@ngneat/hot-toast';
 import { IntWorkorder, IntUser } from '@workorders/models/workorders.models';
@@ -9,7 +9,7 @@ import { WorkordersService } from '@workorders/services/workorders.service';
   templateUrl: './supervisors-handover-modal.component.html',
   styleUrls: ['./supervisors-handover-modal.component.scss']
 })
-export class SupervisorsHandoverModalComponent implements OnInit {
+export class SupervisorsHandoverModalComponent implements OnInit, OnChanges {
 
   constructor(
     private workordersService: WorkordersService,
@@ -23,14 +23,15 @@ export class SupervisorsHandoverModalComponent implements OnInit {
     });
   }
 
-  @Input()
-  workorder!: IntWorkorder;
-  @Input()
-  supervisors!: IntUser[];
+  @Input('workorder')
+  selectedWorkorder!: IntWorkorder;
+  @Input('supervisors')
+  allSupervisors!: IntUser[];
 
   // output
   @Output()
   close: EventEmitter<string> = new EventEmitter<string>();
+  @Output() updateWorkorder: EventEmitter<string> = new EventEmitter<string>();
 
   // template references
   @ViewChild('openModalButton') openModalButton!: ElementRef;
@@ -39,14 +40,24 @@ export class SupervisorsHandoverModalComponent implements OnInit {
 
   form!: FormGroup;
 
+  workorder!: IntWorkorder;
+  supervisors!: IntUser[];
+
   productionSupervisors!: IntUser[];
   engineeringSupervisors!: IntUser[];
 
-
   handingOver = false;
 
-
   ngOnInit(): void {
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    const workorder = changes['selectedWorkorder']?.currentValue;
+    const supervisors = changes['allSupervisors']?.currentValue; 
+
+    this.workorder = workorder;
+    this.supervisors = supervisors;
+
     this.createForm();
     this.filterSupervisors();
   }
@@ -80,6 +91,12 @@ export class SupervisorsHandoverModalComponent implements OnInit {
     }
   }
 
+  private updateWorkordersArray(uid: string, update: {}): void {
+    this.workordersService.refreshWorkorders(
+      uid, update
+    ).then(() => this.updateWorkorder.emit(uid));
+  }
+
   closeModal(): void {
     if (this.closeModalButton) {
       this.closeModalButton.nativeElement.click();
@@ -104,6 +121,7 @@ export class SupervisorsHandoverModalComponent implements OnInit {
 
         const workorderNumber = this.workorder.workorder.number;
         const workorderUid = this.workorder.workorder.uid;
+        const workorderType = this.workorder.workorder.type;
         const workorderUpdateData = {
           supervisor: newSupervisor
         };
@@ -114,14 +132,17 @@ export class SupervisorsHandoverModalComponent implements OnInit {
           .then(() => {
             this.closeButtonSpinner();
             this.closeModal();
+            this.updateWorkordersArray(workorderUid, workorderUpdateData);
             this.toast.success(`Success.
-             Workorder ${workorderNumber} delegated successfully.`, { id: 'supervisor-handover-success' });
+             <b>${workorderType
+              }</b> workorder <b>${workorderNumber}</b> delegated successfully.`, { id: 'supervisor-handover-success' });
           })
           .catch(() => {
             this.closeButtonSpinner();
 
             this.toast.error(`Failed:
-             Delegating workorder ${workorderNumber} failed with error code LW-SH-01. Please try again or report this error code to support for assistance if the issue persists.`,
+             Delegating <b>${workorderType
+              }</b> workorder <b>${workorderNumber}</b> failed with error code LW-SH-01. Please try again or report this error code to support for assistance if the issue persists.`,
               { autoClose: false, id: 'error-code-WL-06' });
           });
       }

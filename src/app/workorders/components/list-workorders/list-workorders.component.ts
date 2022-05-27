@@ -1,6 +1,6 @@
-import { Component, OnInit, ElementRef, ViewChild, OnDestroy } from '@angular/core';
+import { Component, OnInit, ElementRef, ViewChild, OnDestroy, ChangeDetectorRef, AfterContentInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { FormGroup } from '@angular/forms';
+import { MediaMatcher } from '@angular/cdk/layout';
 
 // rxjs
 import { takeUntil, Subject } from 'rxjs';
@@ -11,16 +11,6 @@ import { HotToastService } from '@ngneat/hot-toast';
 
 // interfaces
 import { IntUser, IntWorkorder } from '@workorders/models/workorders.models';
-
-// dayjs
-import * as dayjs from 'dayjs';
-import * as weekOfYear from 'dayjs/plugin/weekOfYear';
-import * as isToday from 'dayjs/plugin/isToday';
-import * as isYesterday from 'dayjs/plugin/isYesterday';
-
-dayjs.extend(weekOfYear);
-dayjs.extend(isToday);
-dayjs.extend(isYesterday);
 
 @Component({
   selector: 'app-list-workorders',
@@ -33,8 +23,36 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private workordersService: WorkordersService,
     private toast: HotToastService,
-  ) { }
-  private stopWorkordersListener: Subject<boolean> = new Subject<boolean>();
+    public mediaMatcher: MediaMatcher,
+  ) {
+    this.updateScreenProperties
+      .pipe(takeUntil(this.stopAllListeners))
+      .subscribe(
+        (object: SidenavsDeterminer) => {
+          const largeScreen = object['largeScreen'];
+          const hasActions = object['workorderHasActions'];
+
+          this.largeScreen = largeScreen;
+
+          if (hasActions) {
+            this.showLeftSidenav = true;
+            this.showRightSidenav = true;
+          } else {
+            this.showLeftSidenav = true;
+            this.showRightSidenav = false;
+          }
+
+        }
+
+
+      );
+  }
+
+
+  private stopAllListeners: Subject<void> = new Subject<void>();
+  private updateScreenProperties: Subject<SidenavsDeterminer> = new Subject<SidenavsDeterminer>();
+
+  matcher!: MediaQueryList;
 
   // template refs
   @ViewChild('loadingWorkordersSpinner') loadingWorkordersSpinner!: ElementRef;
@@ -47,10 +65,6 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
   workorders!: IntWorkorder[];
   workordersToDisplay!: IntWorkorder[];
   workorder!: IntWorkorder | undefined;
-  workorderUid!: string;
-
-  // form groups
-  form!: FormGroup;
 
   // for handover templates
   supervisors!: IntUser[];
@@ -60,8 +74,8 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
   workorderHasActions = false;
 
   // toggle sidenavs
-  showLeftSidenav = true;
-  showRightSidenav = false;
+  showLeftSidenav!: boolean;
+  showRightSidenav!: boolean;
 
   // loading spinner
   loadingWorkorders = true;
@@ -70,10 +84,6 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
   loadingWorkordersOtherError!: string;
   loadingWorkordersDefaultError: string = `
   Loading workorders failed with error code ULW-01. Try reloading the page or report the error code to support to have it fixed.`;
-
-  // filter workorders
-  showWorkordersFilterOptions = false;
-  filterOption!: string;
 
   // show/hide
   showHelpModal = false;
@@ -86,9 +96,17 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
   showReviewWorkordersModal = false;
   showRaiseConcernsModal = false;
 
+  largeScreen!: boolean;
+
+  workordersWithActions: string[] = [
+    'open', 'approved', 'unverified', 'un-reviewed'
+  ];
+
   ngOnDestroy(): void {
-    this.stopWorkordersListener.next(true);
-    this.stopWorkordersListener.complete();
+    this.stopAllListeners.next();
+    this.stopAllListeners.complete();
+    this.matcher.removeEventListener('change', this.mediaSizeListener);
+
   }
 
   ngOnInit(): void {
@@ -98,10 +116,22 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
 
     this.getWorkorders();
     this.getUsers();
+
+    this.matcher = this.mediaMatcher.matchMedia('(min-width: 670px)');
+    this.matcher.addEventListener('change', this.mediaSizeListener);
+    this.getScreenSizeOnLoad((window.innerWidth) > 670);
+  }
+
+  private getScreenSizeOnLoad(largeScreen: boolean): void {
+    this.updateScreenProperties.next(this.checkWorkorderStatus(largeScreen));
+  }
+
+  private mediaSizeListener = (event: { matches: any }) => {
+    this.updateScreenProperties.next(this.checkWorkorderStatus(event.matches))
   }
 
   // create query
-  private filterWorkordersByUser(workorders: IntWorkorder[]): IntWorkorder[] | undefined {
+  private filterUsersWorkorders(workorders: IntWorkorder[]): IntWorkorder[] | undefined {
     if (
       this.userType &&
       this.workordersType &&
@@ -118,7 +148,7 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
               }
               return false;
             });
-
+          this.workorderHasActions = false;
           return reviewedWorkorders;
 
         }
@@ -182,6 +212,7 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
 
             }
           );
+          this.workorderHasActions = false;
 
           return approvedWorkorders;
 
@@ -203,6 +234,7 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
               }
               return false;
             });
+          this.workorderHasActions = false;
 
           return rejectedWorkorders;
 
@@ -221,9 +253,27 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
               return false;
             }
           );
+          this.workorderHasActions = false;
 
           return raisedWorkorders;
 
+        }
+
+        // escalated
+        else if (this.workordersType === 'escalated') {
+          const escalatedWorkorders = workorders.filter(
+            (workorder: IntWorkorder) => {
+              const escalated = workorder.escalated?.status;
+
+              if (escalated) {
+                return true;
+              }
+              return false;
+            }
+          );
+
+          this.workorderHasActions = true;
+          return escalatedWorkorders;
         }
       }
       // engineering technician
@@ -273,6 +323,7 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
 
               return false;
             });
+          this.workorderHasActions = false;
 
           return closedWorkorders;
         }
@@ -345,6 +396,7 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
               return false;
             }
           );
+          this.workorderHasActions = false;
 
           return raisedWorkorders;
         }
@@ -365,6 +417,7 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
 
               return false;
             });
+          this.workorderHasActions = true;
 
           return approvedWorkorders;
         }
@@ -385,6 +438,7 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
 
               return false;
             });
+          this.workorderHasActions = false;
 
           return rejectedWorkorders;
         }
@@ -395,18 +449,16 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
 
   // get workorders
   private getWorkorders(): void {
-    console.log('LW METHOD CALLED');
     this.workordersService.$allWorkorders
-      .pipe(takeUntil(this.stopWorkordersListener))
+      .pipe(takeUntil(this.stopAllListeners))
       .subscribe(
         (workorders: IntWorkorder[] | null) => {
           if (workorders !== null) {
-            const filteredWorkorders = this.filterWorkordersByUser(workorders);
+            const filteredWorkorders = this.filterUsersWorkorders(workorders);
 
             if (filteredWorkorders) {
               this.workorders = filteredWorkorders;
               this.workordersToDisplay = this.workorders;
-
               this.hideLoadingWorkordersSpinner();
             } else {
               this.hideLoadingWorkordersSpinnerOnError();
@@ -467,139 +519,19 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
 
   }
 
-  // filter workorder fns
-  private filterTodaysWorkorders(date: string): boolean {
-    const dateRaised = dayjs(date);
-    return dateRaised && dateRaised.isToday() ? true : false;
-  }
-
-  private filterYesterdaysWorkorders(date: string): boolean {
-    const dateRaised = dayjs(date);
-
-    return dateRaised && dateRaised.isYesterday() ? true : false;
-  }
-
-  private filterThisWeeksWorkorders(date: string): boolean {
-    const now = dayjs();
-    const dateRaised = dayjs(date);
-    const yearsDifference = dateRaised.year() - now.year();
-    const monthsDifference = dateRaised.month() - now.month();
-    const weeksDifference = dateRaised.week() - now.week();
-
-    return yearsDifference === 0 && monthsDifference === 0 && weeksDifference === 0 ? true : false;
-
-  }
-
-  private filterLastWeeksWorkorders(date: string): boolean {
-    const now = dayjs();
-    const dateRaised = dayjs(date);
-
-    const yearsDifference = dateRaised.year() - now.year();
-    const monthsDifference = dateRaised.month() - now.month();
-    const weeksDifference = dateRaised.week() - now.week();
-
-    return yearsDifference === 0 && monthsDifference === 0 && weeksDifference === -1 ? true : false;
-  }
-
-  private filterThisMonthsWorkorders(date: string): boolean {
-    const now = dayjs();
-    const dateRaised = dayjs(date);
-
-    const yearsDifference = dateRaised.year() - now.year();
-    const monthsDifference = dateRaised.month() - now.month();
-
-    return yearsDifference === 0 && monthsDifference === 0 ? true : false;
-  }
-
-  private filterLastMonthsWorkorders(date: string): boolean {
-    const now = dayjs();
-    const dateRaised = dayjs(date);
-
-    const yearsDifference = dateRaised.year() - now.year();
-    const monthsDifference = dateRaised.month() - now.month();
-
-    return yearsDifference === 0 && monthsDifference === -1 ? true : false;
-  }
-
   // public functions
   createWorkordersHeader(): string {
     return this.workordersType?.replace(/-/g, '') + ' workorders';
   }
 
   closeLeftSidenav(): boolean {
-    return this.showLeftSidenav = false;
-
+    console.log('called 1');
+    return this.largeScreen && this.workorderHasActions ? this.showLeftSidenav = true : this.showLeftSidenav = false;
   }
 
   closeRightSidenav(): boolean {
-    return this.showRightSidenav = false;
-
-  }
-
-  displayWorkorder(workorderNumber: string): IntWorkorder | undefined {
-    this.workorder = this.workordersToDisplay?.find((workorder: IntWorkorder) => workorder?.workorder.number === workorderNumber);
-
-    if (this.workorder) {
-      this.workorderUid = this.workorder.workorder.uid;
-      if (this.workorderHasActions) {
-        this.showLeftSidenav = false;
-        this.showRightSidenav = true;
-      }
-      return this.workorder;
-    }
-    return;
-
-  }
-
-  filterWorkordersByDateRaised(filterOption: string): IntWorkorder[] {
-    if (filterOption) {
-      this.filterOption = filterOption;
-      this.workordersToDisplay = this.workorders
-        .filter((workorder: IntWorkorder) => {
-          const date = workorder.raised.dateTime;
-          if (filterOption === 'Today') {
-            return this.filterTodaysWorkorders(date) ? workorder : null;
-          } else if (filterOption === 'Yesterday') {
-            return this.filterYesterdaysWorkorders(date);
-          }
-          else if (filterOption === 'This Week') {
-            return this.filterThisWeeksWorkorders(date);
-          }
-          else if (filterOption === 'Last Week') {
-            return this.filterLastWeeksWorkorders(date);
-          }
-          else if (filterOption === 'This Month') {
-            return this.filterThisMonthsWorkorders(date);
-          }
-          else if (filterOption === 'Last Month') {
-            return this.filterLastMonthsWorkorders(date);
-          }
-          else if (filterOption === 'None') {
-            return true;
-          }
-          else {
-            this.workordersToDisplay = this.workorders;
-            return this.workordersToDisplay;
-          }
-        });
-      this.workorder = undefined;
-      this.showWorkordersFilterOptions = false;
-      return this.workordersToDisplay;
-    } else {
-      this.workorder = undefined;
-      this.showWorkordersFilterOptions = false;
-      return this.workordersToDisplay;
-    }
-
-
-  }
-
-  filterWorkordersByType(type: string): IntWorkorder[] | null {
-    return type && this.workordersToDisplay ?
-      this.workordersToDisplay.filter((workorder: IntWorkorder) => workorder.workorder.type === type) ?
-        this.workordersToDisplay.filter((workorder: IntWorkorder) => workorder.workorder.type === type)
-        : null
-      : null;
+    console.log('called 2');
+    return this.largeScreen && this.workorderHasActions ? this.showRightSidenav = true : this.showRightSidenav = false;
   }
 
   closeAllModals(): void {
@@ -614,9 +546,32 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
     this.showRaiseConcernsModal = false;
   }
 
+  // from workorder numbers components
+  workordersFiltered(workorders: IntWorkorder[]): any {
+    this.workordersToDisplay = workorders;
+    if (workorders.length === 0) {
+      this.workorder = undefined;
+    }
+  }
+
+  displayCurrentWorkorder(workorder: IntWorkorder): any {
+    this.workorder = workorder;
+
+    this.updateScreenProperties.next(this.checkWorkorderStatus(this.largeScreen));
+  }
+
+  private checkWorkorderStatus(largeScreen: boolean): SidenavsDeterminer {
+    const workorderHasActions = this.workorderHasActions ? this.workorderHasActions : false;
+
+    return {
+      largeScreen,
+      workorderHasActions
+    };
+
+  }
+
   // from actions component
   toggleModal(event: string): boolean | void {
-    console.log('IN LIST, ', event);
     return event ?
       event === 'help' ?
         this.showHelpModal = true :
@@ -650,8 +605,18 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
       this.workorder = workorder;
     } else {
       this.workorder = undefined;
-      this.showLeftSidenav = true;
-      this.showRightSidenav = false;
+      if (this.largeScreen) {
+        this.showLeftSidenav = true;
+        this.showRightSidenav = true;
+      } else {
+        this.showLeftSidenav = true;
+        this.showRightSidenav = false;
+      }
     }
   }
+}
+
+export interface SidenavsDeterminer {
+  largeScreen: boolean;
+  workorderHasActions: boolean;
 }
