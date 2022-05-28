@@ -1,4 +1,6 @@
-<mat-card class="home-page-card" [ngClass]="{'chart-displayed': !viewData, 'chart-hidden': viewData }">
+<mat-card
+  class="home-page-card"
+>
   <mat-card-header class="mx-auto">
     <mat-card-title> ABM Workordered Home </mat-card-title>
   </mat-card-header>
@@ -19,37 +21,23 @@
     </div>
 
     <!-- user logged in -->
-    <div *ngIf="!loading && !loadingFailed" class="loading-finished-container">
-      <div *ngIf="user" class="user-logged-in-container">
+    <div *ngIf="!loading && !loadingFailed">
+      <div *ngIf="user">
         <!-- user email verified -->
-        <div *ngIf="user.emailVerified" class="user-email-verified-container">
+        <div *ngIf="user.emailVerified" class="user-email-verified">
           <!-- pick what to see -->
-          <div class="toggle-chart-and-data">
+          <div class="view-chart-button">
             <button
-              *ngIf="viewData"
               type="button"
               class="btn btn-primary btn-sm"
-              (click)="viewData = !viewData"
+              [routerLink]="['/reports/maintenance-cost']"
             >
               View Reports
             </button>
-            <button
-              *ngIf="!viewData"
-              type="button"
-              class="btn btn-primary btn-sm"
-              (click)="viewData = !viewData"
-            >
-              View Data
-            </button>
-          </div>
-
-          <!-- chart -->
-          <div *ngIf="!viewData" class="canvas-object-container">
-            <app-maintenance-cost></app-maintenance-cost>
           </div>
 
           <!-- raw data -->
-          <div *ngIf="viewData">
+          <div class="navigation-links-container">
             <!-- operators -->
             <div *ngIf="isOperatorOrOperatorLike" class="navigation-links">
               <!-- raise new workorder -->

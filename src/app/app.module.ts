@@ -28,7 +28,6 @@ import { HotToastModule } from '@ngneat/hot-toast';
 import { NgxSpinnerModule } from 'ngx-spinner';
 import { AutosizeModule } from 'ngx-autosize';
 import { NgChartsModule } from 'ng2-charts';
-import { ReportsModule } from '@reports/reports.module';
 
 
 
@@ -47,7 +46,6 @@ import { ReportsModule } from '@reports/reports.module';
     WorkordersModule,
     NgxSpinnerModule,
     AutosizeModule,
-    ReportsModule,
 
     provideFirebaseApp(() => initializeApp(environment.firebase)),
     provideAnalytics(() => getAnalytics()),

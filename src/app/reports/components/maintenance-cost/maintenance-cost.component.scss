@@ -1,76 +1,49 @@
-.canvas-container {
-    .canvas-object,
-    .canvas-filter-fields {
-        border: 1px solid rgba(0, 0, 0, 0.5);
-        padding: 0 10px;
-    }
+.chart-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    flex-flow: column wrap;
+    gap: 16px;
+    padding: 15px;
+    border-radius: 20px;
+    margin: 16px auto;
+    background: #e9eef3;
+    max-width: 800px;
+    max-height: 700px;
 
-    .charts-filter-label {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        margin: 5px 0;
-        color: green;
-    }
-}
-
-// screens smaller than 350px
-@media (max-width: 350px) {
-    .canvas-container {
-        flex-direction: column;
-
-        .canvas-object {
-            order: 1;
-        }
-
-        .canvas-filter-fields {
-            order: 2;
-
-            .filter-sections-form-field {
-                width: 30%;
-            }
-        }
-    }
-}
-
-// for screens larger than 300px
-@media (min-width: 351px) {
-    .canvas-container {
-        padding: 10px 0;
-        display: flex;
-        gap: 20px;
+    .chart-object {
+        order: 1;
         width: 100%;
-        height: 100%;
+        height: 400px;
+        padding: 5px 20px;
+        // border: 1px solid rgba(0, 0, 0, 0.5);
+    }
 
-        flex-direction: row;
+    .filter-charts {
+        order: 2;
+        width: 50%;
+        align-self: flex-start;
+        max-height: 200px;
+        border: 1px solid rgba(0, 0, 0, 0.5);
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
 
-        .canvas-object,
-        .canvas-filter-fields {
-            height: 100%;
+        .filter-charts-label {
+            text-align: center;
         }
 
-        .canvas-object {
-            order: 2;
-            flex-grow: 1;
+        .filter-sections {
+            width: 75%;
+            padding: 0 5px;
 
-            display: flex;
-
-            canvas {
-                display: flex !important;
-                width: auto !important;
-                height: auto !important;
-                flex-shrink: 1 !important;
-            }
-        }
-
-        .canvas-filter-fields {
-            order: 1;
-            display: flex;
-            flex-direction: column;
-
-            .filter-sections-form-field {
+            mat-form-field.filter-sections-field {
                 width: 100%;
             }
         }
+    }
+
+    .filter-charts.no-chart {
+        align-self: center;
     }
 }

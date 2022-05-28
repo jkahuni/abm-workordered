@@ -1,4 +1,4 @@
-import { Component, OnInit, ElementRef, ViewChild, OnDestroy, ChangeDetectorRef, AfterContentInit } from '@angular/core';
+import { Component, OnInit, ElementRef, ViewChild, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { MediaMatcher } from '@angular/cdk/layout';
 
@@ -26,7 +26,7 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
     public mediaMatcher: MediaMatcher,
   ) {
     this.updateScreenProperties
-      .pipe(takeUntil(this.stopAllListeners))
+      .pipe(takeUntil(this.onDestroy))
       .subscribe(
         (object: SidenavsDeterminer) => {
           const largeScreen = object['largeScreen'];
@@ -46,11 +46,21 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
 
 
       );
+
+    this.setActionsAndUsers
+      .pipe(takeUntil(this.onDestroy))
+      .subscribe((workorderHasActions: boolean) => {
+        this.workorderHasActions = workorderHasActions;
+        if (workorderHasActions) {
+          this.getUsers();
+        } 
+      });
   }
 
 
-  private stopAllListeners: Subject<void> = new Subject<void>();
+  private onDestroy: Subject<void> = new Subject<void>();
   private updateScreenProperties: Subject<SidenavsDeterminer> = new Subject<SidenavsDeterminer>();
+  private setActionsAndUsers: Subject<boolean> = new Subject<boolean>();
 
   matcher!: MediaQueryList;
 
@@ -71,7 +81,7 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
   technicians!: IntUser[];
 
   // when to show right-sidenav
-  workorderHasActions = false;
+  workorderHasActions!: boolean;
 
   // toggle sidenavs
   showLeftSidenav!: boolean;
@@ -99,8 +109,8 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
   largeScreen!: boolean;
 
   ngOnDestroy(): void {
-    this.stopAllListeners.next();
-    this.stopAllListeners.complete();
+    this.onDestroy.next();
+    this.onDestroy.complete();
     this.matcher.removeEventListener('change', this.mediaSizeListener);
 
   }
@@ -111,7 +121,6 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
     this.userUid = this.route.snapshot.paramMap.get('userUid');
 
     this.getWorkorders();
-    this.getUsers();
 
     this.matcher = this.mediaMatcher.matchMedia('(min-width: 670px)');
     this.matcher.addEventListener('change', this.mediaSizeListener);
@@ -144,7 +153,7 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
               }
               return false;
             });
-          this.workorderHasActions = false;
+          this.setActionsAndUsers.next(false);
           return reviewedWorkorders;
 
         }
@@ -159,7 +168,7 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
               return false;
 
             });
-          this.workorderHasActions = true;
+          this.setActionsAndUsers.next(true);
           return unReviewedWorkorders;
 
         }
@@ -185,7 +194,7 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
             }
           );
 
-          this.workorderHasActions = true;
+          this.setActionsAndUsers.next(true);
           return unverifiedWorkorders;
         }
 
@@ -208,7 +217,7 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
 
             }
           );
-          this.workorderHasActions = false;
+          this.setActionsAndUsers.next(false);
 
           return approvedWorkorders;
 
@@ -230,7 +239,7 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
               }
               return false;
             });
-          this.workorderHasActions = false;
+          this.setActionsAndUsers.next(false);
 
           return rejectedWorkorders;
 
@@ -249,7 +258,7 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
               return false;
             }
           );
-          this.workorderHasActions = false;
+          this.setActionsAndUsers.next(false);
 
           return raisedWorkorders;
 
@@ -268,7 +277,7 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
             }
           );
 
-          this.workorderHasActions = true;
+          this.setActionsAndUsers.next(true);
           return escalatedWorkorders;
         }
       }
@@ -295,7 +304,7 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
               return false;
             });
 
-          this.workorderHasActions = true;
+          this.setActionsAndUsers.next(true);
           return openWorkorders;
         }
 
@@ -319,7 +328,7 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
 
               return false;
             });
-          this.workorderHasActions = false;
+          this.setActionsAndUsers.next(false);
 
           return closedWorkorders;
         }
@@ -347,7 +356,7 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
               return false;
             });
 
-          this.workorderHasActions = true;
+          this.setActionsAndUsers.next(true);
           return openWorkorders;
         }
 
@@ -372,7 +381,7 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
               return false;
             });
 
-          this.workorderHasActions = true;
+          this.setActionsAndUsers.next(true);
           return closedWorkorders;
         }
 
@@ -392,7 +401,7 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
               return false;
             }
           );
-          this.workorderHasActions = false;
+          this.setActionsAndUsers.next(false);
 
           return raisedWorkorders;
         }
@@ -413,7 +422,7 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
 
               return false;
             });
-          this.workorderHasActions = true;
+          this.setActionsAndUsers.next(false);
 
           return approvedWorkorders;
         }
@@ -434,7 +443,7 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
 
               return false;
             });
-          this.workorderHasActions = false;
+          this.setActionsAndUsers.next(false);
 
           return rejectedWorkorders;
         }
@@ -446,7 +455,7 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
   // get workorders
   private getWorkorders(): void {
     this.workordersService.$allWorkorders
-      .pipe(takeUntil(this.stopAllListeners))
+      .pipe(takeUntil(this.onDestroy))
       .subscribe(
         (workorders: IntWorkorder[] | null) => {
           if (workorders !== null) {
@@ -484,23 +493,21 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
 
   // get all users
   private getUsers(): void {
-    if (this.workorderHasActions) {
-      this.workordersService.getUsers()
-        .then((users: IntUser[]) => {
-          this.supervisors = users.filter((user: IntUser) => user.group === 'Supervisor'
-          );
+    this.workordersService.getUsers()
+      .then((users: IntUser[]) => {
+        this.supervisors = users.filter((user: IntUser) => user.group === 'Supervisor'
+        );
 
-          this.technicians = users.filter(
-            (user: IntUser) =>
-              user.group === 'Technician'
-          );
-        })
-        .catch(() => {
-          this.toast.close();
-          this.toast.error(`Error: A crucial operation failed with error code LW-GU-01. Please reload the page or report the error code to support to have it fixed.`,
-            { autoClose: false, id: 'error-code-WL-03' });
-        });
-    }
+        this.technicians = users.filter(
+          (user: IntUser) =>
+            user.group === 'Technician'
+        );
+      })
+      .catch(() => {
+        this.toast.close();
+        this.toast.error(`Error: A crucial operation failed with error code LW-GU-01. Please reload the page or report the error code to support to have it fixed.`,
+          { autoClose: false, id: 'error-code-WL-03' });
+      });
   }
 
   // hide spinners
@@ -548,7 +555,7 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
     if (workorders.length === 0) {
       this.workorder = undefined;
     }
-    
+
   }
 
   displayCurrentWorkorder(workorder: IntWorkorder): any {

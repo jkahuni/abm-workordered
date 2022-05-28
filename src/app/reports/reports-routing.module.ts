@@ -9,6 +9,7 @@ const redirectToLogin = () => redirectUnauthorizedTo(['authentication/sign-in'])
 
 
 const routes: Routes = [
+  { path: '', redirectTo: '/reports/maintenance-cost', pathMatch: 'full' },
   { path: 'reports/maintenance-cost', component: MaintenanceCostComponent,
 ...canActivate(redirectToLogin)}
 ];

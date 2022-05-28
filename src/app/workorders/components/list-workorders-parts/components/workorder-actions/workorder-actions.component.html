@@ -17,11 +17,11 @@
   [ngClass]="{ escalated: workorder.escalated?.status }"
 >
   <div *ngIf="!workorder.escalated?.status" class="workorder-status">
-    status: Opened
+    Status: Opened
   </div>
 
   <div *ngIf="workorder.escalated?.status" class="workorder-status escalated">
-    status: Escalated
+    Status: Escalated
   </div>
 </div>
 

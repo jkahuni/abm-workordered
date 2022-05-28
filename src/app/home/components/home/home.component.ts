@@ -71,9 +71,6 @@ export class HomeComponent implements OnInit {
   otherError!: string;
   defaultError = `Error UHE-01 occured. Please try reloading this page or report this error to support to have the issue fixed if it persists.`;
 
-  // toggle view chart/data
-  viewData = false;
-
   ngOnInit(): void {
     onAuthStateChanged(this.auth,
       (user: User | null) => {
@@ -82,7 +79,6 @@ export class HomeComponent implements OnInit {
           this.userUid = user.uid;
           if (!user.emailVerified) {
             this.loading = false;
-            this.viewData = true;
 
           } else {
             this.getAllWorkorders();
@@ -90,7 +86,6 @@ export class HomeComponent implements OnInit {
           }
         } else {
           this.loading = false;
-          this.viewData = true;
           
         }
       },
@@ -512,8 +507,6 @@ export class HomeComponent implements OnInit {
 
   resendVerificationCode(): any {
     if (this.user) {
-      const uid = this.user.uid;
-
       this.spinner.show('app-verify-email-spinner');
       this.authenticationService
         .sendVerificationEmail(this.user)

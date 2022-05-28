@@ -1,16 +1,21 @@
-<div class="canvas-container">
-  <div class="canvas-object">
+<div class="chart-container">
+  <!-- canvas = chart -->
+  <div class="chart-object" [hidden]="!chartPlotted">
     <canvas baseChart id="reportsChart"> {{ chartObject }} </canvas>
   </div>
-  <div class="filter-sections-form-field-container canvas-filter-fields">
-    <div class="charts-filter-label">Filter Charts</div>
-    <div>
-      <mat-form-field class="filter-sections-form-field" appearance="outline">
+
+  <!-- filter fields -->
+  <div class="filter-charts" 
+  [ngClass]="{'no-chart': !chartPlotted}">
+    <div class="filter-charts-label" *ngIf="!chartPlotted">Select Maintenance Cost Section</div>
+    <div class="filter-charts-label" *ngIf="chartPlotted">Filter Charts</div>
+    <div  class="filter-sections">
+      <mat-form-field class="filter-sections-field" appearance="outline">
         <mat-label>Select Section</mat-label>
         <mat-select
           #sectionsFilterField
           (selectionChange)="
-            generateMaintenanceCostPerSection(sectionsFilterField.value)
+            generateMaintenanceCostPerSection(sectionsFilterField.value, '2022')
           "
         >
           <mat-option
@@ -23,10 +28,4 @@
     </div>
   </div>
 </div>
-
-<!-- [type]="chartType"
-        [data]="lineChartData"
-        [options]="lineChartOptions"
-        [plugins]="lineChartPlugins"
-        (chartClick)="lineChartClicked($event)" -->
         

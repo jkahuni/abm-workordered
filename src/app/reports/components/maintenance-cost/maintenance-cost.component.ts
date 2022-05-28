@@ -1,4 +1,8 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { MediaMatcher } from '@angular/cdk/layout';
+
+// rxjs
+import { takeUntil, Subject } from 'rxjs';
 
 // services
 import { WorkordersService } from '@workorders/services/workorders.service';
@@ -7,9 +11,6 @@ import { ResourcesService } from '@resources/services/resources.service';
 // interfaces
 import { IntWorkorder } from '@workorders/models/workorders.models';
 import { IntSection, IntMachine } from '@resources/models/resources.models';
-
-// rxjs
-import { Subject, takeUntil } from 'rxjs';
 
 // for chart
 import { ChartConfiguration, ChartType, ChartData, ChartEvent, Chart } from 'chart.js';
@@ -28,17 +29,17 @@ export class MaintenanceCostComponent implements OnInit, OnDestroy {
 
   constructor(
     private workordersService: WorkordersService,
-    private resourcesService: ResourcesService,
-  ) { }
+    public mediaMatcher: MediaMatcher,
+  ) {
 
-  ngOnDestroy(): void {
-    this.onDestroy.next();
-    this.onDestroy.complete();
   }
 
   @ViewChild(BaseChartDirective) chart!: BaseChartDirective;
 
   private onDestroy = new Subject<void>();
+  private updateScreenProperties: Subject<any> = new Subject<any>();
+
+  matcher!: MediaQueryList;
 
   workorders!: IntWorkorder[];
   sections!: IntSection[];
@@ -54,36 +55,24 @@ export class MaintenanceCostComponent implements OnInit, OnDestroy {
 
   // chart
   chartObject!: Chart;
+  chartPlotted = false;
 
 
-  // for bar chart
-  public chartType: ChartType = 'line';
-  public lineChartOptions!: ChartConfiguration['options'];
-  public lineChartPlugins = [
-    DataLabelsPlugin
-  ];
-  public lineChartData: ChartConfiguration['data'] = {
-    labels: [],
-    datasets: [
-      {
-        data: [],
-        borderWidth: 1,
-        backgroundColor: 'rgba(77,83,96,0.2)',
-        borderColor: 'rgba(77,83,96,1)',
-        pointBackgroundColor: 'rgba(77,83,96,1)',
-        pointBorderColor: '#fff',
-        pointHoverBackgroundColor: '#fff',
-        pointHoverBorderColor: 'rgba(77,83,96,1)',
-        fill: 'origin',
-      }
-    ],
-
-  };
-
+  ngOnDestroy(): void {
+    this.onDestroy.next();
+    this.onDestroy.complete();
+    this.matcher.removeEventListener('change', this.mediaSizeListener);
+  }
 
   ngOnInit(): void {
     this.getWorkorders();
     this.generateMaintenanceCostPerSection('Grid Casting');
+    this.matcher = this.mediaMatcher.matchMedia('(min-width: 500px)');
+    this.matcher.addEventListener('change', this.mediaSizeListener);
+  }
+
+  private mediaSizeListener = (event: { matches: any }) => {
+    this.updateScreenProperties.next(this.chartObject)
   }
 
   private createChart(type: ChartType, labels: string[], chartData: any[]): Chart {
@@ -107,12 +96,16 @@ export class MaintenanceCostComponent implements OnInit, OnDestroy {
 
     const maximumCost = Math.max(...chartData as number[]);
 
+    Chart.defaults.font.family = 'Lato, "Open Sans", Arial, Helvetica, Noto, "Lucida Sans", sans-serif';
+    Chart.defaults.font.size = 16;
+    Chart.defaults.font.lineHeight = 1.6;
     const chart = new Chart('reportsChart', {
       type,
       data,
       plugins: [DataLabelsPlugin],
       options: {
         responsive: true,
+        maintainAspectRatio: false,
 
         elements: type === 'line' ? {
           line: {
@@ -123,23 +116,30 @@ export class MaintenanceCostComponent implements OnInit, OnDestroy {
         scales: {
           x: {
             grid: {
-              tickColor: 'blue'
+              display: false,
+              tickColor: 'black'
             },
             ticks: {
-              color: 'blue',
+              color: 'black',
             },
             title: {
-              color: 'blue',
+              color: 'black',
               display: true,
               text: 'Months'
             }
           },
           y: {
             grid: {
-              tickColor: 'blue'
+              display: false,
+              tickColor: 'black'
             },
             ticks: {
-              color: 'blue',
+              color: 'black',
+            },
+            title: {
+              color: 'black',
+              display: true,
+              text: 'Million Ksh'
             },
 
             suggestedMin: 0,
@@ -158,22 +158,52 @@ export class MaintenanceCostComponent implements OnInit, OnDestroy {
             text: ['Monthly Maintenance Costs', `${this.section}`]
           },
           datalabels: {
-            anchor: 'end',
-            align: 'left',
-            textAlign: 'center',
-            formatter: function (value) {
-              if (+value === 0) {
-                return '';
-              } else {
-                const roundedValue = ~~value;
-                return roundedValue.toLocaleString('en-US', { minimumFractionDigits: 0 });
+            display: 'auto',
+            anchor: (context) => {
+              const pointIndex = context.dataIndex;
+              const contextIndex = context.datasetIndex;
+              const lastDataPoint = context.chart.data?.datasets[contextIndex]?.data?.length - 1;
+
+              if (pointIndex === 0) {
+                const currentPointData = data?.datasets[contextIndex]?.data[pointIndex];
+                const nextPointData = context.chart.data?.datasets[contextIndex]?.data[pointIndex + 1];
+
+                return currentPointData && nextPointData &&
+                  currentPointData < nextPointData ? 'start' : 'end';
+              }
+
+              else {
+                return 'end';
               }
             },
-            color: function (context) {
-              return context.dataIndex === 0 ? 'red' : 'blue';
+            align: (context) => {
+              const pointIndex = context.dataIndex;
+              const contextIndex = context.datasetIndex;
+              const lastDataPoint = context.chart.data?.datasets[contextIndex]?.data?.length - 1;
 
+              if (pointIndex === 0) {
+                return 'right';
+              }
 
+              else if (pointIndex === lastDataPoint) {
+                const currentPointData = context.chart.data.datasets[contextIndex].data[pointIndex];
+
+                return currentPointData !== null && currentPointData === 0 ? 'end' : 'left';
+              }
+              else {
+                const currentPointData = context.chart.data.datasets[contextIndex].data[pointIndex];
+                return currentPointData ? 'top' : 'end';
+              }
             },
+            textAlign: 'center',
+            formatter: function (value, context) {
+              if (+value === 0 && context.dataIndex === 0) {
+                return '';
+              } else {
+                return value.toLocaleString('en-US', { minimumFractionDigits: 0 });
+              }
+            },
+            color: 'black',
             offset: 10
 
           },
@@ -284,7 +314,7 @@ export class MaintenanceCostComponent implements OnInit, OnDestroy {
           }).reduce((totalSparesCost: number, totalSpareCost: number) => {
             const total = totalSparesCost + totalSpareCost;
 
-            return total;
+            return total / 1000000;
           }, 0);
           monthsLabels.push(label);
           workordersDataArray.push(workorders);
@@ -295,6 +325,10 @@ export class MaintenanceCostComponent implements OnInit, OnDestroy {
         this.chartObject.destroy();
       }
       this.chartObject = this.createChart('line', monthsLabels, workordersDataArray);
+
+      if (this.chartObject) {
+        this.chartPlotted = true;
+      }
     }
 
 

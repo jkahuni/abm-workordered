@@ -23,106 +23,71 @@ mat-card.home-page-card {
     border-radius: 20px;
     margin: 16px auto;
     background: #e9eef3;
+    max-width: 300px;
 
     mat-card-content {
         width: 100%;
 
-        .bootstrap-spinner-container {
+        .bootstrap-spinner-container-wrapper {
             display: flex;
             justify-content: center;
             align-items: center;
-
-            .bootstrap-spinner {
+            .bootstrap-spinner-container {
                 display: flex;
                 justify-content: center;
                 align-items: center;
-                flex-direction: column;
-                margin: 32px 0 8px;
 
-                .loading-tag {
-                    margin: 16px 0;
+                .bootstrap-spinner {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    flex-direction: column;
+                    margin: 32px 0 8px;
+
+                    .loading-tag {
+                        margin: 16px 0;
+                    }
                 }
             }
         }
-    }
-}
 
-// with chart displayed = .home-page-card.chart-displayed
-mat-card.home-page-card:not(.chart-hidden) {
-    max-width: 90vw;
-    height: 85vh;
-
-    mat-card-header {
-        height: $mat-card-header-text-height;
-
-        ::ng-deep {
-            .mat-card-header-text {
-                .mat-card-title {
-                    margin: 0;
-                    padding: 0;
-                }
-            }
-        }
-    }
-
-    mat-card-content {
-        height: calc(100% - $mat-card-header-text-height);
-        display: flex;
-
-        .loading-finished-container,
-        .user-logged-in-container,
-        .user-email-verified-container,
-        .bootstrap-spinner-container-wrapper {
-            height: 100%;
-            width: 100%;
-        }
-
-        app-maintenance-cost {
-            width: 100%;
-        }
-    }
-}
-
-// with chart hidden = .home-page-card.chart-hidden
-mat-card.home-page-card:not(.chart-displayed) {
-    max-width: 300px;
-
-    mat-card-content {
-        .navigation-links {
+        .user-email-verified {
             display: flex;
-            justify-content: flex-start;
-            align-items: center;
-            flex-flow: row wrap;
+            flex-direction: column;
+            gap: 16px;
+            margin: 10px 0 0;
 
-            div {
-                width: 100%;
-                margin-top: 10px;
+            .view-chart-button {
+                order: 1;
+                display: flex;
+                align-items: center;
+                justify-content: space-evenly;
+            }
 
-                a.btn {
-                    text-decoration: none;
-                }
+            .navigation-links-container {
+                order: 2;
+                .navigation-links {
+                    display: flex;
+                    justify-content: flex-start;
+                    align-items: center;
+                    flex-flow: row wrap;
 
-                a.btn.btn-link:hover,
-                a.btn.btn-link:focus {
-                    background: #002ead;
-                    color: white;
+                    div {
+                        width: 100%;
+                        margin-top: 10px;
+
+                        a.btn {
+                            text-decoration: none;
+                        }
+
+                        a.btn.btn-link:hover,
+                        a.btn.btn-link:focus {
+                            background: #002ead;
+                            color: white;
+                        }
+                    }
                 }
             }
         }
     }
-}
-
-.toggle-chart-and-data {
-    display: flex;
-    align-items: center;
-    justify-content: space-evenly;
-    height: $mat-card-header-height;
-}
-
-.canvas-object-container {
-    // margin: 10px 0 0;
-    padding: 0 10px;
-    display: flex;
-    // align-items: stretch;
-    height: calc(100% - $mat-card-header-height);
 }

@@ -17,14 +17,14 @@
     border: 1px solid rgba(100%, 0, 0, 0.5);
 }
 .workorder-status-wrapper:not(.escalated) {
-    border: 1px solid green;
+    border: 1px solid black;
 }
 
 .workorder-status {
     color: red;
 }
 .workorder-status:not(.escalated) {
-    color: green;
+    color: black;
 }
 
 .workorders-sidenav-text {

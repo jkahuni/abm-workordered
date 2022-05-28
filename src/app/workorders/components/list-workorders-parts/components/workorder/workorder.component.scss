@@ -1,3 +1,6 @@
+$code-length: 35%;
+$quantity-length: 15%;
+$cost-length: 50%;
 .spare-form-header-row {
     width: 100%;
     display: flex;
@@ -7,19 +10,20 @@
     .code-label,
     .quantity-label,
     .total-cost-label {
-        color: green;
+        color: black;
+        font-weight: bold;
     }
 
     .code-label {
-        width: 30%;
+        width: $code-length;
     }
 
     .quantity-label {
-        width: 20%;
+        width: $quantity-length;
     }
 
     .total-cost-label {
-        width: 50%;
+        width: $cost-length;
     }
 }
 
@@ -27,15 +31,15 @@
     width: 100%;
 
     mat-form-field.code {
-        width: 35%;
+        width: $code-length;
     }
 
     mat-form-field.quantity {
-        width: 15%;
+        width: $quantity-length;
     }
 
     mat-form-field.total-cost {
-        width: 50%;
+        width: $cost-length;
     }
 }
 

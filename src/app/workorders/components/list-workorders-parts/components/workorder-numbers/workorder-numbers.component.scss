@@ -44,10 +44,10 @@
 .filter-field-value {
     margin: 5px 2px 0;
     padding: 5px 0px;
-    border: 1px solid green;
+    border: 1px solid black;
 
     .filter-value {
-        color: green;
+        color: black;
     }
 }
 
@@ -73,7 +73,7 @@ mat-divider.mat-divider {
                 padding: 0px;
             }
             .mat-subheader {
-                color: green;
+                color: black;
                 padding: 0px;
                 margin: 10px 0px 0px !important;
                 height: 24px;
