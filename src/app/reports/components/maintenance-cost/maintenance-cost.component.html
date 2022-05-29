@@ -1,1 +1,21 @@
-<canvas baseChart id="reportsChart"> {{ chartObject }} </canvas>
+<div *ngIf="loading" class="bootstrap-spinner-container-wrapper">
+  <div class="bootstrap-spinner-container">
+    <div class="bootstrap-spinner">
+      <div
+        #loadingSpinner
+        class="spinner-border"
+        style="width: 2rem; height: 2rem"
+        role="status"
+      ></div>
+      <span class="loading-tag"><strong>Plotting Chart...</strong></span>
+    </div>
+  </div>
+</div>
+
+<canvas baseChart id="reportsChart" [hidden]="loading || loadingFailed">
+  {{ chartObject }}
+</canvas>
+
+<div *ngIf="!loading && loadingFailed">
+  {{ loadingDefaultError ? loadingDefaultError : loadingFallbackError }}
+</div>

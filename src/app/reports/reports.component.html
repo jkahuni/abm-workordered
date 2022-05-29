@@ -1,14 +1,17 @@
-<div class="chart-container">
+<div
+  class="chart-container"
+  *ngIf="!loadingWorkordersFailed"
+>
   <!-- canvas objects -->
-    <app-maintenance-cost
-     class="chart-object"
-      [workorders]="workorders"
-      [section]="section"
-      (chartPlotted)="updateChartPlotted($event)"
-    ></app-maintenance-cost>
+  <app-maintenance-cost
+    class="chart-object"
+    [workorders]="workorders"
+    [section]="section"
+    (chartPlotted)="updateChartPlotted($event)"
+  ></app-maintenance-cost>
 
   <!-- filter fields -->
-  <div class="filter-charts" [ngClass]="{ 'no-chart': !chartPlotted }">
+  <div *ngIf="chartPlotted" class="filter-charts">
     <div class="filter-charts-label" *ngIf="!chartPlotted">
       Select Maintenance Cost Section
     </div>
@@ -29,4 +32,9 @@
       </mat-form-field>
     </div>
   </div>
+</div>
+
+<!-- could not load workorders -->
+<div *ngIf="loadingWorkordersFailed" class="chart-container">
+  {{ indexingError ? indexingError : otherError ? otherError : fallbackError }}
 </div>

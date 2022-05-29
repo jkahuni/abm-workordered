@@ -1,8 +1,8 @@
-import { Component, OnDestroy, OnInit, ViewChild, Input, OnChanges, Output, SimpleChanges , EventEmitter} from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild, Input, OnChanges, Output, SimpleChanges, EventEmitter } from '@angular/core';
 import { MediaMatcher } from '@angular/cdk/layout';
 
 // rxjs
-import { takeUntil, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 
 // services
 import { WorkordersService } from '@workorders/services/workorders.service';
@@ -18,6 +18,8 @@ import DataLabelsPlugin from 'chartjs-plugin-datalabels';
 
 // dayjs
 import * as dayjs from 'dayjs';
+import * as duration from 'dayjs/plugin/duration';
+dayjs.extend(duration);
 
 @Component({
   selector: 'app-maintenance-cost',
@@ -27,7 +29,6 @@ import * as dayjs from 'dayjs';
 export class MaintenanceCostComponent implements OnInit, OnDestroy, OnChanges {
 
   constructor(
-    private workordersService: WorkordersService,
     public mediaMatcher: MediaMatcher,
   ) {
 
@@ -57,6 +58,11 @@ export class MaintenanceCostComponent implements OnInit, OnDestroy, OnChanges {
   // chart
   chartObject!: Chart;
 
+  loading = true;
+  loadingFailed = false;
+  loadingDefaultError!: string;
+  loadingFallbackError = `Plotting chart failed with error code U-MC-C-01. Please try reloading the page or report the error code if the issue persists.`;
+
   ngOnDestroy(): void {
     this.onDestroy.next();
     this.onDestroy.complete();
@@ -64,7 +70,6 @@ export class MaintenanceCostComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   ngOnInit(): void {
-    // this.workorders = this.allWorkorders;
     this.matcher = this.mediaMatcher.matchMedia('(min-width: 500px)');
     this.matcher.addEventListener('change', this.mediaSizeListener);
   }
@@ -76,8 +81,11 @@ export class MaintenanceCostComponent implements OnInit, OnDestroy, OnChanges {
     this.workorders = workorders ? workorders : this.workorders;
     this.section = section ? section : this.section;
 
-    this.generateMaintenanceCostPerSection(this.section);
+    if (this.workorders && this.section) {
+      this.generateMaintenanceCostPerSection();
     }
+
+  }
 
   private mediaSizeListener = (event: { matches: any }) => {
     this.updateScreenProperties.next(this.chartObject)
@@ -117,7 +125,7 @@ export class MaintenanceCostComponent implements OnInit, OnDestroy, OnChanges {
 
         elements: type === 'line' ? {
           line: {
-            tension: 0.5
+            tension: 0.4
           }
         } : {},
 
@@ -207,6 +215,8 @@ export class MaintenanceCostComponent implements OnInit, OnDestroy, OnChanges {
             textAlign: 'center',
 
             formatter: function (value, context) {
+              // value falls on y-axis and 
+              // value = 0
               if (+value === 0 && context.dataIndex === 0) {
                 return '';
               } else {
@@ -232,11 +242,17 @@ export class MaintenanceCostComponent implements OnInit, OnDestroy, OnChanges {
           if (points.length) {
             const point = points[0];
 
-            const maintenanceCost = chart.data.datasets[point.datasetIndex].data[point.index] as number;
+            const cost = chart.data.datasets[point.datasetIndex].data[point.index] as number;
+            const totalMaintenanceCost = cost ? cost * 1000000 : 0;
             const monthYearLabel = chart.data.labels?.[point.index] as string;
+            const month = dayjs(monthYearLabel).month();
+            const monthAsObject = dayjs().month(month-1);
+            const totalWeeksAtStartOfCurrentMonth = dayjs.duration({ months: month }).weeks();
+            const totalWeeksAtStartOfPreviousMonth = dayjs.duration({ months: month +1}).weeks();
+            const totalWeeks = totalWeeksAtStartOfCurrentMonth - totalWeeksAtStartOfPreviousMonth;
 
-            console.log('cost', maintenanceCost*1000000);
-            console.log('label', monthYearLabel);
+            console.log(monthAsObject.daysInMonth());
+            console.log(dayjs.duration(monthAsObject.daysInMonth(), 'd').weeks());
           }
 
         }
@@ -285,9 +301,8 @@ export class MaintenanceCostComponent implements OnInit, OnDestroy, OnChanges {
     return filteredWorkorders;
   }
 
-  generateMaintenanceCostPerSection(sectionName: string, workordersYear?: string): void {
+  generateMaintenanceCostPerSection(workordersYear?: string): void {
     if (this.workorders) {
-      this.section = sectionName;
       const year = workordersYear || '2022';
       let monthsLabels: string[] = [];
       let workordersDataArray: number[] = [];
@@ -296,25 +311,26 @@ export class MaintenanceCostComponent implements OnInit, OnDestroy, OnChanges {
         (workorder: IntWorkorder) => {
           const section = workorder.section.name;
 
-          return section === sectionName;
+          return section === this.section;
         }
       );
 
       // get the mtnc costs per section per month
       this.monthValues.forEach(
         (month: number) => {
-          const label = dayjs(dayjs().month(month)).format('MMM YY');
-          const workorders = this.filterMonthlyWorkorders(sectionsWorkorders, month, year).map((workorder: IntWorkorder) => {
+          const monthAndYearLabel = dayjs(dayjs().month(month)).format('MMM YY');
+          const maintenanceCost = this.filterMonthlyWorkorders(sectionsWorkorders, month, year).map((workorder: IntWorkorder) => {
             const totalSparesCost = workorder.sparesUsed.status ? this.formatCostAsInteger(workorder.sparesUsed.totalCost) : 0;
 
             return totalSparesCost;
           }).reduce((totalSparesCost: number, totalSpareCost: number) => {
             const total = totalSparesCost + totalSpareCost;
-
+            
             return total / 1000000;
           }, 0);
-          monthsLabels.push(label);
-          workordersDataArray.push(workorders);
+          
+          monthsLabels.push(monthAndYearLabel);
+          workordersDataArray.push(maintenanceCost);
         }
       );
 
@@ -324,8 +340,17 @@ export class MaintenanceCostComponent implements OnInit, OnDestroy, OnChanges {
       this.chartObject = this.createChart('line', monthsLabels, workordersDataArray);
 
       if (this.chartObject) {
+        this.loading = false;
         this.chartPlotted.emit(true);
+      } else {
+        this.loading = false;
+        this.loadingFailed = true;
+        this.loadingDefaultError = `Plotting chart failed with error code MC-C-01. Please try reloading the page or report the error code if the issue persists.`;
       }
+    } else {
+      this.loading = false;
+      this.loadingFailed = true;
+      this.loadingDefaultError = `Plotting chart failed with error code MC-C-02. Please try reloading the page or report the error code if the issue persists.`;
     }
 
 

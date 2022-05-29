@@ -69,7 +69,7 @@ export class HomeComponent implements OnInit {
   loadingFailed = false;
   indexingError!: string;
   otherError!: string;
-  defaultError = `Error UHE-01 occured. Please try reloading this page or report this error to support to have the issue fixed if it persists.`;
+  defaultError = `Error with <b>code UHE-01</b> occured. Please try reloading this page or report this error code to support to have the issue fixed if it persists.`;
 
   ngOnInit(): void {
     onAuthStateChanged(this.auth,
@@ -200,9 +200,9 @@ export class HomeComponent implements OnInit {
         (err: any) => {
           this.hideSpinnerOnError();
           if (err.code === 'failed-precondition') {
-            this.indexingError = `Error IND-H-02 occured. Please report this error to support to have it fixed.`;
+            this.indexingError = `Initialising your data failed with error <b>code IND-H-02</b>. Please report this error to support to have it fixed.`;
           } else {
-            this.otherError = `Error H-02 occured. Please report this error to support to have it fixed.`;
+            this.otherError = `Initialising your data failed with error <b>code H-02</b>. Please reload the page or report this error to support to have it fixed if it persists`;
           }
         }
       );
@@ -219,9 +219,9 @@ export class HomeComponent implements OnInit {
             .catch((err: any) => {
               this.hideSpinnerOnError();
               if (err.code === 'failed-precondition') {
-                this.indexingError = `Error IND-H-01 occured. Please report this error to support to have it fixed.`;
+                this.indexingError = `Displaying workorders failed with error <b>code IND-H-01</b>. Please report this error to support to have it fixed.`;
               } else {
-                this.otherError = `Error H-01 occured. Please try reloading this page or report this error to support to have the issue fixed if it persists.`;
+                this.otherError = `Displaying workorders failed with error <b>code H-01</b>. Please try reloading this page or report this error to support to have the issue fixed if it persists.`;
               }
             });
         }
