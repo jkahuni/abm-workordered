@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild, Input, OnChanges, Output, SimpleChanges , EventEmitter} from '@angular/core';
 import { MediaMatcher } from '@angular/cdk/layout';
 
 // rxjs
@@ -6,14 +6,13 @@ import { takeUntil, Subject } from 'rxjs';
 
 // services
 import { WorkordersService } from '@workorders/services/workorders.service';
-import { ResourcesService } from '@resources/services/resources.service';
 
 // interfaces
 import { IntWorkorder } from '@workorders/models/workorders.models';
 import { IntSection, IntMachine } from '@resources/models/resources.models';
 
 // for chart
-import { ChartConfiguration, ChartType, ChartData, ChartEvent, Chart } from 'chart.js';
+import { ChartConfiguration, ChartType, Chart } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
 import DataLabelsPlugin from 'chartjs-plugin-datalabels';
 
@@ -25,7 +24,7 @@ import * as dayjs from 'dayjs';
   templateUrl: './maintenance-cost.component.html',
   styleUrls: ['./maintenance-cost.component.scss']
 })
-export class MaintenanceCostComponent implements OnInit, OnDestroy {
+export class MaintenanceCostComponent implements OnInit, OnDestroy, OnChanges {
 
   constructor(
     private workordersService: WorkordersService,
@@ -33,6 +32,11 @@ export class MaintenanceCostComponent implements OnInit, OnDestroy {
   ) {
 
   }
+
+  @Input('workorders') allWorkorders!: IntWorkorder[];
+  @Input('section') currentSection!: string;
+
+  @Output() chartPlotted: EventEmitter<boolean> = new EventEmitter<boolean>();
 
   @ViewChild(BaseChartDirective) chart!: BaseChartDirective;
 
@@ -45,9 +49,6 @@ export class MaintenanceCostComponent implements OnInit, OnDestroy {
   sections!: IntSection[];
   machines!: IntMachine[];
 
-  factorySections: string[] = ['Grid Casting', 'Sovema',
-    'Pasting', 'Jar Formation', 'Assembly Line', 'IGO\'s', 'Acid Plant', 'Hygro Cubicles', 'Tank Formation'];
-
   // for chart config
   monthValues!: number[];
   workordersPerSectionPerMonth!: IntWorkorder[];
@@ -55,8 +56,6 @@ export class MaintenanceCostComponent implements OnInit, OnDestroy {
 
   // chart
   chartObject!: Chart;
-  chartPlotted = false;
-
 
   ngOnDestroy(): void {
     this.onDestroy.next();
@@ -65,11 +64,20 @@ export class MaintenanceCostComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.getWorkorders();
-    this.generateMaintenanceCostPerSection('Grid Casting');
+    // this.workorders = this.allWorkorders;
     this.matcher = this.mediaMatcher.matchMedia('(min-width: 500px)');
     this.matcher.addEventListener('change', this.mediaSizeListener);
   }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    const workorders = changes['allWorkorders']?.currentValue;
+    const section = changes['currentSection']?.currentValue;
+
+    this.workorders = workorders ? workorders : this.workorders;
+    this.section = section ? section : this.section;
+
+    this.generateMaintenanceCostPerSection(this.section);
+    }
 
   private mediaSizeListener = (event: { matches: any }) => {
     this.updateScreenProperties.next(this.chartObject)
@@ -97,8 +105,8 @@ export class MaintenanceCostComponent implements OnInit, OnDestroy {
     const maximumCost = Math.max(...chartData as number[]);
 
     Chart.defaults.font.family = 'Lato, "Open Sans", Arial, Helvetica, Noto, "Lucida Sans", sans-serif';
-    Chart.defaults.font.size = 16;
-    Chart.defaults.font.lineHeight = 1.6;
+    Chart.defaults.font.size = 14;
+    Chart.defaults.font.lineHeight = 1.4;
     const chart = new Chart('reportsChart', {
       type,
       data,
@@ -162,7 +170,6 @@ export class MaintenanceCostComponent implements OnInit, OnDestroy {
             anchor: (context) => {
               const pointIndex = context.dataIndex;
               const contextIndex = context.datasetIndex;
-              const lastDataPoint = context.chart.data?.datasets[contextIndex]?.data?.length - 1;
 
               if (pointIndex === 0) {
                 const currentPointData = data?.datasets[contextIndex]?.data[pointIndex];
@@ -176,6 +183,7 @@ export class MaintenanceCostComponent implements OnInit, OnDestroy {
                 return 'end';
               }
             },
+
             align: (context) => {
               const pointIndex = context.dataIndex;
               const contextIndex = context.datasetIndex;
@@ -195,7 +203,9 @@ export class MaintenanceCostComponent implements OnInit, OnDestroy {
                 return currentPointData ? 'top' : 'end';
               }
             },
+
             textAlign: 'center',
+
             formatter: function (value, context) {
               if (+value === 0 && context.dataIndex === 0) {
                 return '';
@@ -222,10 +232,10 @@ export class MaintenanceCostComponent implements OnInit, OnDestroy {
           if (points.length) {
             const point = points[0];
 
-            const maintenanceCost = chart.data.datasets[point.datasetIndex].data[point.index];
-            const monthYearLabel = chart.data.labels?.[point.index];
+            const maintenanceCost = chart.data.datasets[point.datasetIndex].data[point.index] as number;
+            const monthYearLabel = chart.data.labels?.[point.index] as string;
 
-            console.log('cost', maintenanceCost);
+            console.log('cost', maintenanceCost*1000000);
             console.log('label', monthYearLabel);
           }
 
@@ -236,18 +246,6 @@ export class MaintenanceCostComponent implements OnInit, OnDestroy {
 
     return chart;
 
-  }
-
-  private getWorkorders(): void {
-    this.workordersService.$allWorkorders
-      .pipe(takeUntil(this.onDestroy))
-      .subscribe((workorders: IntWorkorder[] | null) => {
-        if (workorders) {
-          this.workorders = workorders;
-        } else {
-          this.workordersService.getAllWorkorders().catch();
-        }
-      });
   }
 
   private generateMonthValues(months: number): number[] {
@@ -286,7 +284,6 @@ export class MaintenanceCostComponent implements OnInit, OnDestroy {
 
     return filteredWorkorders;
   }
-
 
   generateMaintenanceCostPerSection(sectionName: string, workordersYear?: string): void {
     if (this.workorders) {
@@ -327,11 +324,10 @@ export class MaintenanceCostComponent implements OnInit, OnDestroy {
       this.chartObject = this.createChart('line', monthsLabels, workordersDataArray);
 
       if (this.chartObject) {
-        this.chartPlotted = true;
+        this.chartPlotted.emit(true);
       }
     }
 
 
   }
-
 }

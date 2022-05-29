@@ -4,13 +4,15 @@ import { LayoutModule } from '@angular/cdk/layout';
 
 import { ReportsRoutingModule } from '@reports/reports-routing.module';
 import { NgChartsModule } from 'ng2-charts';
-import { MaintenanceCostComponent } from '@reports/components/maintenance-cost/maintenance-cost.component';
-
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
+
+// components
 import { ReportsComponent } from '@reports/reports.component';
+import { MaintenanceCostComponent } from '@reports/components/maintenance-cost/maintenance-cost.component';
+
 
 @NgModule({
   declarations: [
@@ -27,6 +29,7 @@ import { ReportsComponent } from '@reports/reports.component';
     MatInputModule,
     MatSelectModule,
     LayoutModule
-  ]
+  ],
+  exports: [MaintenanceCostComponent]
 })
 export class ReportsModule { }

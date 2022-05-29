@@ -1,1 +1,32 @@
-<p>reports works!</p>
+<div class="chart-container">
+  <!-- canvas objects -->
+    <app-maintenance-cost
+     class="chart-object"
+      [workorders]="workorders"
+      [section]="section"
+      (chartPlotted)="updateChartPlotted($event)"
+    ></app-maintenance-cost>
+
+  <!-- filter fields -->
+  <div class="filter-charts" [ngClass]="{ 'no-chart': !chartPlotted }">
+    <div class="filter-charts-label" *ngIf="!chartPlotted">
+      Select Maintenance Cost Section
+    </div>
+    <div class="filter-charts-label" *ngIf="chartPlotted">Filter Charts</div>
+    <div class="filter-sections">
+      <mat-form-field class="filter-sections-field" appearance="outline">
+        <mat-label>Select Section</mat-label>
+        <mat-select
+          #sectionsFilterField
+          (selectionChange)="updateSectionToDisplay(sectionsFilterField.value)"
+        >
+          <mat-option
+            *ngFor="let section of factorySections"
+            value="{{ section }}"
+            >{{ section }}</mat-option
+          >
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </div>
+</div>
