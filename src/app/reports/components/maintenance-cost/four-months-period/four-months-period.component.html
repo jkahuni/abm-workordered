@@ -12,8 +12,8 @@
   </div>
 </div>
 
-<canvas baseChart id="reportsChart" [hidden]="loading || loadingFailed">
-  {{ chartObject }}
+<canvas baseChart id="fourMonthPeriodChart" [hidden]="loading || loadingFailed">
+  {{ chart }}
 </canvas>
 
 <div *ngIf="!loading && loadingFailed">

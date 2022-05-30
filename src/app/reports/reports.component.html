@@ -1,14 +1,26 @@
-<div
-  class="chart-container"
-  *ngIf="!loadingWorkordersFailed"
->
+<div class="chart-container-wrapper" *ngIf="!loadingWorkordersFailed">
   <!-- canvas objects -->
-  <app-maintenance-cost
-    class="chart-object"
+
+  <!-- four month comparison -->
+  <app-four-months-period
+    *ngIf="showFourMonthsPeriodChart"
+    class="chart-container"
     [workorders]="workorders"
     [section]="section"
     (chartPlotted)="updateChartPlotted($event)"
-  ></app-maintenance-cost>
+    (switchChart)="switchChart($event)"
+  ></app-four-months-period>
+
+  <!-- one month broken down to its weeks -->
+  <app-one-month-period 
+  *ngIf="showOneMonthPeriodChart"
+  class="chart-container"
+  [cost]="cost"
+  [month]="month"
+  [section]="section"
+  [monthsWithYears]="monthsWithYears"
+  (switchChart)="switchChart($event)"
+  ></app-one-month-period>
 
   <!-- filter fields -->
   <div *ngIf="chartPlotted" class="filter-charts">

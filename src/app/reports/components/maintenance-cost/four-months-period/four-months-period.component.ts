@@ -1,19 +1,16 @@
-import { Component, OnDestroy, OnInit, ViewChild, Input, OnChanges, Output, SimpleChanges, EventEmitter } from '@angular/core';
+import { Component, OnDestroy, OnInit, Input, OnChanges, Output, SimpleChanges, EventEmitter } from '@angular/core';
 import { MediaMatcher } from '@angular/cdk/layout';
 
 // rxjs
-import { Subject } from 'rxjs';
-
-// services
-import { WorkordersService } from '@workorders/services/workorders.service';
+import { takeUntil, Subject } from 'rxjs';
 
 // interfaces
 import { IntWorkorder } from '@workorders/models/workorders.models';
-import { IntSection, IntMachine } from '@resources/models/resources.models';
+import { IntSwitchChart } from '@reports/models/reports.models';
+
 
 // for chart
 import { ChartConfiguration, ChartType, Chart } from 'chart.js';
-import { BaseChartDirective } from 'ng2-charts';
 import DataLabelsPlugin from 'chartjs-plugin-datalabels';
 
 // dayjs
@@ -21,53 +18,51 @@ import * as dayjs from 'dayjs';
 import * as duration from 'dayjs/plugin/duration';
 dayjs.extend(duration);
 
+
 @Component({
-  selector: 'app-maintenance-cost',
-  templateUrl: './maintenance-cost.component.html',
-  styleUrls: ['./maintenance-cost.component.scss']
+  selector: 'app-four-months-period',
+  templateUrl: './four-months-period.component.html',
+  styleUrls: ['./four-months-period.component.scss']
 })
-export class MaintenanceCostComponent implements OnInit, OnDestroy, OnChanges {
+export class FourMonthsPeriodComponent implements OnInit, OnDestroy, OnChanges {
 
   constructor(
     public mediaMatcher: MediaMatcher,
-  ) {
-
+  ) { 
+    this.updateChartPlotted
+      .pipe(takeUntil(this.onDestroy))
+      .subscribe(() => setTimeout(() => this.chartPlotted.emit(true)));
   }
 
   @Input('workorders') allWorkorders!: IntWorkorder[];
   @Input('section') currentSection!: string;
 
   @Output() chartPlotted: EventEmitter<boolean> = new EventEmitter<boolean>();
-
-  @ViewChild(BaseChartDirective) chart!: BaseChartDirective;
+  @Output() switchChart: EventEmitter<IntSwitchChart> = new EventEmitter<IntSwitchChart>();
 
   private onDestroy = new Subject<void>();
   private updateScreenProperties: Subject<any> = new Subject<any>();
+  private updateChartPlotted: Subject<void> = new Subject<void>();
 
   matcher!: MediaQueryList;
 
   workorders!: IntWorkorder[];
-  sections!: IntSection[];
-  machines!: IntMachine[];
 
   // for chart config
   monthValues!: number[];
   workordersPerSectionPerMonth!: IntWorkorder[];
   section!: string;
 
+  // for sending to other components
+  monthAndFourYearDigitLabels: string[] = [];
+
   // chart
-  chartObject!: Chart;
+  chart!: Chart;
 
   loading = true;
   loadingFailed = false;
   loadingDefaultError!: string;
-  loadingFallbackError = `Plotting chart failed with error code U-MC-C-01. Please try reloading the page or report the error code if the issue persists.`;
-
-  ngOnDestroy(): void {
-    this.onDestroy.next();
-    this.onDestroy.complete();
-    this.matcher.removeEventListener('change', this.mediaSizeListener);
-  }
+  loadingFallbackError = `Plotting chart failed with error code U-MC-FMP-01. Please try reloading the page or report the error code if the issue persists.`;
 
   ngOnInit(): void {
     this.matcher = this.mediaMatcher.matchMedia('(min-width: 500px)');
@@ -82,16 +77,22 @@ export class MaintenanceCostComponent implements OnInit, OnDestroy, OnChanges {
     this.section = section ? section : this.section;
 
     if (this.workorders && this.section) {
-      this.generateMaintenanceCostPerSection();
+      this.generateMaitenanceCostForFourMonthsPeriod();
     }
 
   }
 
-  private mediaSizeListener = (event: { matches: any }) => {
-    this.updateScreenProperties.next(this.chartObject)
+  ngOnDestroy(): void {
+    this.onDestroy.next();
+    this.onDestroy.complete();
+    this.matcher.removeEventListener('change', this.mediaSizeListener);
   }
 
-  private createChart(type: ChartType, labels: string[], chartData: any[]): Chart {
+  private mediaSizeListener = (event: { matches: any }) => {
+    this.updateScreenProperties.next(this.chart)
+  }
+
+  private createFourMonthPeriodChart(type: ChartType, labels: string[], chartData: any[]): Chart {
     const data: ChartConfiguration['data'] = {
       labels,
       datasets: [
@@ -115,7 +116,7 @@ export class MaintenanceCostComponent implements OnInit, OnDestroy, OnChanges {
     Chart.defaults.font.family = 'Lato, "Open Sans", Arial, Helvetica, Noto, "Lucida Sans", sans-serif';
     Chart.defaults.font.size = 14;
     Chart.defaults.font.lineHeight = 1.4;
-    const chart = new Chart('reportsChart', {
+    const chart = new Chart('fourMonthPeriodChart', {
       type,
       data,
       plugins: [DataLabelsPlugin],
@@ -241,18 +242,12 @@ export class MaintenanceCostComponent implements OnInit, OnDestroy, OnChanges {
           const points = chart.getElementsAtEventForMode(event as unknown as Event, 'nearest', { intersect: true }, false);
           if (points.length) {
             const point = points[0];
-
-            const cost = chart.data.datasets[point.datasetIndex].data[point.index] as number;
-            const totalMaintenanceCost = cost ? cost * 1000000 : 0;
-            const monthYearLabel = chart.data.labels?.[point.index] as string;
-            const month = dayjs(monthYearLabel).month();
-            const monthAsObject = dayjs().month(month-1);
-            const totalWeeksAtStartOfCurrentMonth = dayjs.duration({ months: month }).weeks();
-            const totalWeeksAtStartOfPreviousMonth = dayjs.duration({ months: month +1}).weeks();
-            const totalWeeks = totalWeeksAtStartOfCurrentMonth - totalWeeksAtStartOfPreviousMonth;
-
-            console.log(monthAsObject.daysInMonth());
-            console.log(dayjs.duration(monthAsObject.daysInMonth(), 'd').weeks());
+            if (point) {
+              const cost = chart.data.datasets[point.datasetIndex].data[point.index] as number;
+              const month = chart.data.labels?.[point.index] as string;
+              const monthData = { cost, month };
+              this.activateOneMonthPeriodChart(monthData);
+            }
           }
 
         }
@@ -301,8 +296,21 @@ export class MaintenanceCostComponent implements OnInit, OnDestroy, OnChanges {
     return filteredWorkorders;
   }
 
-  generateMaintenanceCostPerSection(workordersYear?: string): void {
-    if (this.workorders) {
+  // workorders for specific month
+  private activateOneMonthPeriodChart({ month, cost }: { month: string, cost: number }): void {
+    const oneMonthPeriodData: IntSwitchChart = {
+      type: 'one-month-period',
+      section: this.section,
+      month,
+      cost,
+      monthsWithYears: this.monthAndFourYearDigitLabels
+    };
+
+    this.switchChart.emit(oneMonthPeriodData);
+  }
+
+  generateMaitenanceCostForFourMonthsPeriod(workordersYear?: string): void {
+    if (this.workorders.length > 0) {
       const year = workordersYear || '2022';
       let monthsLabels: string[] = [];
       let workordersDataArray: number[] = [];
@@ -318,39 +326,41 @@ export class MaintenanceCostComponent implements OnInit, OnDestroy, OnChanges {
       // get the mtnc costs per section per month
       this.monthValues.forEach(
         (month: number) => {
-          const monthAndYearLabel = dayjs(dayjs().month(month)).format('MMM YY');
+          const monthAndTwoYearDigitLabel = dayjs(dayjs().month(month)).format('MMM YY');
+          const monthAndFourYearDigitLabel = dayjs(dayjs().month(month)).format('MMM YYYY');
           const maintenanceCost = this.filterMonthlyWorkorders(sectionsWorkorders, month, year).map((workorder: IntWorkorder) => {
             const totalSparesCost = workorder.sparesUsed.status ? this.formatCostAsInteger(workorder.sparesUsed.totalCost) : 0;
 
             return totalSparesCost;
           }).reduce((totalSparesCost: number, totalSpareCost: number) => {
             const total = totalSparesCost + totalSpareCost;
-            
+
             return total / 1000000;
           }, 0);
-          
-          monthsLabels.push(monthAndYearLabel);
+
+          monthsLabels.push(monthAndTwoYearDigitLabel);
+          this.monthAndFourYearDigitLabels.push(monthAndFourYearDigitLabel);
           workordersDataArray.push(maintenanceCost);
         }
       );
 
-      if (this.chartObject) {
-        this.chartObject.destroy();
+      if (this.chart) {
+        this.chart.destroy();
       }
-      this.chartObject = this.createChart('line', monthsLabels, workordersDataArray);
+      this.chart = this.createFourMonthPeriodChart('line', monthsLabels, workordersDataArray);
 
-      if (this.chartObject) {
+      if (this.chart) {
         this.loading = false;
-        this.chartPlotted.emit(true);
+        this.updateChartPlotted.next();
       } else {
         this.loading = false;
         this.loadingFailed = true;
-        this.loadingDefaultError = `Plotting chart failed with error code MC-C-01. Please try reloading the page or report the error code if the issue persists.`;
+        this.loadingDefaultError = `Plotting chart failed with error code MC-C-FMP-01. Please try reloading the page or report the error code if the issue persists.`;
       }
     } else {
       this.loading = false;
       this.loadingFailed = true;
-      this.loadingDefaultError = `Plotting chart failed with error code MC-C-02. Please try reloading the page or report the error code if the issue persists.`;
+      this.loadingDefaultError = `Plotting chart failed with error code MC-C-FMP-02. Please try reloading the page or report the error code if the issue persists.`;
     }
 
 

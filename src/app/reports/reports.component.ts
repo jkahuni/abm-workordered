@@ -8,8 +8,7 @@ import { WorkordersService } from '@workorders/services/workorders.service';
 
 // interfaces
 import { IntWorkorder } from '@workorders/models/workorders.models';
-
-
+import { IntSwitchChart } from '@reports/models/reports.models';
 
 @Component({
   selector: 'app-reports',
@@ -30,7 +29,6 @@ export class ReportsComponent implements OnInit, OnDestroy {
   workorders!: IntWorkorder[];
   chartPlotted = false;
 
-
   factorySections: string[] = ['Grid Casting', 'Sovema',
     'Pasting', 'Jar Formation', 'Assembly Line', 'IGO\'s', 'Acid Plant', 'Hygro Cubicles', 'Tank Formation'];
 
@@ -43,6 +41,15 @@ export class ReportsComponent implements OnInit, OnDestroy {
   otherError!: string;
   fallbackError = `Getting workorders data failed with error code U-Re-01. Please try reloading the page or report the error code to support to have the issue fixed if it persists.`;
 
+  // for one month chart component
+  cost!: number;
+  month!: string;
+  monthsWithYears!: string[];
+
+  // control child to show
+  showFourMonthsPeriodChart = true;
+  showOneMonthPeriodChart = false;
+  showOneWeekPeriodChart = false;
 
   ngOnDestroy(): void {
     this.onDestroy.next();
@@ -81,6 +88,12 @@ export class ReportsComponent implements OnInit, OnDestroy {
       });
   }
 
+  private hideAllChildrenCharts(): void {
+    this.showFourMonthsPeriodChart = false;
+    this.showOneMonthPeriodChart = false;
+    this.showOneWeekPeriodChart = false;
+  }
+
   // update section to display
   updateSectionToDisplay(section: string): string {
     return this.section = section ? section : '';
@@ -89,5 +102,20 @@ export class ReportsComponent implements OnInit, OnDestroy {
   // emitted from different components
   updateChartPlotted(status: boolean): boolean {
     return this.chartPlotted = status ? true : false;
+  }
+  // show different chart
+  switchChart(data: IntSwitchChart): any {
+    const type = data['type'];
+    this.hideAllChildrenCharts();
+
+    if (type === 'four-months-period') {
+      this.showFourMonthsPeriodChart = true;
+    } else if (type === 'one-month-period') {
+      this.cost = data['cost'] ? data['cost'] : 0;
+      this.month = data['month'] ? data['month'] : '';
+      this.monthsWithYears = data['monthsWithYears'] ? data['monthsWithYears'] : [];
+      this.showOneMonthPeriodChart = true;
+    }
+
   }
 }

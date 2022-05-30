@@ -1,7 +1,13 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { MaintenanceCostComponent } from '@reports/components/maintenance-cost/maintenance-cost.component';
 import { ReportsComponent } from '@reports/reports.component';
+
+// exported/children components
+import { FourMonthsPeriodComponent } from '@reports/components/maintenance-cost/four-months-period/four-months-period.component';
+import { OneMonthPeriodComponent } from '@reports/components/maintenance-cost/one-month-period/one-month-period.component';
+import { OneWeekPeriodComponent } from '@reports/components/maintenance-cost/one-week-period/one-week-period.component';
+
+
 // firebase auth guards
 import { canActivate, redirectUnauthorizedTo } from '@angular/fire/auth-guard';
 
@@ -12,9 +18,8 @@ const redirectToLogin = () => redirectUnauthorizedTo(['authentication/sign-in'])
 const routes: Routes = [
   {
     path: '', component: ReportsComponent,
-    ...canActivate(redirectToLogin) },
-  { path: 'reports/maintenance-cost', component: MaintenanceCostComponent,
-...canActivate(redirectToLogin)}
+    ...canActivate(redirectToLogin)
+  }
 ];
 
 @NgModule({
@@ -22,3 +27,9 @@ const routes: Routes = [
   exports: [RouterModule]
 })
 export class ReportsRoutingModule { }
+
+export const childrenComponents = [
+  FourMonthsPeriodComponent,
+  OneMonthPeriodComponent,
+  OneWeekPeriodComponent
+];
