@@ -29,11 +29,32 @@ export class ReportsComponent implements OnInit, OnDestroy {
   workorders!: IntWorkorder[];
   chartPlotted = false;
 
+  // for changing sections
   factorySections: string[] = ['Grid Casting', 'Sovema',
     'Pasting', 'Jar Formation', 'Assembly Line', 'IGO\'s', 'Acid Plant', 'Hygro Cubicles', 'Tank Formation'];
 
+    // for changing months
+  months: any = [
+    { name: 'January', formatted: 'Jan 22' },
+    { name: 'February', formatted: 'Feb 22' },
+    { name: 'March', formatted: 'Mar 22' },
+    { name: 'April', formatted: 'Apr 22' },
+    { name: 'May', formatted: 'May 22' },
+    { name: 'June', formatted: 'Jun 22' },
+    { name: 'July', formatted: 'Jul 22' },
+    { name: 'August', formatted: 'Aug 22' },
+    { name: 'September', formatted: 'Sept 22' },
+    { name: 'October', formatted: 'Oct 22' },
+    { name: 'November', formatted: 'Nov 22' },
+    { name: 'December', formatted: 'Dec 22' },
+
+  ];
+
+
   initialFactorySections: string[] = ['Grid Casting',
     'Pasting', 'Jar Formation', 'Assembly Line', 'Acid Plant'];
+
+  loading = true;
 
   // in case of errors
   loadingWorkordersFailed = false;
@@ -44,7 +65,6 @@ export class ReportsComponent implements OnInit, OnDestroy {
   // for one month chart component
   cost!: number;
   month!: string;
-  monthsWithYears!: string[];
 
   // control child to show
   showFourMonthsPeriodChart = true;
@@ -99,10 +119,20 @@ export class ReportsComponent implements OnInit, OnDestroy {
     return this.section = section ? section : '';
   }
 
+  // update week to display
+  updateMonthToDisplay(month: string): string {
+    return this.month = month ? month : '';
+  }
+
   // emitted from different components
   updateChartPlotted(status: boolean): boolean {
-    return this.chartPlotted = status ? true : false;
+    return status ? (
+      this.chartPlotted = true,
+      this.loading = false
+    ) : (
+      this.chartPlotted = this.loading = false);
   }
+
   // show different chart
   switchChart(data: IntSwitchChart): any {
     const type = data['type'];
@@ -113,7 +143,6 @@ export class ReportsComponent implements OnInit, OnDestroy {
     } else if (type === 'one-month-period') {
       this.cost = data['cost'] ? data['cost'] : 0;
       this.month = data['month'] ? data['month'] : '';
-      this.monthsWithYears = data['monthsWithYears'] ? data['monthsWithYears'] : [];
       this.showOneMonthPeriodChart = true;
     }
 

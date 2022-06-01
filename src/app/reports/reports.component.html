@@ -1,6 +1,23 @@
 <div class="chart-container-wrapper" *ngIf="!loadingWorkordersFailed">
-  <!-- canvas objects -->
+  
+  <!-- spinner -->
+  <div *ngIf="loading" class="chart-container">
+    <div class="bootstrap-spinner-container-wrapper">
+      <div class="bootstrap-spinner-container">
+        <div class="bootstrap-spinner">
+          <div
+            #loadingSpinner
+            class="spinner-border"
+            style="width: 2rem; height: 2rem"
+            role="status"
+          ></div>
+          <span class="loading-tag"><strong>Plotting Chart...</strong></span>
+        </div>
+      </div>
+    </div>
+  </div>
 
+  <!-- canvas objects -->
   <!-- four month comparison -->
   <app-four-months-period
     *ngIf="showFourMonthsPeriodChart"
@@ -12,24 +29,22 @@
   ></app-four-months-period>
 
   <!-- one month broken down to its weeks -->
-  <app-one-month-period 
-  *ngIf="showOneMonthPeriodChart"
-  class="chart-container"
-  [cost]="cost"
-  [month]="month"
-  [section]="section"
-  [monthsWithYears]="monthsWithYears"
-  (switchChart)="switchChart($event)"
+  <app-one-month-period
+    *ngIf="showOneMonthPeriodChart"
+    class="chart-container"
+    [month]="month"
+    [section]="section"
+    [workorders]="workorders"
+    (switchChart)="switchChart($event)"
   ></app-one-month-period>
 
   <!-- filter fields -->
   <div *ngIf="chartPlotted" class="filter-charts">
-    <div class="filter-charts-label" *ngIf="!chartPlotted">
-      Select Maintenance Cost Section
-    </div>
     <div class="filter-charts-label" *ngIf="chartPlotted">Filter Charts</div>
-    <div class="filter-sections">
-      <mat-form-field class="filter-sections-field" appearance="outline">
+
+    <!-- filter sections -->
+    <div class="filter-chart-field">
+      <mat-form-field class="filter-chart-form-field" appearance="outline">
         <mat-label>Select Section</mat-label>
         <mat-select
           #sectionsFilterField
@@ -39,6 +54,23 @@
             *ngFor="let section of factorySections"
             value="{{ section }}"
             >{{ section }}</mat-option
+          >
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <!-- filter months -->
+    <div *ngIf="showOneMonthPeriodChart" class="filter-chart-field">
+      <mat-form-field class="filter-chart-form-field" appearance="outline">
+        <mat-label>Select Month</mat-label>
+        <mat-select
+          #monthsFilterField
+          (selectionChange)="updateMonthToDisplay(monthsFilterField.value)"
+        >
+          <mat-option
+            *ngFor="let month of months"
+            value="{{ month.formatted }}"
+            >{{ month.name }}</mat-option
           >
         </mat-select>
       </mat-form-field>

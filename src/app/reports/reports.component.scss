@@ -17,6 +17,29 @@
         height: 400px;
         padding: 5px 20px;
         // border: 1px solid rgba(0, 0, 0, 0.5);
+
+        .bootstrap-spinner-container-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            .bootstrap-spinner-container {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+
+                .bootstrap-spinner {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    flex-direction: column;
+                    margin: 32px 0 8px;
+
+                    .loading-tag {
+                        margin: 16px 0;
+                    }
+                }
+            }
+        }
     }
 
     .filter-charts {
@@ -33,11 +56,11 @@
             text-align: center;
         }
 
-        .filter-sections {
+        .filter-chart-field {
             width: 75%;
             padding: 0 5px;
 
-            mat-form-field.filter-sections-field {
+            mat-form-field.filter-chart-form-field {
                 width: 100%;
             }
         }

@@ -1,2 +1,7 @@
-<p>one-month-period works!</p>
-<p><button class="btn btn-sm btn-success" (click)="goBack()">Back</button></p>
+<canvas baseChart id="oneMonthPeriodChart" [hidden]="loadingFailed">
+  {{ chart }}
+</canvas>
+
+<div *ngIf="loadingFailed">
+  {{ loadingDefaultError ? loadingDefaultError : loadingFallbackError }}
+</div>

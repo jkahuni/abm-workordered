@@ -3,5 +3,4 @@ export interface IntSwitchChart {
     section: string;
     cost?: number;
     month?: string;
-    monthsWithYears?: string[];
 }
