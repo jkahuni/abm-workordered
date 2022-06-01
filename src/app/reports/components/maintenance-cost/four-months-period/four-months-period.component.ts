@@ -40,7 +40,7 @@ export class FourMonthsPeriodComponent implements OnInit, OnDestroy, OnChanges {
   @Output() chartPlotted: EventEmitter<boolean> = new EventEmitter<boolean>();
   @Output() switchChart: EventEmitter<IntSwitchChart> = new EventEmitter<IntSwitchChart>();
 
-  private onDestroy = new Subject<void>();
+  private onDestroy: Subject<void> = new Subject<void>();
   private updateChartPlotted: Subject<boolean> = new Subject<boolean>();
 
   workorders!: IntWorkorder[];
@@ -102,12 +102,14 @@ export class FourMonthsPeriodComponent implements OnInit, OnDestroy, OnChanges {
     return 0;
   }
 
+  // returns maintenance cost as int
   private filterWorkordersInSectionMonthAndYear(monthIndex: number, year: string): number[] {
     const maintenanceCostForSectionForMonthAndYear = this.workorders.filter(
       (workorder: IntWorkorder) => {
+        const raised: dayjs.Dayjs = dayjs(workorder.raised.dateTime);
         const section = workorder.section.name;
-        const workorderYear = dayjs(workorder.raised.dateTime).year();
-        const workorderMonth = dayjs(workorder.raised.dateTime).month();
+        const workorderYear = raised.year();
+        const workorderMonth = raised.month();
 
         return section === this.section && workorderYear === +year && workorderMonth === monthIndex;
       }
@@ -123,7 +125,8 @@ export class FourMonthsPeriodComponent implements OnInit, OnDestroy, OnChanges {
     return maintenanceCostForSectionForMonthAndYear;
   }
 
-  private createFourMonthPeriodChart(labels: string[], maintenanceCostArray: number[]): Chart {
+  // returns the Chart object
+  private createChart(labels: string[], maintenanceCostArray: number[]): Chart {
     const type: ChartType = 'line';
 
     const data: ChartConfiguration['data'] = {
@@ -320,7 +323,7 @@ export class FourMonthsPeriodComponent implements OnInit, OnDestroy, OnChanges {
       if (this.chart) {
         this.chart.destroy();
       }
-      this.chart = this.createFourMonthPeriodChart(monthsLabels, maintenanceCostArray);
+      this.chart = this.createChart(monthsLabels, maintenanceCostArray);
 
       if (this.chart) {
         this.updateChartPlotted.next(true);

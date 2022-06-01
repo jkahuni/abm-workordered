@@ -9,6 +9,8 @@ import { WorkordersService } from '@workorders/services/workorders.service';
 // interfaces
 import { IntWorkorder } from '@workorders/models/workorders.models';
 import { IntSwitchChart } from '@reports/models/reports.models';
+// dayjs
+import * as dayjs from 'dayjs';
 
 @Component({
   selector: 'app-reports',
@@ -33,8 +35,13 @@ export class ReportsComponent implements OnInit, OnDestroy {
   factorySections: string[] = ['Grid Casting', 'Sovema',
     'Pasting', 'Jar Formation', 'Assembly Line', 'IGO\'s', 'Acid Plant', 'Hygro Cubicles', 'Tank Formation'];
 
-    // for changing months
-  months: any = [
+  initialFactorySections: string[] = ['Grid Casting',
+    'Pasting', 'Jar Formation', 'Assembly Line', 'Acid Plant'];
+
+  sections: { name: string, formattedName: string }[] = [];
+
+  // for changing months
+  months: { name: string, formatted: string }[] = [
     { name: 'January', formatted: 'Jan 22' },
     { name: 'February', formatted: 'Feb 22' },
     { name: 'March', formatted: 'Mar 22' },
@@ -43,16 +50,12 @@ export class ReportsComponent implements OnInit, OnDestroy {
     { name: 'June', formatted: 'Jun 22' },
     { name: 'July', formatted: 'Jul 22' },
     { name: 'August', formatted: 'Aug 22' },
-    { name: 'September', formatted: 'Sept 22' },
+    { name: 'September', formatted: 'Sep 22' },
     { name: 'October', formatted: 'Oct 22' },
     { name: 'November', formatted: 'Nov 22' },
     { name: 'December', formatted: 'Dec 22' },
 
   ];
-
-
-  initialFactorySections: string[] = ['Grid Casting',
-    'Pasting', 'Jar Formation', 'Assembly Line', 'Acid Plant'];
 
   loading = true;
 
@@ -67,7 +70,8 @@ export class ReportsComponent implements OnInit, OnDestroy {
   month!: string;
 
   // control child to show
-  showFourMonthsPeriodChart = true;
+  showSectionsPerMonthChart = true;
+  showFourMonthsPeriodChart = false;
   showOneMonthPeriodChart = false;
   showOneWeekPeriodChart = false;
 
@@ -77,8 +81,85 @@ export class ReportsComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.month = dayjs().format('MMM YY');
+    this.sections = this.setFirstFiveSections();
     this.section = this.setInitialRandomSection();
     this.getWorkorders();
+  }
+
+  private setFirstFiveSections(): { name: string, formattedName: string }[] {
+    let sections: { name: string, formattedName: string }[] = [];
+
+
+    for (let i = 0; i <= this.factorySections.length; i++) {
+      const section = this.factorySections[Math.floor(Math.random() * this.factorySections.length)];
+
+      const formattedSection = this.formatSectionNameAndFormattedName(section);
+
+      const sectionAlreadyAdded = sections.filter(section =>
+        section.formattedName === formattedSection['formattedName']
+      ).length > 0;
+
+      if (!sectionAlreadyAdded) {
+        if (sections.length === 5) {
+          break;
+        }
+        sections.push(formattedSection);
+      }
+    }
+
+    return sections;
+  }
+
+  private formatSectionNameAndFormattedName(section: string): { name: string, formattedName: string } {
+    let object: { name: string, formattedName: string };
+
+    if (section) {
+      const name = section;
+      if (section === 'Grid Casting') {
+        const formattedName = 'Casting';
+        object = { name, formattedName };
+        return object;
+      }
+
+      else if (section === 'Sovema'
+        || section === 'Pasting'
+        || section === 'IGO\'s') {
+        const formattedName = section;
+        object = { name, formattedName };
+        return object;
+
+      }
+      else if (section === 'Jar Formation') {
+        const formattedName = 'Jar';
+        object = { name, formattedName };
+        return object;
+
+      } else if (section === 'Assembly Line') {
+        const formattedName = 'Assembly';
+        object = { name, formattedName };
+        return object;
+
+      } else if (section === 'Acid Plant') {
+        const formattedName = 'Reactor';
+        object = { name, formattedName };
+        return object;
+
+      } else if (section === 'Hygro Cubicles') {
+        const formattedName = 'Hygros';
+        object = { name, formattedName };
+        return object;
+
+      } else if (section === 'Tank Formation') {
+        const formattedName = 'Tank';
+        return object = { name, formattedName };
+
+      }
+    }
+
+    return {
+      name: '', formattedName: ''
+    };
   }
 
   private setInitialRandomSection(): string {
@@ -112,6 +193,7 @@ export class ReportsComponent implements OnInit, OnDestroy {
     this.showFourMonthsPeriodChart = false;
     this.showOneMonthPeriodChart = false;
     this.showOneWeekPeriodChart = false;
+    this.showSectionsPerMonthChart = false
   }
 
   // update section to display
@@ -143,6 +225,7 @@ export class ReportsComponent implements OnInit, OnDestroy {
     } else if (type === 'one-month-period') {
       this.cost = data['cost'] ? data['cost'] : 0;
       this.month = data['month'] ? data['month'] : '';
+      this.section = data['section'] ? data['section'] : this.section;
       this.showOneMonthPeriodChart = true;
     }
 

@@ -1,5 +1,4 @@
 <div class="chart-container-wrapper" *ngIf="!loadingWorkordersFailed">
-  
   <!-- spinner -->
   <div *ngIf="loading" class="chart-container">
     <div class="bootstrap-spinner-container-wrapper">
@@ -18,6 +17,18 @@
   </div>
 
   <!-- canvas objects -->
+  <!-- five sections one month -->
+  <app-sections-per-month
+    *ngIf="showSectionsPerMonthChart"
+    class="chart-container"
+    [workorders]="workorders"
+    [sections]="sections"
+    [month]="month"
+    (chartPlotted)="updateChartPlotted($event)"
+    (switchChart)="switchChart($event)"
+  >
+  </app-sections-per-month>
+
   <!-- four month comparison -->
   <app-four-months-period
     *ngIf="showFourMonthsPeriodChart"
@@ -43,7 +54,7 @@
     <div class="filter-charts-label" *ngIf="chartPlotted">Filter Charts</div>
 
     <!-- filter sections -->
-    <div class="filter-chart-field">
+    <div class="filter-chart-field" *ngIf="showFourMonthsPeriodChart || showOneMonthPeriodChart">
       <mat-form-field class="filter-chart-form-field" appearance="outline">
         <mat-label>Select Section</mat-label>
         <mat-select
@@ -60,7 +71,7 @@
     </div>
 
     <!-- filter months -->
-    <div *ngIf="showOneMonthPeriodChart" class="filter-chart-field">
+    <div *ngIf="showOneMonthPeriodChart || showSectionsPerMonthChart" class="filter-chart-field">
       <mat-form-field class="filter-chart-form-field" appearance="outline">
         <mat-label>Select Month</mat-label>
         <mat-select

@@ -1,67 +1,144 @@
-.chart-container-wrapper {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-flow: column wrap;
-    gap: 16px;
-    padding: 15px;
-    border-radius: 20px;
-    margin: 16px auto;
-    background: #e9eef3;
-    max-width: 800px;
-    max-height: 700px;
+// xl screen
+@media (min-width: 899.99px) {
+    .chart-container-wrapper {
+        display: flex;
+        gap: 16px;
+        padding: 15px;
+        border-radius: 20px;
+        margin: 16px auto;
+        background: #e9eef3;
+        justify-content: center;
+        align-items: center;
+        flex-flow: row wrap;
+        max-width: 900px;
+        max-height: 500px;
 
-    .chart-container {
-        order: 1;
-        width: 100%;
-        height: 400px;
-        padding: 5px 20px;
-        // border: 1px solid rgba(0, 0, 0, 0.5);
+        .chart-container {
+            order: 2;
+            width: 650px;
+            height: 400px;
+            margin: 0 auto 0;
 
-        .bootstrap-spinner-container-wrapper {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            .bootstrap-spinner-container {
+            // border: 1px solid rgba(0, 0, 0, 0.5);
+
+            .bootstrap-spinner-container-wrapper {
                 display: flex;
                 justify-content: center;
                 align-items: center;
-
-                .bootstrap-spinner {
+                .bootstrap-spinner-container {
                     display: flex;
                     justify-content: center;
                     align-items: center;
-                    flex-direction: column;
-                    margin: 32px 0 8px;
 
-                    .loading-tag {
-                        margin: 16px 0;
+                    .bootstrap-spinner {
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        flex-direction: column;
+                        margin: 32px 0 8px;
+
+                        .loading-tag {
+                            margin: 16px 0;
+                        }
                     }
                 }
             }
         }
+
+        .filter-charts {
+            order: 1;
+            width: 200px;
+            height: 400px;
+
+            // align-self: flex-start;
+            border: 1px solid rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+
+            .filter-charts-label {
+                text-align: center;
+            }
+
+            .filter-chart-field {
+                width: 100%;
+                padding: 0 5px;
+
+                mat-form-field.filter-chart-form-field {
+                    width: 100%;
+                }
+            }
+        }
     }
+}
 
-    .filter-charts {
-        order: 2;
-        width: 50%;
-        align-self: flex-start;
-        max-height: 200px;
-        border: 1px solid rgba(0, 0, 0, 0.5);
+// any other screen
+@media (max-width: 899.98px) {
+    .chart-container-wrapper {
         display: flex;
-        flex-direction: column;
-        gap: 2px;
+        gap: 16px;
+        padding: 15px;
+        border-radius: 20px;
+        margin: 16px auto;
+        background: #e9eef3;
+        justify-content: center;
+        align-items: center;
+        flex-flow: column wrap;
+        max-width: 800px;
+        max-height: 700px;
 
-        .filter-charts-label {
-            text-align: center;
+        .chart-container {
+            order: 1;
+            width: 100%;
+            height: 400px;
+            padding: 5px 20px;
+            // border: 1px solid rgba(0, 0, 0, 0.5);
+
+            .bootstrap-spinner-container-wrapper {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                .bootstrap-spinner-container {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+
+                    .bootstrap-spinner {
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        flex-direction: column;
+                        margin: 32px 0 8px;
+
+                        .loading-tag {
+                            margin: 16px 0;
+                        }
+                    }
+                }
+            }
         }
 
-        .filter-chart-field {
-            width: 75%;
-            padding: 0 5px;
+        .filter-charts {
+            order: 2;
+            width: 50%;
+            align-self: flex-start;
+            max-height: 200px;
+            border: 1px solid rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
 
-            mat-form-field.filter-chart-form-field {
-                width: 100%;
+            .filter-charts-label {
+                text-align: center;
+            }
+
+            .filter-chart-field {
+                width: 75%;
+                padding: 0 5px;
+
+                mat-form-field.filter-chart-form-field {
+                    width: 100%;
+                }
             }
         }
     }

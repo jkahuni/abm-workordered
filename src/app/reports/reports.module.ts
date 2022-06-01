@@ -16,7 +16,7 @@ import { ReportsComponent } from '@reports/reports.component';
 @NgModule({
   declarations: [
     ReportsComponent,
-    childrenComponents
+    childrenComponents,
     ],
   imports: [
     CommonModule,
