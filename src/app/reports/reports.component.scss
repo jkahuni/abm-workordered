@@ -56,6 +56,13 @@
             flex-direction: column;
             gap: 2px;
 
+            .select-chart-type,
+            .filter-chart-parameters {
+                display: flex;
+                flex-direction: column;
+                gap: 2px;
+            }
+
             .filter-charts-label {
                 text-align: center;
             }
@@ -120,13 +127,21 @@
 
         .filter-charts {
             order: 2;
-            width: 50%;
-            align-self: flex-start;
+            width: 100%;
             max-height: 200px;
-            border: 1px solid rgba(0, 0, 0, 0.5);
             display: flex;
-            flex-direction: column;
-            gap: 2px;
+            flex-flow: row wrap;
+            justify-content: space-evenly;
+            align-self: flex-start;
+
+            .select-chart-type,
+            .filter-chart-parameters {
+                display: flex;
+                flex-direction: column;
+                border: 1px solid rgba(0, 0, 0, 0.5);
+                width: 45%;
+                gap: 2px;
+            }
 
             .filter-charts-label {
                 text-align: center;
@@ -142,4 +157,9 @@
             }
         }
     }
+}
+
+.select-multiple-sections-trigger {
+    opacity: 0.75;
+    font-size: 0.75em;
 }

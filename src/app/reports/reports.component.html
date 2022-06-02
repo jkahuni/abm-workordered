@@ -49,42 +49,122 @@
     (switchChart)="switchChart($event)"
   ></app-one-month-period>
 
+  <!-- one week broken down to its days -->
+
   <!-- filter fields -->
   <div *ngIf="chartPlotted" class="filter-charts">
-    <div class="filter-charts-label" *ngIf="chartPlotted">Filter Charts</div>
-
-    <!-- filter sections -->
-    <div class="filter-chart-field" *ngIf="showFourMonthsPeriodChart || showOneMonthPeriodChart">
-      <mat-form-field class="filter-chart-form-field" appearance="outline">
-        <mat-label>Select Section</mat-label>
-        <mat-select
-          #sectionsFilterField
-          (selectionChange)="updateSectionToDisplay(sectionsFilterField.value)"
-        >
-          <mat-option
-            *ngFor="let section of factorySections"
-            value="{{ section }}"
-            >{{ section }}</mat-option
+    <!-- select chart type -->
+    <div class="select-chart-type">
+      <div class="filter-charts-label">Change Chart Type</div>
+      <div class="filter-chart-field">
+        <mat-form-field class="filter-chart-form-field" appearance="outline">
+          <mat-label>Select Chart</mat-label>
+          <mat-select
+            [(ngModel)]="chartType"
+            #chartTypeField
+            (selectionChange)="changeDisplayedChart(chartTypeField.value)"
           >
-        </mat-select>
-      </mat-form-field>
+            <mat-option value="sections-one-month">
+              Sections Per Month</mat-option
+            >
+            <mat-option value="section-four-months-period">
+              Section Over Four Months</mat-option
+            ><mat-option value="section-one-month-period">
+              Section In One Month</mat-option
+            ><mat-option
+              *ngIf="showOneMonthPeriodChart"
+              value="section-one-week-period"
+            >
+              Section In One Week</mat-option
+            >
+          </mat-select>
+        </mat-form-field>
+      </div>
     </div>
 
-    <!-- filter months -->
-    <div *ngIf="showOneMonthPeriodChart || showSectionsPerMonthChart" class="filter-chart-field">
-      <mat-form-field class="filter-chart-form-field" appearance="outline">
-        <mat-label>Select Month</mat-label>
-        <mat-select
-          #monthsFilterField
-          (selectionChange)="updateMonthToDisplay(monthsFilterField.value)"
-        >
-          <mat-option
-            *ngFor="let month of months"
-            value="{{ month.formatted }}"
-            >{{ month.name }}</mat-option
+    <!-- filter charts -->
+    <div class="filter-chart-parameters">
+      <div class="filter-charts-label">Change Chart Values</div>
+
+      <!-- select multiple sections -->
+      <div *ngIf="showSectionsPerMonthChart" class="filter-chart-field">
+        <mat-form-field class="filter-chart-form-field" appearance="outline">
+          <mat-label>Change Sections</mat-label>
+          <mat-select
+            multiple
+            #multipleSections
+            [(ngModel)]="sections"
+            (selectionChange)="updateSectionsToDisplay($event.value)"
           >
-        </mat-select>
-      </mat-form-field>
+            <mat-select-trigger>
+              {{
+                multipleSections?.value
+                  ? multipleSections.value[0]["formattedName"]
+                  : ""
+              }}
+              <span
+                *ngIf="multipleSections?.value?.length > 1"
+                class="select-multiple-sections-trigger"
+              >
+                (+{{ multipleSections?.value?.length - 1 }}
+                {{
+                  multipleSections?.value?.length === 2 ? "other" : "others"
+                }})</span
+              >
+            </mat-select-trigger>
+
+            <mat-option
+              *ngFor="let section of factorySections"
+              [value]="section"
+              >{{ section.name }}</mat-option
+            >
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <!-- filter sections -->
+      <div
+        class="filter-chart-field"
+        *ngIf="showFourMonthsPeriodChart || showOneMonthPeriodChart"
+      >
+        <mat-form-field class="filter-chart-form-field" appearance="outline">
+          <mat-label>Change Section</mat-label>
+          <mat-select
+            [(ngModel)]="section"
+            #sectionsFilterField
+            (selectionChange)="
+              updateSectionToDisplay(sectionsFilterField.value)
+            "
+          >
+            <mat-option
+              *ngFor="let section of factorySections"
+              value="{{ section.name }}"
+              >{{ section.name }}</mat-option
+            >
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <!-- filter months -->
+      <div
+        *ngIf="showOneMonthPeriodChart || showSectionsPerMonthChart"
+        class="filter-chart-field"
+      >
+        <mat-form-field class="filter-chart-form-field" appearance="outline">
+          <mat-label>Change Month</mat-label>
+          <mat-select
+            [(ngModel)]="month"
+            #monthsFilterField
+            (selectionChange)="updateMonthToDisplay(monthsFilterField.value)"
+          >
+            <mat-option
+              *ngFor="let month of months"
+              value="{{ month.formattedName }}"
+              >{{ month.name }}</mat-option
+            >
+          </mat-select>
+        </mat-form-field>
+      </div>
     </div>
   </div>
 </div>

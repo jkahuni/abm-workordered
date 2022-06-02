@@ -4,3 +4,8 @@ export interface IntSwitchChart {
     cost?: number;
     month?: string;
 }
+
+export interface IntNameAndFormattedName {
+    name: string;
+    formattedName: string;
+}

@@ -2,6 +2,6 @@
   {{ chart }}
 </canvas>
 
-<div *ngIf="loadingFailed">
+<div *ngIf="!loading && loadingFailed">
   {{ loadingDefaultError ? loadingDefaultError : loadingFallbackError }}
 </div>

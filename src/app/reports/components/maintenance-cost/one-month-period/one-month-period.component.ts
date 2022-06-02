@@ -27,7 +27,15 @@ export class OneMonthPeriodComponent implements OnInit, OnChanges, OnDestroy {
   constructor() {
     this.updateChartPlotted
       .pipe(takeUntil(this.onDestroy))
-      .subscribe((status: boolean) => setTimeout(() => this.chartPlotted.emit(status)));
+      .subscribe((status: boolean) => setTimeout(() => {
+        this.chartPlotted.emit(status);
+        setTimeout(() => {
+          this.loading = false;
+        }, 10)
+        if (!status) {
+          this.loadingFailed = true;
+        }
+      }));
   }
 
   @Input('cost') totalCost!: number;
@@ -50,6 +58,7 @@ export class OneMonthPeriodComponent implements OnInit, OnChanges, OnDestroy {
   // chart
   chart!: Chart;
 
+  loading = true;
   loadingFailed = false;
   loadingDefaultError!: string;
   loadingFallbackError = `Plotting chart failed with error code U-MC-OMP-01. Please try reloading the page or report the error code if the issue persists.`;
@@ -256,7 +265,7 @@ export class OneMonthPeriodComponent implements OnInit, OnChanges, OnDestroy {
       ]
     };
 
-    const maximumCost = Math.max(...maintenanceCostsArray );
+    const maximumCost = Math.max(...maintenanceCostsArray);
 
     Chart.defaults.font.family = 'Lato, "Open Sans", Arial, Helvetica, Noto, "Lucida Sans", sans-serif';
     Chart.defaults.font.size = 14;
@@ -319,7 +328,7 @@ export class OneMonthPeriodComponent implements OnInit, OnChanges, OnDestroy {
             display: true,
             text: ['Weekly Maintenance Costs',
               this.generateSectionAndMonthTitle()
-              ]
+            ]
           },
           datalabels: {
             display: 'auto',
@@ -408,48 +417,51 @@ export class OneMonthPeriodComponent implements OnInit, OnChanges, OnDestroy {
 
   // generate chart data
   private generateMaintenanceCostForOneMonthPeriod(): void {
-    if (this.workorders.length > 0) {
-      // variables
-      let maintenanceCostsArray: number[] = [];
+    // if (this.workorders.length > 0) {
+    // variables
+    let maintenanceCostsArray: number[] = [];
 
-      // constants
-      const weekLabels: string[] = this.constructLabelsArray();
+    // constants
+    const weekLabels: string[] = this.constructLabelsArray();
 
-      // get workorders for each week
-      // then reduce to get their maintenance costs
-      weekLabels.forEach(
-        (weekLabel: string) => {
-          const workorders = this.filterWorkordersInSectionAndMonthAndWeek(weekLabel);
+    // get workorders for each week
+    // then reduce to get their maintenance costs
+    weekLabels.forEach(
+      (weekLabel: string) => {
+        const workorders = this.filterWorkordersInSectionAndMonthAndWeek(weekLabel);
 
-          const maintenanceCost: number = workorders
-            .reduce(
-              (finalSparesCost: number, initialSpareCost: number) => finalSparesCost + initialSpareCost
-              , 0
-            );
+        const maintenanceCost: number = workorders
+          .reduce(
+            (finalSparesCost: number, initialSpareCost: number) => finalSparesCost + initialSpareCost
+            , 0
+          );
 
-          maintenanceCostsArray.push(maintenanceCost);
-        }
-      );
-
-      if (this.chart) {
-        this.chart.destroy();
+        maintenanceCostsArray.push(maintenanceCost);
       }
+    );
 
-      this.chart = this.createOneMonthPeriodChart(weekLabels, maintenanceCostsArray);
+    // allows reusing canvas
+    if (this.chart) {
+      this.chart.destroy();
+    }
 
-      if (this.chart) {
-        this.updateChartPlotted.next(true);
-      }
+    this.chart = this.createOneMonthPeriodChart(weekLabels, maintenanceCostsArray);
 
-      else {
-        this.updateChartPlotted.next(false);
-      }
+    // updates loading status on parent
+    if (this.chart) {
+      this.updateChartPlotted.next(true);
     }
 
     else {
-      this.loadingFailed = true;
-      this.loadingDefaultError = `Plotting chart failed with error code MC-C-OMP-02. Please try reloading the page or report the error code if the issue persists.`;
+      this.updateChartPlotted.next(false);
+      this.loadingDefaultError = `Plotting chart failed with error code MC-C-OMP-01. Please try reloading the page or report the error code if the issue persists.`;
     }
+    // }
+
+    // else {
+    //   this.updateChartPlotted.next(false);
+    //   this.loadingDefaultError = `Plotting chart failed with error code MC-C-OMP-02. Please try reloading the page or report the error code if the issue persists.`;
+    // }
 
   }
 

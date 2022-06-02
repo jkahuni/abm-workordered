@@ -8,7 +8,7 @@ import { WorkordersService } from '@workorders/services/workorders.service';
 
 // interfaces
 import { IntWorkorder } from '@workorders/models/workorders.models';
-import { IntSwitchChart } from '@reports/models/reports.models';
+import { IntSwitchChart, IntNameAndFormattedName  } from '@reports/models/reports.models';
 // dayjs
 import * as dayjs from 'dayjs';
 
@@ -31,49 +31,61 @@ export class ReportsComponent implements OnInit, OnDestroy {
   workorders!: IntWorkorder[];
   chartPlotted = false;
 
-  // for changing sections
-  factorySections: string[] = ['Grid Casting', 'Sovema',
-    'Pasting', 'Jar Formation', 'Assembly Line', 'IGO\'s', 'Acid Plant', 'Hygro Cubicles', 'Tank Formation'];
-
-  initialFactorySections: string[] = ['Grid Casting',
-    'Pasting', 'Jar Formation', 'Assembly Line', 'Acid Plant'];
-
-  sections: { name: string, formattedName: string }[] = [];
-
-  // for changing months
-  months: { name: string, formatted: string }[] = [
-    { name: 'January', formatted: 'Jan 22' },
-    { name: 'February', formatted: 'Feb 22' },
-    { name: 'March', formatted: 'Mar 22' },
-    { name: 'April', formatted: 'Apr 22' },
-    { name: 'May', formatted: 'May 22' },
-    { name: 'June', formatted: 'Jun 22' },
-    { name: 'July', formatted: 'Jul 22' },
-    { name: 'August', formatted: 'Aug 22' },
-    { name: 'September', formatted: 'Sep 22' },
-    { name: 'October', formatted: 'Oct 22' },
-    { name: 'November', formatted: 'Nov 22' },
-    { name: 'December', formatted: 'Dec 22' },
-
-  ];
-
+  // controls bootstrap spinner
   loading = true;
 
-  // in case of errors
+  // handle errors
   loadingWorkordersFailed = false;
   indexingError!: string;
   otherError!: string;
   fallbackError = `Getting workorders data failed with error code U-Re-01. Please try reloading the page or report the error code to support to have the issue fixed if it persists.`;
 
-  // for one month chart component
-  cost!: number;
-  month!: string;
-
-  // control child to show
+  // control child component to show
   showSectionsPerMonthChart = true;
   showFourMonthsPeriodChart = false;
   showOneMonthPeriodChart = false;
   showOneWeekPeriodChart = false;
+
+
+  factorySections: IntNameAndFormattedName [] = [
+    { name: 'Grid Casting', formattedName: 'Casting' },
+    { name: 'Sovema', formattedName: 'Sovema' },
+    { name: 'Pasting', formattedName: 'Pasting' },
+    { name: 'Jar Formation', formattedName: 'Jar' },
+    { name: 'Assembly Line', formattedName: 'PP Line' },
+    { name: 'IGO\'s', formattedName: 'IGO\'s' },
+    { name: 'Acid Plant', formattedName: 'Acid' },
+    { name: 'Hygro Cubicles', formattedName: 'Hygros' },
+    { name: 'Tank Formation', formattedName: 'Tank' }
+  ];
+
+  // ng model on sections one month chart
+  sections: IntNameAndFormattedName [] = [];
+
+  // ng model for chart types
+  chartType!: string;
+
+  // for changing months
+  months: IntNameAndFormattedName[] = [
+    { name: 'January', formattedName : 'Jan 22' },
+    { name: 'February', formattedName : 'Feb 22' },
+    { name: 'March', formattedName : 'Mar 22' },
+    { name: 'April', formattedName : 'Apr 22' },
+    { name: 'May', formattedName : 'May 22' },
+    { name: 'June', formattedName : 'Jun 22' },
+    { name: 'July', formattedName : 'Jul 22' },
+    { name: 'August', formattedName : 'Aug 22' },
+    { name: 'September', formattedName : 'Sep 22' },
+    { name: 'October', formattedName : 'Oct 22' },
+    { name: 'November', formattedName : 'Nov 22' },
+    { name: 'December', formattedName : 'Dec 22' },
+
+  ];
+
+  // for one month chart component
+  // ng model on the same chart
+  month!: string;
+
 
   ngOnDestroy(): void {
     this.onDestroy.next();
@@ -84,17 +96,41 @@ export class ReportsComponent implements OnInit, OnDestroy {
     this.month = dayjs().format('MMM YY');
     this.sections = this.setFirstFiveSections();
     this.section = this.setInitialRandomSection();
+    this.setChartType();
     this.getWorkorders();
   }
 
-  private setFirstFiveSections(): { name: string, formattedName: string }[] {
-    let sections: { name: string, formattedName: string }[] = [];
+  // set chart type ng model value
+  private setChartType(): string {
+    if (this.showSectionsPerMonthChart) {
+      return this.chartType = 'sections-one-month';
+     }
+
+    else if (this.showFourMonthsPeriodChart) { 
+      return this.chartType = 'section-four-months-period';
+    }
+
+    else if (this.showOneMonthPeriodChart) { 
+      return this.chartType = 'section-one-month-period';
+    }
+
+    else if (this.showOneWeekPeriodChart) { 
+      return this.chartType = 'section-one-week-period';
+    }
+
+    else {
+      return this.chartType = 'unknown chart';
+    }
+  
+  }
+
+  // sets 5 random sections
+  private setFirstFiveSections(): IntNameAndFormattedName [] {
+    let sections: IntNameAndFormattedName [] = [];
 
 
     for (let i = 0; i <= this.factorySections.length; i++) {
-      const section = this.factorySections[Math.floor(Math.random() * this.factorySections.length)];
-
-      const formattedSection = this.formatSectionNameAndFormattedName(section);
+      const formattedSection: IntNameAndFormattedName  = this.factorySections[Math.floor(Math.random() * this.factorySections.length)];
 
       const sectionAlreadyAdded = sections.filter(section =>
         section.formattedName === formattedSection['formattedName']
@@ -111,61 +147,14 @@ export class ReportsComponent implements OnInit, OnDestroy {
     return sections;
   }
 
-  private formatSectionNameAndFormattedName(section: string): { name: string, formattedName: string } {
-    let object: { name: string, formattedName: string };
-
-    if (section) {
-      const name = section;
-      if (section === 'Grid Casting') {
-        const formattedName = 'Casting';
-        object = { name, formattedName };
-        return object;
-      }
-
-      else if (section === 'Sovema'
-        || section === 'Pasting'
-        || section === 'IGO\'s') {
-        const formattedName = section;
-        object = { name, formattedName };
-        return object;
-
-      }
-      else if (section === 'Jar Formation') {
-        const formattedName = 'Jar';
-        object = { name, formattedName };
-        return object;
-
-      } else if (section === 'Assembly Line') {
-        const formattedName = 'Assembly';
-        object = { name, formattedName };
-        return object;
-
-      } else if (section === 'Acid Plant') {
-        const formattedName = 'Reactor';
-        object = { name, formattedName };
-        return object;
-
-      } else if (section === 'Hygro Cubicles') {
-        const formattedName = 'Hygros';
-        object = { name, formattedName };
-        return object;
-
-      } else if (section === 'Tank Formation') {
-        const formattedName = 'Tank';
-        return object = { name, formattedName };
-
-      }
-    }
-
-    return {
-      name: '', formattedName: ''
-    };
-  }
-
+  // enables smooth transition
+  // to section over four months chart
+  // in case no particular section was selected
+  // in the sections over one month chart
   private setInitialRandomSection(): string {
-    const section = this.initialFactorySections[Math.floor(Math.random() * this.initialFactorySections.length)];
+    const section: IntNameAndFormattedName  = this.factorySections[Math.floor(Math.random() * this.factorySections.length)];
 
-    return section;
+    return section.name;
   }
 
   private getWorkorders(): void {
@@ -196,6 +185,31 @@ export class ReportsComponent implements OnInit, OnDestroy {
     this.showSectionsPerMonthChart = false
   }
 
+  // changes chart displayed
+  changeDisplayedChart(type: string): any {
+    this.hideAllChildrenCharts();
+    if (type === 'sections-one-month') {
+      this.showSectionsPerMonthChart = true;
+    }
+    else if (type === 'section-four-months-period') {
+      this.showFourMonthsPeriodChart = true;
+    }
+    else if (type === 'section-one-month-period') {
+      this.showOneMonthPeriodChart = true;
+    }
+    else if (type === 'section-one-week-period') {
+      this.showOneWeekPeriodChart = true;
+    }
+    this.setChartType();
+
+  }
+
+  // update sections to display
+  // on sections per month chart
+  updateSectionsToDisplay(sections: IntNameAndFormattedName []): any {
+    this.sections = sections;
+  }
+
   // update section to display
   updateSectionToDisplay(section: string): string {
     return this.section = section ? section : '';
@@ -212,7 +226,8 @@ export class ReportsComponent implements OnInit, OnDestroy {
       this.chartPlotted = true,
       this.loading = false
     ) : (
-      this.chartPlotted = this.loading = false);
+      this.chartPlotted = false),
+      this.loading = false;
   }
 
   // show different chart
@@ -223,7 +238,6 @@ export class ReportsComponent implements OnInit, OnDestroy {
     if (type === 'four-months-period') {
       this.showFourMonthsPeriodChart = true;
     } else if (type === 'one-month-period') {
-      this.cost = data['cost'] ? data['cost'] : 0;
       this.month = data['month'] ? data['month'] : '';
       this.section = data['section'] ? data['section'] : this.section;
       this.showOneMonthPeriodChart = true;

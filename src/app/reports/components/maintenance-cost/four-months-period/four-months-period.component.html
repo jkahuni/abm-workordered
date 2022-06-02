@@ -1,7 +1,7 @@
-<canvas baseChart id="fourMonthsPeriodChart" [hidden]="loadingFailed">
+<canvas baseChart id="fourMonthsPeriodChart" [hidden]="loading || loadingFailed">
   {{ chart }}
 </canvas>
 
-<div *ngIf="loadingFailed">
+<div *ngIf="!loading && loadingFailed">
   {{ loadingDefaultError ? loadingDefaultError : loadingFallbackError }}
 </div>

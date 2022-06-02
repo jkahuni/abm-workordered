@@ -31,6 +31,12 @@ export class FourMonthsPeriodComponent implements OnInit, OnDestroy, OnChanges {
       .pipe(takeUntil(this.onDestroy))
       .subscribe((status: boolean) => setTimeout(() => {
         this.chartPlotted.emit(status);
+        setTimeout(() => {
+          this.loading = false;
+        }, 10)
+        if (!status) {
+          this.loadingFailed = true;
+        }
       }));
   }
 
@@ -53,6 +59,7 @@ export class FourMonthsPeriodComponent implements OnInit, OnDestroy, OnChanges {
   // chart
   chart!: Chart;
 
+  loading = true;
   loadingFailed = false;
   loadingDefaultError!: string;
   loadingFallbackError = `Plotting chart failed with error code U-MC-FMP-01. Please try reloading the page or report the error code if the issue persists.`;
@@ -296,48 +303,50 @@ export class FourMonthsPeriodComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   private generateMaitenanceCostForFourMonthsPeriod(workordersYear?: string): void {
-    if (this.workorders.length > 0) {
-      const year = workordersYear || '2022';
+    const year = workordersYear || '2022';
 
-      // chart variables
-      let monthsLabels: string[] = [];
-      let maintenanceCostArray: number[] = [];
+    // chart variables
+    let monthsLabels: string[] = [];
+    let maintenanceCostArray: number[] = [];
 
-      this.fourMonthsIndexesArray = this.generateMonthIndexes(3);
+    this.fourMonthsIndexesArray = this.generateMonthIndexes(3);
 
-      // get the mtnc costs per section per month
-      this.fourMonthsIndexesArray.forEach(
-        (month: number) => {
-          const monthAndTwoYearDigitLabel = dayjs(dayjs().month(month)).format('MMM YY');
+    // get the mtnc costs per section per month
+    this.fourMonthsIndexesArray.forEach(
+      (month: number) => {
+        const monthAndTwoYearDigitLabel = dayjs(dayjs().month(month)).format('MMM YY');
 
-          const maintenanceCost = this.filterWorkordersInSectionMonthAndYear(month, year)
-            .reduce((totalCost: number, initialCost: number) => 
+        const maintenanceCost = this.filterWorkordersInSectionMonthAndYear(month, year)
+          .reduce((totalCost: number, initialCost: number) =>
             totalCost + initialCost
-          , 0);
+            , 0);
 
-          monthsLabels.push(monthAndTwoYearDigitLabel);
-          maintenanceCostArray.push(maintenanceCost);
-        }
-      );
-
-      if (this.chart) {
-        this.chart.destroy();
+        monthsLabels.push(monthAndTwoYearDigitLabel);
+        maintenanceCostArray.push(maintenanceCost);
       }
-      this.chart = this.createChart(monthsLabels, maintenanceCostArray);
+    );
 
-      if (this.chart) {
-        this.updateChartPlotted.next(true);
-      } else {
-        this.updateChartPlotted.next(false);
-        this.loadingFailed = true;
-        this.loadingDefaultError = `Plotting chart failed with error code MC-C-FMP-01. Please try reloading the page or report the error code if the issue persists.`;
-      }
+    // allows reusing canvas
+    if (this.chart) {
+      this.chart.destroy();
     }
+    this.chart = this.createChart(monthsLabels, maintenanceCostArray);
 
+    // updates loading status on parent
+    if (this.chart) {
+      this.updateChartPlotted.next(true);
+    } 
+    
     else {
-      this.loadingFailed = true;
-      this.loadingDefaultError = `Plotting chart failed with error code MC-C-FMP-02. Please try reloading the page or report the error code if the issue persists.`;
+      this.updateChartPlotted.next(false);
+      this.loadingDefaultError = `Plotting chart failed with error code MC-C-FMP-01. Please try reloading the page or report the error code if the issue persists.`;
     }
+    // }
+
+    // else {
+    //   this.updateChartPlotted.next(false);
+    //   this.loadingDefaultError = `Plotting chart failed with error code MC-C-FMP-02. Please try reloading the page or report the error code if the issue persists.`;
+    // }
   }
 
   // show chart for selected month (weeks)

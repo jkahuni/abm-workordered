@@ -26,6 +26,12 @@ export class SectionsPerMonthComponent implements OnInit, OnDestroy, OnChanges {
       .pipe(takeUntil(this.onDestroy))
       .subscribe((status: boolean) => setTimeout(() => {
         this.chartPlotted.emit(status);
+        setTimeout(() => {
+          this.loading = false;
+        }, 10)
+        if (!status) {
+          this.loadingFailed = true;
+        }
       }));
   }
 
@@ -106,10 +112,9 @@ export class SectionsPerMonthComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   // returns maintenance cost
-  private filterWorkordersInMonthAndSection(section: string): number[] {
+  private filterWorkordersInMonthAndSection(section: string, dateObject: { month: number, year: number }): number[] {
     const maintenanceCost = this.workorders.filter(
       (workorder: IntWorkorder) => {
-        const dateObject = this.getMonthAndYearIndices();
         const comparisonMonth = dateObject['month'];
         const comparisonYear = dateObject['year'];
 
@@ -208,7 +213,7 @@ export class SectionsPerMonthComponent implements OnInit, OnDestroy, OnChanges {
           },
           title: {
             display: true,
-            text: ['Sectional Maintenance Costs', `${this.formattedMonth
+            text: ['Sections Maintenance Costs', `${this.formattedMonth
               }`]
           },
           datalabels: {
@@ -249,7 +254,7 @@ export class SectionsPerMonthComponent implements OnInit, OnDestroy, OnChanges {
               const cost = chart.data.datasets[point.datasetIndex].data[point.index] as number;
               const section = chart.data.labels?.[point.index] as string;
               const sectionalData = { cost, section };
-              this.activateOneMonthPeriodChart(sectionalData);
+              console.log(sectionalData, this.month);
             }
           }
 
@@ -264,45 +269,48 @@ export class SectionsPerMonthComponent implements OnInit, OnDestroy, OnChanges {
 
   // get workorders data
   private generateMaintenanceCostForSectionsAndMonth(): void {
-    if (this.workorders.length > 0) {
-      // chart variables
-      let sectionsLabels: string[] = [];
-      let maintenanceCostArray: number[] = [];
+    // if (this.workorders.length > 0) {
+    // chart variables
+    let sectionsLabels: string[] = [];
+    let maintenanceCostArray: number[] = [];
 
-      this.sections.forEach(
-        (section: { name: string, formattedName: string }) => {
-          const sectionName = section['name'];
-          const formattedSectionName = section['formattedName'];
+    this.sections.forEach(
+      (section: { name: string, formattedName: string }) => {
+        const sectionName = section['name'];
+        const formattedSectionName = section['formattedName'];
+        const dateObject = this.getMonthAndYearIndices();
 
-          const maintenanceCost = this.filterWorkordersInMonthAndSection(sectionName)
-            .reduce((finalCost: number, initialCost: number) => finalCost + initialCost, 0);
 
-          sectionsLabels.push(formattedSectionName);
-          maintenanceCostArray.push(maintenanceCost);
+        const maintenanceCost = this.filterWorkordersInMonthAndSection(sectionName, dateObject)
+          .reduce((finalCost: number, initialCost: number) => finalCost + initialCost, 0);
 
-        });
+        sectionsLabels.push(formattedSectionName);
+        maintenanceCostArray.push(maintenanceCost);
 
-      if (this.chart) {
-        this.chart.destroy();
-      }
+      });
 
-      this.chart = this.createChart(sectionsLabels, maintenanceCostArray);
-
-      if (this.chart) {
-        this.updateChartPlotted.next(true);
-        setTimeout(() => { (this.loading = false) }, 15);
-      } else {
-        this.updateChartPlotted.next(false);
-        this.loading = false;
-        this.loadingFailed = true;
-        this.loadingDefaultError = `Plotting chart failed with error code MC-C-SPM-01. Please try reloading the page or report the error code if the issue persists.`;
-      }
+    // destroy chart instance
+    // allows reusing canvas
+    if (this.chart) {
+      this.chart.destroy();
     }
 
-    else {
-      this.loadingFailed = true;
-      this.loadingDefaultError = `Plotting chart failed with error code MC-C-SPM-02. Please try reloading the page or report the error code if the issue persists.`;
+    this.chart = this.createChart(sectionsLabels, maintenanceCostArray);
+
+    // updates loading status on parent
+    if (this.chart) {
+      this.updateChartPlotted.next(true);
+
+    } else {
+      this.updateChartPlotted.next(false);
+      this.loadingDefaultError = `Plotting chart failed with error code MC-C-SPM-01. Please try reloading the page or report the error code if the issue persists.`;
     }
+    // }
+
+    // else {
+    //   this.updateChartPlotted.next(false);
+    //   this.loadingDefaultError = `Plotting chart failed with error code MC-C-SPM-02. Please try reloading the page or report the error code if the issue persists.`;
+    // }
   }
 
   // activate one month period chart
