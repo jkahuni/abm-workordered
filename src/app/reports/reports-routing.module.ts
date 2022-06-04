@@ -3,10 +3,10 @@ import { RouterModule, Routes } from '@angular/router';
 import { ReportsComponent } from '@reports/reports.component';
 
 // exported/children components
-import { SectionsPerMonthComponent } from '@reports/components/maintenance-cost/sections-per-month/sections-per-month.component';
-import { FourMonthsPeriodComponent } from '@reports/components/maintenance-cost/four-months-period/four-months-period.component';
-import { OneMonthPeriodComponent } from '@reports/components/maintenance-cost/one-month-period/one-month-period.component';
-import { OneWeekPeriodComponent } from '@reports/components/maintenance-cost/one-week-period/one-week-period.component';
+import { McOneSectionMultipleMonthsPeriodComponent } from '@reports/components/maintenance-cost/mc-one-section-multiple-months-period/mc-one-section-multiple-months-period.component';
+import { McOneSectionOneMonthPeriodComponent } from '@reports/components/maintenance-cost/mc-one-section-one-month-period/mc-one-section-one-month-period.component';
+import { McOneSectionOneWeekPeriodComponent } from '@reports/components/maintenance-cost/mc-one-section-one-week-period/mc-one-section-one-week-period.component';
+import { McMultipleSectionsOneMonthPeriodComponent } from '@reports/components/maintenance-cost/mc-multiple-sections-one-month-period/mc-multiple-sections-one-month-period.component';
 
 
 // firebase auth guards
@@ -30,8 +30,8 @@ const routes: Routes = [
 export class ReportsRoutingModule { }
 
 export const childrenComponents = [
-  SectionsPerMonthComponent,
-  FourMonthsPeriodComponent,
-  OneMonthPeriodComponent,
-  OneWeekPeriodComponent
+  McMultipleSectionsOneMonthPeriodComponent,
+  McOneSectionMultipleMonthsPeriodComponent,
+  McOneSectionOneMonthPeriodComponent,
+  McOneSectionOneWeekPeriodComponent,
 ];

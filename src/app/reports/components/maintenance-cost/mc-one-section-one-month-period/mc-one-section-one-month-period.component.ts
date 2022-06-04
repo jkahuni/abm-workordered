@@ -14,15 +14,14 @@ import DataLabelsPlugin from 'chartjs-plugin-datalabels';
 
 // dayjs
 import * as dayjs from 'dayjs';
-import * as duration from 'dayjs/plugin/duration';
-dayjs.extend(duration);
+
 
 @Component({
-  selector: 'app-one-month-period',
-  templateUrl: './one-month-period.component.html',
-  styleUrls: ['./one-month-period.component.scss']
+  selector: 'app-mc-one-section-one-month-period',
+  templateUrl: './mc-one-section-one-month-period.component.html',
+  styleUrls: ['./mc-one-section-one-month-period.component.scss']
 })
-export class OneMonthPeriodComponent implements OnInit, OnChanges, OnDestroy {
+export class McOneSectionOneMonthPeriodComponent implements OnInit, OnChanges, OnDestroy {
 
   constructor() {
     this.updateChartPlotted
@@ -267,7 +266,9 @@ export class OneMonthPeriodComponent implements OnInit, OnChanges, OnDestroy {
     Chart.defaults.font.family = 'Lato, "Open Sans", Arial, Helvetica, Noto, "Lucida Sans", sans-serif';
     Chart.defaults.font.size = 14;
     Chart.defaults.font.lineHeight = 1.4;
-    const chart = new Chart('oneMonthPeriodChart', {
+    const chart = new Chart(
+      'mcOneSectionOneMonthPeriodChart',
+      {
       type,
       data,
       plugins: [DataLabelsPlugin],
@@ -396,10 +397,8 @@ export class OneMonthPeriodComponent implements OnInit, OnChanges, OnDestroy {
           if (points.length) {
             const point = points[0];
             if (point) {
-              const cost = chart.data.datasets[point.datasetIndex].data[point.index] as number;
               const week = chart.data.labels?.[point.index] as string;
-              const weekData = { cost, week };
-              this.activateOneWeekPeriodChart(weekData);
+              this.switchToOneSectionOneWeekPeriod(week);
             }
           }
 
@@ -463,17 +462,17 @@ export class OneMonthPeriodComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   // show chart for selected week = days
-  private activateOneWeekPeriodChart({ cost, week }: { cost: number, week: string }) {
-    console.log('cost', cost);
+  private switchToOneSectionOneWeekPeriod(week: string ) {
+    const oneWeekPeriodData: IntSwitchChart = {
+      type: 'one-section-one-week-period',
+      section: this.section,
+      month: this.month
+    };
+
+    this.switchChart.emit(oneWeekPeriodData);
+
     console.log('week', week);
 
   }
 
-  goBack(): void {
-    const data: IntSwitchChart = {
-      type: 'four-months-period',
-      section: ''
-    }
-    this.switchChart.emit(data);
-  }
 }

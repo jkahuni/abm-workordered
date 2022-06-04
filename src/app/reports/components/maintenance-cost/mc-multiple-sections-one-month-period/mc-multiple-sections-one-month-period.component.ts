@@ -14,12 +14,13 @@ import DataLabelsPlugin from 'chartjs-plugin-datalabels';
 // dayjs
 import * as dayjs from 'dayjs';
 
+
 @Component({
-  selector: 'app-sections-per-month',
-  templateUrl: './sections-per-month.component.html',
-  styleUrls: ['./sections-per-month.component.scss']
+  selector: 'app-mc-multiple-sections-one-month-period',
+  templateUrl: './mc-multiple-sections-one-month-period.component.html',
+  styleUrls: ['./mc-multiple-sections-one-month-period.component.scss']
 })
-export class SectionsPerMonthComponent implements OnInit, OnDestroy, OnChanges {
+export class McMultipleSectionsOneMonthPeriodComponent implements OnInit, OnDestroy, OnChanges {
 
   constructor() {
     this.updateChartPlotted
@@ -165,7 +166,7 @@ export class SectionsPerMonthComponent implements OnInit, OnDestroy, OnChanges {
     Chart.defaults.font.family = 'Lato, "Open Sans", Arial, Helvetica, Noto, "Lucida Sans", sans-serif';
     Chart.defaults.font.size = 14;
     Chart.defaults.font.lineHeight = 1.4;
-    const chart = new Chart('sectionsPerMonthChart', {
+    const chart = new Chart('mcMultipleSectionsOneMonthPeriodChart', {
       type,
       data,
       plugins: [DataLabelsPlugin],
@@ -254,7 +255,7 @@ export class SectionsPerMonthComponent implements OnInit, OnDestroy, OnChanges {
             const point = points[0];
             if (point) {
               const section = chart.data.labels?.[point.index] as string;
-              this.activateFourMonthsPeriodChart(section);
+              this.switchToOneSectionMultipleMonthsPeriod(section);
             }
           }
 
@@ -313,13 +314,12 @@ export class SectionsPerMonthComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   // activate one month period chart
-  private activateFourMonthsPeriodChart(section: string): void {
+  private switchToOneSectionMultipleMonthsPeriod(section: string): void {
     const switchChartData: IntSwitchChart = {
-      type: 'four-months-period-chart',
+      type: 'one-section-multiple-months-period',
       section: this.generateSectionName(section),
     };
 
     this.switchChart.emit(switchChartData);
   }
-
 }

@@ -18,38 +18,45 @@
 
   <!-- canvas objects -->
   <!-- five sections one month -->
-  <app-sections-per-month
-    *ngIf="showSectionsPerMonthChart"
+  <app-mc-multiple-sections-one-month-period
+    *ngIf="showMultipleSectionsOneMonthChart"
     class="chart-container"
     [workorders]="workorders"
     [sections]="sections"
-    [month]="month"
-    (chartPlotted)="updateChartPlotted($event)"
+    [dateIndicesObject]="dateIndicesObject"
+    (chartPlotted)="updateChartPlottedStatus($event)"
     (switchChart)="switchChart($event)"
   >
-  </app-sections-per-month>
+  </app-mc-multiple-sections-one-month-period>
 
   <!-- four month comparison -->
-  <app-four-months-period
-    *ngIf="showFourMonthsPeriodChart"
+  <app-mc-one-section-multiple-months-period
+    *ngIf="showOneSectionMultipleMonthsPeriodChart"
     class="chart-container"
     [workorders]="workorders"
     [section]="section"
-    (chartPlotted)="updateChartPlotted($event)"
+    [dateIndicesObject]="dateIndicesObject"
+    [totalMonthsPeriod]="totalMonthsPeriod"
+    (chartPlotted)="updateChartPlottedStatus($event)"
     (switchChart)="switchChart($event)"
-  ></app-four-months-period>
+  ></app-mc-one-section-multiple-months-period>
 
   <!-- one month broken down to its weeks -->
-  <app-one-month-period
-    *ngIf="showOneMonthPeriodChart"
+  <app-mc-one-section-one-month-period
+    *ngIf="showOneSectionOneMonthPeriodChart"
     class="chart-container"
-    [month]="month"
+    [dateIndicesObject]="dateIndicesObject"
     [section]="section"
     [workorders]="workorders"
     (switchChart)="switchChart($event)"
-  ></app-one-month-period>
+    (chartPlotted)="updateChartPlottedStatus($event)"
+  ></app-mc-one-section-one-month-period>
 
   <!-- one week broken down to its days -->
+  <app-mc-one-section-one-week-period
+    *ngIf="showOneSectionOneWeekPeriodChart"
+    class="chart-container"
+  ></app-mc-one-section-one-week-period>
 
   <!-- filter fields -->
   <div *ngIf="chartPlotted" class="filter-charts">
@@ -61,21 +68,20 @@
           <mat-label>Select Chart</mat-label>
           <mat-select
             [(ngModel)]="chartType"
-            #chartTypeField
-            (selectionChange)="changeDisplayedChart(chartTypeField.value)"
+            (selectionChange)="changeDisplayedChart($event.value)"
           >
-            <mat-option value="sections-one-month">
-              Sections Per Month</mat-option
+            <mat-option value="sections-one-month-chart">
+              Section(s) Per Month</mat-option
             >
-            <mat-option value="section-four-months-period">
-              Section Over Four Months</mat-option
-            ><mat-option value="section-one-month-period">
-              Section In One Month</mat-option
+            <mat-option value="one-section-multiple-months-period">
+              Section In Many Months</mat-option
+            ><mat-option value="one-section-one-month-period">
+              Section Per Month</mat-option
             ><mat-option
-              *ngIf="showOneMonthPeriodChart"
-              value="section-one-week-period"
+              *ngIf="showOneSectionOneMonthPeriodChart"
+              value="one-section-one-week-period"
             >
-              Section In One Week</mat-option
+              Section Per Week</mat-option
             >
           </mat-select>
         </mat-form-field>
@@ -87,28 +93,23 @@
       <div class="filter-charts-label">Change Chart Values</div>
 
       <!-- select multiple sections -->
-      <div *ngIf="showSectionsPerMonthChart" class="filter-chart-field">
+      <div *ngIf="showMultipleSectionsOneMonthChart" class="filter-chart-field">
         <mat-form-field class="filter-chart-form-field" appearance="outline">
           <mat-label>Change Sections</mat-label>
           <mat-select
             multiple
-            #multipleSections
             [(ngModel)]="sections"
-            (selectionChange)="updateSectionsToDisplay($event.value)"
+            (selectionChange)="updateSections($event.value)"
           >
             <mat-select-trigger>
-              {{
-                multipleSections?.value
-                  ? multipleSections.value[0]["formattedName"]
-                  : ""
-              }}
+              {{ sections ? sections[0]["formattedName"] : "" }}
               <span
-                *ngIf="multipleSections?.value?.length > 1"
+                *ngIf="sections && sections.length > 1"
                 class="select-multiple-sections-trigger"
               >
-                (+{{ multipleSections?.value?.length - 1 }}
+                (+{{ sections && sections.length - 1 }}
                 {{
-                  multipleSections?.value?.length === 2 ? "other" : "others"
+                  sections && sections.length === 2 ? "other" : "others"
                 }})</span
               >
             </mat-select-trigger>
@@ -125,16 +126,16 @@
       <!-- filter sections -->
       <div
         class="filter-chart-field"
-        *ngIf="showFourMonthsPeriodChart || showOneMonthPeriodChart"
+        *ngIf="
+          showOneSectionMultipleMonthsPeriodChart ||
+          showOneSectionOneMonthPeriodChart
+        "
       >
         <mat-form-field class="filter-chart-form-field" appearance="outline">
           <mat-label>Change Section</mat-label>
           <mat-select
             [(ngModel)]="section"
-            #sectionsFilterField
-            (selectionChange)="
-              updateSectionToDisplay(sectionsFilterField.value)
-            "
+            (selectionChange)="updateSection($event.value)"
           >
             <mat-option
               *ngFor="let section of factorySections"
@@ -145,17 +146,58 @@
         </mat-form-field>
       </div>
 
+      <!-- update total months period -->
+      <div
+        class="filter-chart-field"
+        *ngIf="showOneSectionMultipleMonthsPeriodChart"
+      >
+        <mat-form-field class="filter-chart-form-field" appearance="outline">
+          <mat-label>Change Total Months</mat-label>
+          <mat-select
+            [(ngModel)]="totalMonthsPeriod"
+            (selectionChange)="updateTotalMonthsPeriod($event.value)"
+          >
+            <mat-option
+              *ngFor="let period of totalMonthPeriods"
+              [value]="period"
+              >{{ period }}</mat-option
+            >
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <!-- filter years -->
+      <div
+        *ngIf="
+          showOneSectionOneMonthPeriodChart || showMultipleSectionsOneMonthChart
+        "
+        class="filter-chart-field"
+      >
+        <mat-form-field class="filter-chart-form-field" appearance="outline">
+          <mat-label>Change Year</mat-label>
+          <mat-select
+            [(ngModel)]="year"
+            (selectionChange)="updateYear($event.value)"
+          >
+            <mat-option *ngFor="let year of years" [value]="year">{{
+              year
+            }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
       <!-- filter months -->
       <div
-        *ngIf="showOneMonthPeriodChart || showSectionsPerMonthChart"
+        *ngIf="
+          showOneSectionOneMonthPeriodChart || showMultipleSectionsOneMonthChart
+        "
         class="filter-chart-field"
       >
         <mat-form-field class="filter-chart-form-field" appearance="outline">
           <mat-label>Change Month</mat-label>
           <mat-select
             [(ngModel)]="month"
-            #monthsFilterField
-            (selectionChange)="updateMonthToDisplay(monthsFilterField.value)"
+            (selectionChange)="updateMonth($event.value)"
           >
             <mat-option
               *ngFor="let month of months"

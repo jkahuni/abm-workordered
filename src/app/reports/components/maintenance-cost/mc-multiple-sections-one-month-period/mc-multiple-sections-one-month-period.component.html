@@ -1,0 +1,7 @@
+<canvas baseChart id="mcMultipleSectionsOneMonthPeriodChart" [hidden]="loading || loadingFailed">
+  {{ chart }}
+</canvas>
+
+<div *ngIf="!loading && loadingFailed">
+  {{ loadingDefaultError ? loadingDefaultError : loadingFallbackError }}
+</div>

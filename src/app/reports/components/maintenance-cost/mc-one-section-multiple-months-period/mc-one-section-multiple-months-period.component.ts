@@ -14,16 +14,14 @@ import DataLabelsPlugin from 'chartjs-plugin-datalabels';
 
 // dayjs
 import * as dayjs from 'dayjs';
-import * as duration from 'dayjs/plugin/duration';
-dayjs.extend(duration);
 
 
 @Component({
-  selector: 'app-four-months-period',
-  templateUrl: './four-months-period.component.html',
-  styleUrls: ['./four-months-period.component.scss']
+  selector: 'app-mc-one-section-multiple-months-period',
+  templateUrl: './mc-one-section-multiple-months-period.component.html',
+  styleUrls: ['./mc-one-section-multiple-months-period.component.scss']
 })
-export class FourMonthsPeriodComponent implements OnInit, OnDestroy, OnChanges {
+export class McOneSectionMultipleMonthsPeriodComponent implements OnInit, OnDestroy, OnChanges {
 
   constructor(
   ) {
@@ -181,147 +179,149 @@ export class FourMonthsPeriodComponent implements OnInit, OnDestroy, OnChanges {
     Chart.defaults.font.family = 'Lato, "Open Sans", Arial, Helvetica, Noto, "Lucida Sans", sans-serif';
     Chart.defaults.font.size = 14;
     Chart.defaults.font.lineHeight = 1.4;
-    const chart = new Chart('fourMonthsPeriodChart', {
-      type,
-      data,
-      plugins: [DataLabelsPlugin],
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
+    const chart = new Chart(
+      'mcOneSectionMultipleMonthsPeriodChart',
+      {
+        type,
+        data,
+        plugins: [DataLabelsPlugin],
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
 
-        elements: {
-          line: {
-            tension: 0.4
-          }
-        },
-
-        scales: {
-          x: {
-            grid: {
-              display: false,
-              tickColor: 'black'
-            },
-            ticks: {
-              color: 'black',
-            },
-            title: {
-              color: 'black',
-              display: true,
-              text: 'Months'
+          elements: {
+            line: {
+              tension: 0.4
             }
           },
-          y: {
-            grid: {
-              display: false,
-              tickColor: 'black'
+
+          scales: {
+            x: {
+              grid: {
+                display: false,
+                tickColor: 'black'
+              },
+              ticks: {
+                color: 'black',
+              },
+              title: {
+                color: 'black',
+                display: true,
+                text: 'Months'
+              }
             },
-            ticks: {
-              color: 'black',
+            y: {
+              grid: {
+                display: false,
+                tickColor: 'black'
+              },
+              ticks: {
+                color: 'black',
+              },
+              title: {
+                color: 'black',
+                display: true,
+                text: 'Million Ksh'
+              },
+
+              suggestedMin: 0,
+              suggestedMax: maximumCost * 1.1,
+              beginAtZero: true,
+
+            }
+          },
+
+          plugins: {
+            legend: {
+              display: false
             },
             title: {
-              color: 'black',
               display: true,
-              text: 'Million Ksh'
+              text: ['Monthly Maintenance Costs', `${this.section}`]
             },
+            datalabels: {
+              display: 'auto',
+              anchor: (context) => {
+                const pointIndex = context.dataIndex;
+                const contextIndex = context.datasetIndex;
 
-            suggestedMin: 0,
-            suggestedMax: maximumCost * 1.1,
-            beginAtZero: true,
+                if (pointIndex === 0) {
+                  const currentPointData = data?.datasets[contextIndex]?.data[pointIndex];
+                  const nextPointData = context.chart.data?.datasets[contextIndex]?.data[pointIndex + 1];
 
-          }
-        },
+                  return currentPointData && nextPointData &&
+                    currentPointData < nextPointData ? 'start' : 'end';
+                }
 
-        plugins: {
-          legend: {
-            display: false
+                else {
+                  return 'end';
+                }
+              },
+
+              align: (context) => {
+                const pointIndex = context.dataIndex;
+                const contextIndex = context.datasetIndex;
+                const lastDataPoint = context.chart.data?.datasets[contextIndex]?.data?.length - 1;
+
+                if (pointIndex === 0) {
+                  return 'right';
+                }
+
+                else if (pointIndex === lastDataPoint) {
+                  const currentPointData = context.chart.data.datasets[contextIndex].data[pointIndex];
+
+                  return 'top';
+                }
+                else {
+                  const currentPointData = context.chart.data.datasets[contextIndex].data[pointIndex];
+                  return currentPointData ? 'top' : 'end';
+                }
+              },
+
+              textAlign: 'center',
+
+              formatter: function (value, context) {
+                // value falls on y-axis and 
+                // value = 0
+                if (+value === 0 && context.dataIndex === 0) {
+                  return '';
+                } else {
+                  return value.toLocaleString('en-US', { minimumFractionDigits: 0 });
+                }
+              },
+              color: 'black',
+              offset: 10
+
+            },
           },
-          title: {
-            display: true,
-            text: ['Monthly Maintenance Costs', `${this.section}`]
+
+          // interaction.mode default = 'nearest'
+          interaction: {
+            mode: 'nearest',
+            axis: 'y'
           },
-          datalabels: {
-            display: 'auto',
-            anchor: (context) => {
-              const pointIndex = context.dataIndex;
-              const contextIndex = context.datasetIndex;
 
-              if (pointIndex === 0) {
-                const currentPointData = data?.datasets[contextIndex]?.data[pointIndex];
-                const nextPointData = context.chart.data?.datasets[contextIndex]?.data[pointIndex + 1];
+          events: ['click'],
 
-                return currentPointData && nextPointData &&
-                  currentPointData < nextPointData ? 'start' : 'end';
+          onClick: (event) => {
+            const points = chart.getElementsAtEventForMode(event as unknown as Event, 'nearest', { intersect: true }, false);
+            if (points.length) {
+              const point = points[0];
+              if (point) {
+                // EX: Apr 22
+                const monthAndYear = chart.data.labels?.[point.index] as string;
+
+                // EX: Apr
+                // trim to remove white space after Apr
+                const month = monthAndYear.slice(0, -2).trim();
+                this.switchToOneSectionOneMonthPeriod(month);
               }
-
-              else {
-                return 'end';
-              }
-            },
-
-            align: (context) => {
-              const pointIndex = context.dataIndex;
-              const contextIndex = context.datasetIndex;
-              const lastDataPoint = context.chart.data?.datasets[contextIndex]?.data?.length - 1;
-
-              if (pointIndex === 0) {
-                return 'right';
-              }
-
-              else if (pointIndex === lastDataPoint) {
-                const currentPointData = context.chart.data.datasets[contextIndex].data[pointIndex];
-
-                return 'top';
-              }
-              else {
-                const currentPointData = context.chart.data.datasets[contextIndex].data[pointIndex];
-                return currentPointData ? 'top' : 'end';
-              }
-            },
-
-            textAlign: 'center',
-
-            formatter: function (value, context) {
-              // value falls on y-axis and 
-              // value = 0
-              if (+value === 0 && context.dataIndex === 0) {
-                return '';
-              } else {
-                return value.toLocaleString('en-US', { minimumFractionDigits: 0 });
-              }
-            },
-            color: 'black',
-            offset: 10
-
-          },
-        },
-
-        // interaction.mode default = 'nearest'
-        interaction: {
-          mode: 'nearest',
-          axis: 'y'
-        },
-
-        events: ['click'],
-
-        onClick: (event) => {
-          const points = chart.getElementsAtEventForMode(event as unknown as Event, 'nearest', { intersect: true }, false);
-          if (points.length) {
-            const point = points[0];
-            if (point) {
-              // EX: Apr 22
-              const monthAndYear = chart.data.labels?.[point.index] as string;
-
-              // EX: Apr
-              // trim to remove white space after Apr
-              const month = monthAndYear.slice(0, -2).trim();
-              this.activateOneMonthPeriodChart(month);
             }
+
           }
 
         }
-
-      }
-    });
+      });
 
     return chart;
 
@@ -375,9 +375,9 @@ export class FourMonthsPeriodComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   // show chart for selected month (weeks)
-  private activateOneMonthPeriodChart(month: string): void {
+  private switchToOneSectionOneMonthPeriod(month: string): void {
     const oneMonthPeriodData: IntSwitchChart = {
-      type: 'one-month-period-chart',
+      type: 'one-section-one-month-period',
       section: this.section,
       month
     };
