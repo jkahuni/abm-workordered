@@ -11,7 +11,7 @@
         align-items: center;
         flex-flow: row wrap;
         max-width: 900px;
-        max-height: 500px;
+        height: 450px;
 
         .chart-container {
             order: 2;
@@ -49,6 +49,7 @@
             order: 1;
             width: 200px;
             height: 400px;
+            overflow: auto;
 
             // align-self: flex-start;
             border: 1px solid rgba(0, 0, 0, 0.5);
@@ -128,7 +129,7 @@
         .filter-charts {
             order: 2;
             width: 100%;
-            max-height: 200px;
+            height: 200px;
             display: flex;
             flex-flow: row wrap;
             justify-content: space-evenly;
@@ -143,12 +144,17 @@
                 gap: 2px;
             }
 
+            .filter-chart-parameters {
+                height: 200px;
+                overflow: auto;
+            }
+
             .filter-charts-label {
                 text-align: center;
             }
 
             .filter-chart-field {
-                width: 75%;
+                width: 85%;
                 padding: 0 5px;
 
                 mat-form-field.filter-chart-form-field {
@@ -162,4 +168,8 @@
 .select-multiple-sections-trigger {
     opacity: 0.75;
     font-size: 0.75em;
+}
+
+.slider-toggle {
+    margin: 0 0 20px;
 }

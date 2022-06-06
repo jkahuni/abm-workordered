@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { LayoutModule } from '@angular/cdk/layout';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
 import { ReportsRoutingModule, childrenComponents } from '@reports/reports-routing.module';
 import { NgChartsModule } from 'ng2-charts';
@@ -18,7 +18,7 @@ import { ReportsComponent } from '@reports/reports.component';
   declarations: [
     ReportsComponent,
     childrenComponents
-    ],
+  ],
   imports: [
     CommonModule,
     ReportsRoutingModule,
@@ -28,7 +28,7 @@ import { ReportsComponent } from '@reports/reports.component';
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
-    LayoutModule
+    MatSlideToggleModule
   ],
   exports: [childrenComponents]
 })

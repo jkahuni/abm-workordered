@@ -14,3 +14,9 @@ export interface IntDateIndices {
     monthIndex: number;
     yearIndex: number;
 }
+
+export interface IntDateRangeLimits {
+    firstDate: IntDateIndices;
+    lastDate: IntDateIndices;
+    limitsUpdated: boolean;
+}

@@ -1,4 +1,5 @@
-import { Component, OnInit, ViewChild, OnDestroy, ElementRef } from '@angular/core';
+import { Component, OnInit, ViewChild, OnDestroy, ChangeDetectorRef, ElementRef } from '@angular/core';
+import { MatSlideToggleChange } from '@angular/material/slide-toggle';
 
 // rxjs
 import { takeUntil, Subject } from 'rxjs';
@@ -8,7 +9,7 @@ import { WorkordersService } from '@workorders/services/workorders.service';
 
 // interfaces
 import { IntWorkorder } from '@workorders/models/workorders.models';
-import { IntSwitchChart, IntNameAndFormattedName, IntDateIndices } from '@reports/models/reports.models';
+import { IntSwitchChart, IntNameAndFormattedName, IntDateIndices, IntDateRangeLimits } from '@reports/models/reports.models';
 // dayjs
 import * as dayjs from 'dayjs';
 
@@ -20,7 +21,8 @@ import * as dayjs from 'dayjs';
 export class ReportsComponent implements OnInit, OnDestroy {
 
   constructor(
-    private workordersService: WorkordersService
+    private workordersService: WorkordersService,
+    private cdRef: ChangeDetectorRef
   ) {
   }
 
@@ -42,8 +44,8 @@ export class ReportsComponent implements OnInit, OnDestroy {
   fallbackError = `Getting workorders data failed with error code U-Re-01. Please try reloading the page or report the error code to support to have the issue fixed if it persists.`;
 
   // control child component to show
-  showMultipleSectionsOneMonthChart = true;
-  showOneSectionMultipleMonthsPeriodChart = false;
+  showMultipleSectionsOneMonthChart = false;
+  showOneSectionMultipleMonthsPeriodChart = true;
   showOneSectionOneMonthPeriodChart = false;
   showOneSectionOneWeekPeriodChart = false;
 
@@ -100,6 +102,17 @@ export class ReportsComponent implements OnInit, OnDestroy {
   // updates both month and year with their index
   dateIndicesObject!: IntDateIndices;
 
+  // exclusively for showing
+  // sections over a range
+  useCustomRange = false;
+  firstYear!: number;
+  firstMonth!: string;
+  lastYear!: number;
+  lastMonth!: string;
+  dateRangeLimits!: IntDateRangeLimits;
+  firstDate!: IntDateIndices;
+  lastDate!: IntDateIndices;
+
 
   ngOnDestroy(): void {
     this.onDestroy.next();
@@ -113,7 +126,7 @@ export class ReportsComponent implements OnInit, OnDestroy {
 
     this.setFirstFiveSections();
     this.setInitialRandomSection();
-    this.setChartType();
+    this.updateChartType();
     this.getWorkorders();
 
     // sets default dateIndices
@@ -123,7 +136,7 @@ export class ReportsComponent implements OnInit, OnDestroy {
 
   // set current year as default
   private setYearsArray(): number[] {
-    let startingYear: number = 2021;
+    let startingYear: number = 2019;
     let currentYear = dayjs().year();
     let years: number[] = [];
 
@@ -148,7 +161,7 @@ export class ReportsComponent implements OnInit, OnDestroy {
     return this.month = currentMonth;
   }
 
-  private setMonthIndex(month: string): number {
+  private generateMonthIndex(month: string): number {
     const monthIndex = this.months.findIndex(
       (dateObject: IntNameAndFormattedName) => {
         const name = dateObject['name'];
@@ -164,7 +177,7 @@ export class ReportsComponent implements OnInit, OnDestroy {
 
   private setDateIndicesObject(): IntDateIndices {
     const yearIndex = this.year;
-    const monthIndex = this.setMonthIndex(this.month);
+    const monthIndex = this.generateMonthIndex(this.month);
     const dateIndices: IntDateIndices = {
       monthIndex,
       yearIndex
@@ -173,7 +186,7 @@ export class ReportsComponent implements OnInit, OnDestroy {
   }
 
   // set chart type ng model value
-  private setChartType(): string {
+  private updateChartType(): string {
     if (this.showMultipleSectionsOneMonthChart) {
       return this.chartType = 'sections-one-month-chart';
     }
@@ -191,6 +204,7 @@ export class ReportsComponent implements OnInit, OnDestroy {
     }
 
     else {
+      console.log('UNKNOWN CHART');
       return this.chartType = 'unknown chart';
     }
 
@@ -272,7 +286,7 @@ export class ReportsComponent implements OnInit, OnDestroy {
     else if (type === 'one-section-one-week-period') {
       this.showOneSectionOneWeekPeriodChart = true;
     }
-    this.setChartType();
+    this.updateChartType();
 
   }
 
@@ -293,6 +307,106 @@ export class ReportsComponent implements OnInit, OnDestroy {
   updateSection(section: string): string {
     const fallbackSection = 'Grid Casting';
     return this.section = section ? section : fallbackSection;
+  }
+
+  // EXCLUSIVELY FOR ONE SECTION OVER MULTIPLE MONTHS CHART
+  updateUseCustomRange(event: MatSlideToggleChange): boolean {
+    return this.useCustomRange = event.checked ? true : false;
+  }
+
+  // output from child component
+  // updates the ng-models on template
+  updateDateRangeLimitsFromChild(dateLimits: IntDateRangeLimits): any {
+
+    const firstDate: IntDateIndices = dateLimits['firstDate'];
+    const lastDate: IntDateIndices = dateLimits['lastDate'];
+
+    const firstYearIndex = firstDate['yearIndex'];
+    const firstMonthIndex = firstDate['monthIndex'];
+    const firstMonthString = dayjs().year(firstYearIndex).month(firstMonthIndex).format('MMM');
+
+    const lastYearIndex = lastDate['yearIndex'];
+    const lastMonthIndex = lastDate['monthIndex'];
+    const lastMonthString = dayjs().year(lastYearIndex).month(lastMonthIndex).format('MMM');
+
+    // update values
+    setTimeout(() => {
+      this.firstYear = firstYearIndex;
+      this.firstMonth = firstMonthString;
+
+      this.lastYear = lastYearIndex;
+      this.lastMonth = lastMonthString;
+
+
+      console.log(dateLimits);
+    });
+  }
+
+  // update date RangeLimits to Child
+  updateChildsDateRangeLimits({ firstDate, lastDate }: { firstDate: IntDateIndices, lastDate: IntDateIndices }): any {
+    const dateRangeLimits: IntDateRangeLimits = {
+      firstDate,
+      lastDate,
+      limitsUpdated: true
+    };
+
+    return this.dateRangeLimits = dateRangeLimits;
+  }
+
+  updateFirstYear(year: number): void {
+    const firstDate: IntDateIndices = {
+      yearIndex: year,
+      monthIndex: this.generateMonthIndex(this.firstMonth)
+    };
+
+    const lastDate: IntDateIndices = {
+      yearIndex: this.lastYear,
+      monthIndex: this.generateMonthIndex(this.lastMonth)
+    };
+
+    this.updateChildsDateRangeLimits({ firstDate, lastDate });
+  }
+
+  updateFirstMonth(month: string): void {
+    const firstDate: IntDateIndices = {
+      yearIndex: this.firstYear,
+      monthIndex: this.generateMonthIndex(month)
+    };
+
+    const lastDate: IntDateIndices = {
+      yearIndex: this.lastYear,
+      monthIndex: this.generateMonthIndex(this.lastMonth)
+    };
+
+    this.updateChildsDateRangeLimits({ firstDate, lastDate });
+  }
+
+  updateLastYear(year: number): void {
+    const firstDate: IntDateIndices = {
+      yearIndex: this.firstYear,
+      monthIndex: this.generateMonthIndex(this.firstMonth)
+    };
+
+    const lastDate: IntDateIndices = {
+      yearIndex: year,
+      monthIndex: this.generateMonthIndex(this.lastMonth)
+    };
+
+    this.updateChildsDateRangeLimits({ firstDate, lastDate });
+  }
+
+  updateLastMonth(month: string): void {
+    const firstDate: IntDateIndices = {
+      yearIndex: this.firstYear,
+      monthIndex: this.generateMonthIndex(this.firstMonth)
+    };
+
+    const lastDate: IntDateIndices = {
+      yearIndex: this.lastYear,
+      monthIndex: this.generateMonthIndex(month)
+    };
+
+    this.updateChildsDateRangeLimits({ firstDate, lastDate });
   }
 
   // updates total sections to plot over
