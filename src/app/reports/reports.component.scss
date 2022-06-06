@@ -76,6 +76,15 @@
                     width: 100%;
                 }
             }
+
+            .divide-filter-chart-parts {
+                margin: 0 0 10px;
+
+                mat-divider.mat-divider {
+                    border-top-width: 2px;
+                    border-top-color: black;
+                }
+            }
         }
     }
 }
@@ -160,6 +169,11 @@
                 mat-form-field.filter-chart-form-field {
                     width: 100%;
                 }
+            }
+
+            // hide divider
+            .divide-filter-chart-parts {
+                display: none;
             }
         }
     }

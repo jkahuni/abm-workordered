@@ -204,7 +204,6 @@ export class ReportsComponent implements OnInit, OnDestroy {
     }
 
     else {
-      console.log('UNKNOWN CHART');
       return this.chartType = 'unknown chart';
     }
 
@@ -310,8 +309,29 @@ export class ReportsComponent implements OnInit, OnDestroy {
   }
 
   // EXCLUSIVELY FOR ONE SECTION OVER MULTIPLE MONTHS CHART
-  updateUseCustomRange(event: MatSlideToggleChange): boolean {
-    return this.useCustomRange = event.checked ? true : false;
+  updateUseCustomRange(event: MatSlideToggleChange): any {
+    const defaultTotalMonthsPeriod = this.totalMonthsPeriod;
+    const emptyIndices: IntDateIndices = {monthIndex: 0, yearIndex: dayjs().year()};
+    const resetDateRangeLimits: IntDateRangeLimits = {
+      firstDate: emptyIndices,
+      lastDate: emptyIndices,
+      limitsUpdated: false
+    };
+    return event.checked ?
+      (
+        this.useCustomRange = true
+      )
+      :
+      (
+        this.setDateIndicesObject(),
+
+        this.totalMonthsPeriod = 0,
+        this.totalMonthsPeriod = defaultTotalMonthsPeriod,
+        
+        this.dateRangeLimits = resetDateRangeLimits,
+
+        this.useCustomRange = false
+      );
   }
 
   // output from child component
@@ -336,9 +356,6 @@ export class ReportsComponent implements OnInit, OnDestroy {
 
       this.lastYear = lastYearIndex;
       this.lastMonth = lastMonthString;
-
-
-      console.log(dateLimits);
     });
   }
 

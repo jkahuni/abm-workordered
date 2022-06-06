@@ -8,6 +8,7 @@ import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
+import { MatDividerModule } from '@angular/material/divider';
 
 // components
 import { ReportsComponent } from '@reports/reports.component';
@@ -28,7 +29,8 @@ import { ReportsComponent } from '@reports/reports.component';
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
-    MatSlideToggleModule
+    MatSlideToggleModule,
+    MatDividerModule
   ],
   exports: [childrenComponents]
 })

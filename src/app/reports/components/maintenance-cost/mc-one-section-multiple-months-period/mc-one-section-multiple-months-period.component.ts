@@ -59,8 +59,6 @@ export class McOneSectionMultipleMonthsPeriodComponent implements OnInit, OnDest
   useCustomRange!: boolean;
   dateRangeLimits!: IntDateRangeLimits;
   limitsUpdated = false;
-  yearFactor!: number;
-
 
   // for chart config
   multipleMonthsDatesArray!: IntDateIndices[];
@@ -102,7 +100,7 @@ export class McOneSectionMultipleMonthsPeriodComponent implements OnInit, OnDest
     }
 
     if (this.dateRangeLimits && this.dateRangeLimits.limitsUpdated) {
-      this.generateUpdatedDateIndicesArray();
+      this.updateDateIndicesObject();
       this.generateMaitenanceCostForFourMonthsPeriod();
     }
 
@@ -113,43 +111,8 @@ export class McOneSectionMultipleMonthsPeriodComponent implements OnInit, OnDest
     this.onDestroy.complete();
   }
 
-  // default method when no limits updated from parent
-  private generateDateIndicesArray(): IntDateIndices[] {
-    let totalMonths = this.totalMonthsPeriod - 1;
-    let yearFactor = this.yearFactor || 0;
-
-
-    const yearIndex = this.dateIndicesObject['yearIndex'];
-    const monthIndex = this.dateIndicesObject['monthIndex'];
-
-    let monthsIndicesArray: IntDateIndices[] = [];
-    while (totalMonths >= 0) {
-      
-      const month = monthIndex - totalMonths;
-      const years = month < 0 ? Number(String(Math.abs(month)).slice(0, 1)) : 0;
-     
-      // correct for years between the dates
-      const correctedMonthIndex = month + (years * 12);
-      const correctedYearIndex = yearIndex - years;
-
-      monthsIndicesArray.push({
-        monthIndex: correctedMonthIndex,
-        yearIndex: correctedYearIndex
-      });
-
-      console.log(yearFactor, month, totalMonths);
-
-
-      totalMonths--;
-
-    }
-
-    this.setFirstAndLastDateRanges(monthsIndicesArray);
-    return monthsIndicesArray;
-  }
-
   // with limits updated by parent
-  private generateUpdatedDateIndicesArray(): void {
+  private updateDateIndicesObject(): any {
     // object to hold the data
     const firstDateObject: IntDateIndices = this.dateRangeLimits['firstDate'];
     const lastDateObject: IntDateIndices = this.dateRangeLimits['lastDate'];
@@ -167,27 +130,58 @@ export class McOneSectionMultipleMonthsPeriodComponent implements OnInit, OnDest
     const lastDateLarger = lastDate.isAfter(firstDate);
     const lastDateSmaller = lastDate.isBefore(firstDate);
 
-    if (datesMatched || lastDateLarger) {
-      const yearFactor = (lastYearIndex - firstYearIndex) * 12;
-      this.yearFactor = yearFactor;
-      this.totalMonthsPeriod = lastMonthIndex - firstMonthIndex + 1 + yearFactor;
-      this.dateIndicesObject = {
-        yearIndex: lastYearIndex,
-        monthIndex: lastMonthIndex
-      };
-    }
+    let yearFactor: number = 0;
 
-    else if (lastDateSmaller) {
-      const yearFactor = (firstYearIndex - lastYearIndex) * 12;
-      this.yearFactor = yearFactor;
-      this.totalMonthsPeriod = firstMonthIndex - lastMonthIndex + 1 + yearFactor;
-      this.dateIndicesObject = {
-        yearIndex: firstYearIndex,
-        monthIndex: firstMonthIndex
-      };
-    }
+    return datesMatched || lastDateLarger ?
+      (
+        yearFactor = (lastYearIndex - firstYearIndex) * 12,
+        this.totalMonthsPeriod = lastMonthIndex - firstMonthIndex + 1 + yearFactor,
+        this.dateIndicesObject = {
+          yearIndex: lastYearIndex,
+          monthIndex: lastMonthIndex
+        }
+      )
+
+      :
+
+      (
+        yearFactor = (firstYearIndex - lastYearIndex) * 12,
+        this.totalMonthsPeriod = firstMonthIndex - lastMonthIndex + 1 + yearFactor,
+        this.dateIndicesObject = {
+          yearIndex: firstYearIndex,
+          monthIndex: firstMonthIndex
+        }
+      );
   }
 
+  private generateDateIndicesArray(): IntDateIndices[] {
+    let totalMonths = this.totalMonthsPeriod - 1;
+
+    const yearIndex = this.dateIndicesObject['yearIndex'];
+    const monthIndex = this.dateIndicesObject['monthIndex'];
+
+    let monthsIndicesArray: IntDateIndices[] = [];
+    while (totalMonths >= 0) {
+
+      const month = monthIndex - totalMonths;
+      const years = month < 0 ? Math.ceil(Math.abs(month) / 12) : 0;
+
+      // correct for years between the dates
+      const correctedMonthIndex = month + (years * 12);
+      const correctedYearIndex = yearIndex - years;
+
+      monthsIndicesArray.push({
+        monthIndex: correctedMonthIndex,
+        yearIndex: correctedYearIndex
+      });
+      totalMonths--;
+
+    }
+    this.setFirstAndLastDateRanges(monthsIndicesArray);
+    return monthsIndicesArray;
+  }
+
+  // updates parent limits
   private setFirstAndLastDateRanges(datesArray: IntDateIndices[]): void {
     const firstDate = datesArray[0];
     const lastDate = datesArray[datesArray.length - 1];
@@ -209,7 +203,6 @@ export class McOneSectionMultipleMonthsPeriodComponent implements OnInit, OnDest
     }
     return 0;
   }
-
 
   // returns maintenance cost as int
   private filterWorkordersInSectionMonthAndYear(monthIndex: number, year: number): number[] {
