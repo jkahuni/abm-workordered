@@ -29,7 +29,7 @@
   >
   </app-mc-multiple-sections-one-month-period>
 
-  <!-- one section over up to 12 months -->
+  <!-- one section over any number of months -->
   <app-mc-one-section-multiple-months-period
     *ngIf="showOneSectionMultipleMonthsPeriodChart"
     class="chart-container"
@@ -39,6 +39,8 @@
     [totalMonthsPeriod]="totalMonthsPeriod"
     [useCustomRange]="useCustomRange"
     [dateRangeLimits]="dateRangeLimits"
+    [defaultYearIndex]="defaultYearIndex"
+    [defaultMonthIndex]="defaultMonthIndex"
     (chartPlotted)="updateChartPlottedStatus($event)"
     (switchChart)="switchChart($event)"
     (updateDateRangeLimits)="updateDateRangeLimitsFromChild($event)"
@@ -74,17 +76,17 @@
             (selectionChange)="changeDisplayedChart($event.value)"
           >
             <mat-option value="sections-one-month-chart">
-              Section(s) Per Month</mat-option
+              Sections - 1 Month</mat-option
             >
             <mat-option value="one-section-multiple-months-period">
-              Section In Many Months</mat-option
+              1 Section - Many Months</mat-option
             ><mat-option value="one-section-one-month-period">
-              Section Per Month</mat-option
+              1 Section - 1 Month</mat-option
             ><mat-option
               [hidden]="!showOneSectionOneMonthPeriodChart"
               value="one-section-one-week-period"
             >
-              Section Per Week</mat-option
+              1 Section - 1 Week</mat-option
             >
           </mat-select>
         </mat-form-field>

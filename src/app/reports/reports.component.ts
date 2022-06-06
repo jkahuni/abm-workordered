@@ -44,8 +44,8 @@ export class ReportsComponent implements OnInit, OnDestroy {
   fallbackError = `Getting workorders data failed with error code U-Re-01. Please try reloading the page or report the error code to support to have the issue fixed if it persists.`;
 
   // control child component to show
-  showMultipleSectionsOneMonthChart = false;
-  showOneSectionMultipleMonthsPeriodChart = true;
+  showMultipleSectionsOneMonthChart = true;
+  showOneSectionMultipleMonthsPeriodChart = false;
   showOneSectionOneMonthPeriodChart = false;
   showOneSectionOneWeekPeriodChart = false;
 
@@ -112,6 +112,12 @@ export class ReportsComponent implements OnInit, OnDestroy {
   dateRangeLimits!: IntDateRangeLimits;
   firstDate!: IntDateIndices;
   lastDate!: IntDateIndices;
+
+  // used when custom range toggle switch
+  // changes value from true to false
+  // resets chart to its initial state
+  defaultYearIndex!: number
+  defaultMonthIndex!: number;
 
 
   ngOnDestroy(): void {
@@ -270,6 +276,15 @@ export class ReportsComponent implements OnInit, OnDestroy {
     this.showMultipleSectionsOneMonthChart = false
   }
 
+  // EXCLUSIVELY FOR ONE SECTION OVER MULTIPLE MONTHS CHART
+  private updateMonthAndYearDefaults(): any {
+    const yearIndex = this.year;
+    const monthIndex = this.generateMonthIndex(this.month);
+
+    this.defaultYearIndex = yearIndex;
+    this.defaultMonthIndex = monthIndex;
+  }
+
   // changes chart displayed
   changeDisplayedChart(type: string): any {
     this.hideAllChildrenCharts();
@@ -309,29 +324,27 @@ export class ReportsComponent implements OnInit, OnDestroy {
   }
 
   // EXCLUSIVELY FOR ONE SECTION OVER MULTIPLE MONTHS CHART
-  updateUseCustomRange(event: MatSlideToggleChange): any {
-    const defaultTotalMonthsPeriod = this.totalMonthsPeriod;
-    const emptyIndices: IntDateIndices = {monthIndex: 0, yearIndex: dayjs().year()};
+  updateUseCustomRange(event: MatSlideToggleChange): void {
+    const emptyIndices: IntDateIndices = { monthIndex: 0, yearIndex: dayjs().year() };
     const resetDateRangeLimits: IntDateRangeLimits = {
       firstDate: emptyIndices,
       lastDate: emptyIndices,
       limitsUpdated: false
     };
-    return event.checked ?
-      (
-        this.useCustomRange = true
-      )
-      :
-      (
-        this.setDateIndicesObject(),
 
-        this.totalMonthsPeriod = 0,
-        this.totalMonthsPeriod = defaultTotalMonthsPeriod,
-        
-        this.dateRangeLimits = resetDateRangeLimits,
+    if (event.checked) {
+      this.useCustomRange = true;
+    }
 
-        this.useCustomRange = false
-      );
+    else {
+      this.setDateIndicesObject();
+
+      this.dateRangeLimits = resetDateRangeLimits;
+      this.totalMonthsPeriod = 4;
+
+      this.useCustomRange = false;
+    }
+
   }
 
   // output from child component
@@ -370,6 +383,8 @@ export class ReportsComponent implements OnInit, OnDestroy {
     return this.dateRangeLimits = dateRangeLimits;
   }
 
+  // 4 fn's below update individual portions
+  // of the dateRangeLimits
   updateFirstYear(year: number): void {
     const firstDate: IntDateIndices = {
       yearIndex: year,
@@ -428,7 +443,7 @@ export class ReportsComponent implements OnInit, OnDestroy {
 
   // updates total sections to plot over
   updateTotalMonthsPeriod(totalMonthsPeriod: number): number {
-    const fallbackTotalMonthsPeriod = 3;
+    const fallbackTotalMonthsPeriod = 4;
     return this.totalMonthsPeriod = totalMonthsPeriod ? totalMonthsPeriod : fallbackTotalMonthsPeriod;
   }
 
@@ -437,6 +452,7 @@ export class ReportsComponent implements OnInit, OnDestroy {
     const fallbackYear = dayjs().year();
     this.year = year ? year : fallbackYear;
     this.setDateIndicesObject();
+    this.updateMonthAndYearDefaults();
   }
 
   // update week to display
@@ -444,7 +460,7 @@ export class ReportsComponent implements OnInit, OnDestroy {
     const fallbackMonth = dayjs().format('MMM');
     this.month = month ? month : fallbackMonth;
     this.setDateIndicesObject();
-
+    this.updateMonthAndYearDefaults();
   }
 
   // emitted from different components

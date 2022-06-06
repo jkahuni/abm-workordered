@@ -23,8 +23,7 @@ import * as dayjs from 'dayjs';
 })
 export class McOneSectionMultipleMonthsPeriodComponent implements OnInit, OnDestroy, OnChanges {
 
-  constructor(
-  ) {
+  constructor() {
     this.updateChartPlotted
       .pipe(takeUntil(this.onDestroy))
       .subscribe((status: boolean) => setTimeout(() => {
@@ -44,6 +43,8 @@ export class McOneSectionMultipleMonthsPeriodComponent implements OnInit, OnDest
   @Input('totalMonthsPeriod') monthsToPlotOver!: number;
   @Input('useCustomRange') customDatesRange!: boolean;
   @Input('dateRangeLimits') firstAndLastDateRangeLimits!: IntDateRangeLimits;
+  @Input('defaultYearIndex') defaultSelectedYear!: number;
+  @Input('defaultMonthIndex') defaultSelectedMonth!: number;
 
   @Output() chartPlotted: EventEmitter<boolean> = new EventEmitter<boolean>();
   @Output() switchChart: EventEmitter<IntSwitchChart> = new EventEmitter<IntSwitchChart>();
@@ -67,6 +68,13 @@ export class McOneSectionMultipleMonthsPeriodComponent implements OnInit, OnDest
   // control months to show
   totalMonthsPeriod!: number;
 
+  // for resetting chart
+  defaultTotalMonthsPeriod!: number;
+  defaultDateIndicesObject!: IntDateIndices;
+
+  defaultYearIndex!: number;
+  defaultMonthIndex!: number;
+
   // chart
   chart!: Chart;
 
@@ -85,30 +93,56 @@ export class McOneSectionMultipleMonthsPeriodComponent implements OnInit, OnDest
     const totalMonthsPeriod = changes['monthsToPlotOver']?.currentValue;
     const useCustomRange = changes['customDatesRange']?.currentValue;
     const dateRangeLimits = changes['firstAndLastDateRangeLimits']?.currentValue;
+    const defaultYearIndex = changes['defaultSelectedYear']?.currentValue;
+    const defaultMonthIndex = changes['defaultSelectedMonth']?.currentValue;
 
+    // first time use cusotm date range is changed
+    const previousCustomRangeValue = changes['customDatesRange']?.previousValue;
+    const currentCustomRangeValue = changes['customDatesRange']?.currentValue;
 
     this.workorders = workorders ? workorders : this.workorders;
     this.section = section ? section : this.section;
     this.dateIndicesObject = dateIndicesObject ? dateIndicesObject : this.dateIndicesObject;
     this.totalMonthsPeriod = totalMonthsPeriod ? totalMonthsPeriod : this.totalMonthsPeriod;
-
-    this.useCustomRange = useCustomRange ? useCustomRange : this.useCustomRange;
+    this.useCustomRange = useCustomRange !== undefined ? useCustomRange : this.useCustomRange;
     this.dateRangeLimits = dateRangeLimits ? dateRangeLimits : this.dateRangeLimits;
+    this.defaultYearIndex = defaultYearIndex ? defaultYearIndex : this.defaultYearIndex;
+    this.defaultMonthIndex = defaultMonthIndex ? defaultMonthIndex : this.defaultMonthIndex;
 
-    if (this.workorders && this.section && this.dateIndicesObject && this.totalMonthsPeriod) {
+    if (this.workorders) {
+      if (
+        this.useCustomRange === true &&
+        this.dateRangeLimits &&
+        this.dateRangeLimits.limitsUpdated) {
+        this.updateDateIndicesObject();
+      }
+
+      else if (
+        previousCustomRangeValue === true &&
+        currentCustomRangeValue === false) {
+        this.resetDataPoints();
+      }
       this.generateMaitenanceCostForFourMonthsPeriod();
     }
-
-    if (this.dateRangeLimits && this.dateRangeLimits.limitsUpdated) {
-      this.updateDateIndicesObject();
-      this.generateMaitenanceCostForFourMonthsPeriod();
-    }
-
   }
 
   ngOnDestroy(): void {
     this.onDestroy.next();
     this.onDestroy.complete();
+  }
+
+  // resetting month periods and final data points
+  private resetDataPoints(): void {
+    const yearIndex = this.defaultYearIndex;;
+    const monthIndex = this.defaultMonthIndex;;
+
+    const dateIndices: IntDateIndices = {
+      yearIndex,
+      monthIndex
+    };
+
+    this.dateIndicesObject = dateIndices;
+    this.totalMonthsPeriod = 4;
   }
 
   // with limits updated by parent

@@ -1,1 +1,7 @@
-<p>mc-one-section-one-week-period works!</p>
+<canvas baseChart id="mcOneSectionOneWeekPeriodChart" [hidden]="loading || loadingFailed">
+  {{ chart }}
+</canvas>
+
+<div *ngIf="!loading && loadingFailed">
+  {{ loadingDefaultError ? loadingDefaultError : loadingFallbackError }}
+</div>
