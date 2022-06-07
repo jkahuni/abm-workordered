@@ -61,6 +61,12 @@
   <app-mc-one-section-one-week-period
     *ngIf="showOneSectionOneWeekPeriodChart"
     class="chart-container"
+    [workorders]="workorders"
+    [section]="section"
+    [dateIndicesObject]="dateIndicesObject"
+    [week]="week"
+    (chartPlotted)="updateChartPlottedStatus($event)"
+    (updateWeeks)="updateWeeks($event)"
   ></app-mc-one-section-one-week-period>
 
   <!-- filter fields -->
@@ -139,7 +145,8 @@
         class="filter-chart-field"
         *ngIf="
           showOneSectionMultipleMonthsPeriodChart ||
-          showOneSectionOneMonthPeriodChart
+          showOneSectionOneMonthPeriodChart ||
+          showOneSectionOneWeekPeriodChart
         "
       >
         <mat-form-field class="filter-chart-form-field" appearance="outline">
@@ -272,7 +279,9 @@
       <!-- filter years -->
       <div
         *ngIf="
-          showOneSectionOneMonthPeriodChart || showMultipleSectionsOneMonthChart
+          showOneSectionOneMonthPeriodChart ||
+          showMultipleSectionsOneMonthChart ||
+          showOneSectionOneWeekPeriodChart
         "
         class="filter-chart-field"
       >
@@ -292,7 +301,9 @@
       <!-- filter months -->
       <div
         *ngIf="
-          showOneSectionOneMonthPeriodChart || showMultipleSectionsOneMonthChart
+          showOneSectionOneMonthPeriodChart ||
+          showMultipleSectionsOneMonthChart ||
+          showOneSectionOneWeekPeriodChart
         "
         class="filter-chart-field"
       >
@@ -307,6 +318,21 @@
               value="{{ month.formattedName }}"
               >{{ month.name }}</mat-option
             >
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <!-- filter weeks -->
+      <div *ngIf="showOneSectionOneWeekPeriodChart" class="filter-chart-field">
+        <mat-form-field class="filter-chart-form-field" appearance="outline">
+          <mat-label>Change Week</mat-label>
+          <mat-select
+            [(ngModel)]="week"
+            (selectionChange)="updateWeek($event.value)"
+          >
+            <mat-option *ngFor="let week of weeks" [value]="week">{{
+              week
+            }}</mat-option>
           </mat-select>
         </mat-form-field>
       </div>

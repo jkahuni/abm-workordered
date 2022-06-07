@@ -3,6 +3,8 @@ export interface IntSwitchChart {
     section: string;
     month?: string;
     year?: number;
+    week?: string;
+    weeks?: string[];
 }
 
 export interface IntNameAndFormattedName {

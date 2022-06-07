@@ -466,12 +466,13 @@ export class McOneSectionOneMonthPeriodComponent implements OnInit, OnChanges, O
     const oneWeekPeriodData: IntSwitchChart = {
       type: 'one-section-one-week-period',
       section: this.section,
-      month: this.month
+      month: this.month,
+      week,
+      weeks: this.constructLabelsArray()
     };
 
     this.switchChart.emit(oneWeekPeriodData);
 
-    console.log('week', week);
 
   }
 

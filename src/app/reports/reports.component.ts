@@ -116,8 +116,12 @@ export class ReportsComponent implements OnInit, OnDestroy {
   // used when custom range toggle switch
   // changes value from true to false
   // resets chart to its initial state
-  defaultYearIndex!: number
+  defaultYearIndex!: number;
   defaultMonthIndex!: number;
+
+  // for one week chart
+  week!: string;
+  weeks!: string[];
 
 
   ngOnDestroy(): void {
@@ -142,7 +146,7 @@ export class ReportsComponent implements OnInit, OnDestroy {
 
   // set current year as default
   private setYearsArray(): number[] {
-    let startingYear: number = 2019;
+    let startingYear: number = 2021;
     let currentYear = dayjs().year();
     let years: number[] = [];
 
@@ -283,6 +287,17 @@ export class ReportsComponent implements OnInit, OnDestroy {
 
     this.defaultYearIndex = yearIndex;
     this.defaultMonthIndex = monthIndex;
+  }
+
+  // enables smooth transition from
+  // EX: months that have 5 weeks to those with 4
+  private conditionallyUpdateWeek(): void {
+    if (this.week && this.weeks) {
+      const weekPresent = this.weeks.includes(this.week);
+      if (!weekPresent) {
+        this.week = this.weeks[this.weeks.length - 1];
+      }
+    }
   }
 
   // changes chart displayed
@@ -463,6 +478,19 @@ export class ReportsComponent implements OnInit, OnDestroy {
     this.updateMonthAndYearDefaults();
   }
 
+  // updates displayed week
+  updateWeek(week: string): void {
+    const fallbackWeek = 'Week 1';
+    this.week = week ? week : fallbackWeek;
+  }
+
+  // emitted from one section one week component
+  updateWeeks(weeks: string[]): any {
+    this.weeks = weeks;
+    this.conditionallyUpdateWeek();
+  }
+
+
   // emitted from different components
   updateChartPlottedStatus(status: boolean): boolean {
     return status ? (
@@ -478,14 +506,16 @@ export class ReportsComponent implements OnInit, OnDestroy {
     const type = data['type'];
     const section = data['section'];
     const month = data['month'];
+    const week = data['week'];
+    const weeks = data['weeks'];
     this.section = section ? section : this.section;
     month ? (
       this.month = month,
       this.setDateIndicesObject()
     ) : (null);
+    this.week = week ? week : this.week;
+    this.weeks = weeks ? weeks : this.weeks;
 
     this.changeDisplayedChart(type);
-
-
   }
 }
