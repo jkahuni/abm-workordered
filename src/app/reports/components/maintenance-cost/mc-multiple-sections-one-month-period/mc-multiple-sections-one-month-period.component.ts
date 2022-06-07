@@ -10,10 +10,12 @@ import { takeUntil, Subject } from 'rxjs';
 // for chart
 import { ChartConfiguration, ChartType, Chart } from 'chart.js';
 import DataLabelsPlugin from 'chartjs-plugin-datalabels';
+import annotationPlugin from 'chartjs-plugin-annotation';
 
 // dayjs
 import * as dayjs from 'dayjs';
 
+Chart.register(annotationPlugin);
 
 @Component({
   selector: 'app-mc-multiple-sections-one-month-period',
@@ -239,6 +241,29 @@ export class McMultipleSectionsOneMonthPeriodComponent implements OnInit, OnDest
             offset: 5
 
           },
+
+          // annotation: {
+          //   annotations: [
+          //     {
+          //       type: 'line',
+          //       scaleID: 'y',
+          //       value: '2',
+          //       // yMin: '2',
+          //       // yMax: '2',
+          //       borderColor: 'rgba(0,0,0,0.4)',
+          //       borderWidth: 1,
+          //       label: {
+          //         position: 'end',
+          //         enabled: true,
+          //         color: 'white',
+          //         content: 'Cost Limit',
+          //         yAdjust: 0
+
+
+          //       }
+          //     },
+          //   ],
+          // }
         },
 
         // interaction.mode default = 'nearest'
