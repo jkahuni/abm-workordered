@@ -12,13 +12,17 @@ import { MatDividerModule } from '@angular/material/divider';
 
 // components
 import { ReportsComponent } from '@reports/reports.component';
+import { MaintenanceCostComponent } from '@reports/components/maintenance-cost/maintenance-cost.component';
+import { IncidentMetricsComponent } from '@reports/components/incident-metrics/incident-metrics.component';
 
 
 
 @NgModule({
   declarations: [
     ReportsComponent,
-    childrenComponents
+    childrenComponents,
+    MaintenanceCostComponent,
+    IncidentMetricsComponent
   ],
   imports: [
     CommonModule,
