@@ -66,24 +66,42 @@ export class IncidentMetricsComponent implements OnInit {
   // updates both month and year with their index
   dateIndicesObject!: IntDateIndices;
 
+  // viable workorders
+  viableWorkorders: string[] = [
+    'Corrective Maintenance',
+    'Breakdown',
+    'AM',
+    'PM',
+    'Tool Change'
+  ];
 
+  defaultYearIndex!: number;
+  defaultMonthIndex!: number;
 
   loading = true;
+  chartPlotted = false;
   loadingWorkordersFailed = false;
   indexingError!: string;
   otherError!: string;
+  fallbackError = `Getting workorders data failed with error code U-IM-C-01. Please try reloading the page or report the error code to support to have the issue fixed if it persists.`;
 
+  useCustomRange = false;
+
+  chartType!: string;
+
+  // toggle child to show
+  showSectionsMeanApprovalTimeForPerMonth = true;
 
   ngOnInit(): void {
+    this.getWorkorders();
     this.setYearsArray();
     this.setCurrentYear();
     this.setCurrentMonth();
     this.setFirstFiveSections();
     this.setInitialRandomSection();
     this.setDateIndicesObject();
+    this.setChartType();
 
-
-    this.getWorkorders();
   }
 
   // set current year as default
@@ -170,8 +188,6 @@ export class IncidentMetricsComponent implements OnInit {
     return this.section = section.name;
   }
 
-
-
   private getWorkorders(): void {
     this.workordersService.$allWorkorders
       .pipe(takeUntil(this.onDestroy))
@@ -191,6 +207,68 @@ export class IncidentMetricsComponent implements OnInit {
           );
         }
       });
+  }
+
+  private updateMonthAndYearDefaults(): any {
+    const yearIndex = this.year;
+    const monthIndex = this.generateMonthIndex(this.month);
+
+    this.defaultYearIndex = yearIndex;
+    this.defaultMonthIndex = monthIndex;
+  }
+
+  private setChartType(): string {
+    if (this.showSectionsMeanApprovalTimeForPerMonth) {
+      return this.chartType = 'sections-mean-approval-time-per-month';
+    }
+
+    return this.chartType = 'unknown-chart';
+  }
+
+  private hideAllCharts(): void {
+    this.showSectionsMeanApprovalTimeForPerMonth = false;
+  }
+
+  // change displayed chart through select
+  changeChart(type: string){
+    console.log('new chart', type);
+  }
+  // update fns
+  updateSections(sections: IntNameAndFormattedName[]): any {
+    const fallbackSections = [
+      { name: 'Grid Casting', formattedName: 'Casting' },
+      { name: 'Sovema', formattedName: 'Sovema' },
+      { name: 'Pasting', formattedName: 'Pasting' },
+      { name: 'Jar Formation', formattedName: 'Jar' },
+      { name: 'Assembly Line', formattedName: 'PP Line' },
+    ];
+    this.sections = sections ? sections : fallbackSections;
+  }
+
+  updateYear(year: number): void {
+    const fallbackYear = dayjs().year();
+    this.year = year ? year : fallbackYear;
+    this.setDateIndicesObject();
+    this.updateMonthAndYearDefaults();
+  }
+
+  // update week to display
+  updateMonth(month: string): void {
+    const fallbackMonth = dayjs().format('MMM');
+    this.month = month ? month : fallbackMonth;
+    this.setDateIndicesObject();
+    this.updateMonthAndYearDefaults();
+  }
+
+  // emitted from different components
+  updateChartPlottedStatus(status: boolean): boolean {
+    return status ? (
+      this.chartPlotted = true,
+      this.loading = false
+    ) : (
+      this.chartPlotted = false,
+      this.loading = false
+    )
   }
 
 }

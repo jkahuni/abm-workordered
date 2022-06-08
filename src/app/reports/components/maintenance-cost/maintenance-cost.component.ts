@@ -40,7 +40,7 @@ export class MaintenanceCostComponent implements OnInit, OnDestroy {
   loadingWorkordersFailed = false;
   indexingError!: string;
   otherError!: string;
-  fallbackError = `Getting workorders data failed with error code U-Re-01. Please try reloading the page or report the error code to support to have the issue fixed if it persists.`;
+  fallbackError = `Getting workorders data failed with error code U-MC-C-01. Please try reloading the page or report the error code to support to have the issue fixed if it persists.`;
 
   // control child component to show
   showMultipleSectionsOneMonthChart = true;
@@ -496,8 +496,9 @@ export class MaintenanceCostComponent implements OnInit, OnDestroy {
       this.chartPlotted = true,
       this.loading = false
     ) : (
-      this.chartPlotted = false),
-      this.loading = false;
+      this.chartPlotted = false,
+        this.loading = false
+      )
   }
 
   // show different chart

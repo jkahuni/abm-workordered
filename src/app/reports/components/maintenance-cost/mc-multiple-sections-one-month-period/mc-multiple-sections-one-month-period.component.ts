@@ -301,7 +301,7 @@ export class McMultipleSectionsOneMonthPeriodComponent implements OnInit, OnDest
     let maintenanceCostArray: number[] = [];
 
     this.sections.forEach(
-      (section: { name: string, formattedName: string }) => {
+      (section: IntNameAndFormattedName) => {
         const sectionName = section['name'];
         const formattedSectionName = section['formattedName'];
 
