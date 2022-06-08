@@ -2,7 +2,7 @@ import { Component, OnInit, Input, Output, EventEmitter, OnDestroy, OnChanges, S
 
 // interfaces
 import { IntWorkorder } from '@workorders/models/workorders.models';
-import { IntSwitchChart, IntDateIndices } from '@reports/models/reports.models';
+import { IntSwitchChart, IntDateIndices, IntNameAndFormattedName } from '@reports/models/reports.models';
 
 // rxjs
 import { takeUntil, Subject } from 'rxjs';
@@ -48,7 +48,7 @@ export class McMultipleSectionsOneMonthPeriodComponent implements OnInit, OnDest
   private onDestroy: Subject<void> = new Subject<void>();
   private updateChartPlotted: Subject<boolean> = new Subject<boolean>();
 
-  sections!: { name: string, formattedName: string }[];
+  sections!: IntNameAndFormattedName[];
   workorders!: IntWorkorder[];
   dateIndicesObject!: IntDateIndices;
 

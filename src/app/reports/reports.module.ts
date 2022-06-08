@@ -2,7 +2,11 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
-import { ReportsRoutingModule, childrenComponents } from '@reports/reports-routing.module';
+import {
+  ReportsRoutingModule,
+  maintenanceCostsComponents,
+  incidentMetricsComponents
+} from '@reports/reports-routing.module';
 import { NgChartsModule } from 'ng2-charts';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -20,9 +24,10 @@ import { IncidentMetricsComponent } from '@reports/components/incident-metrics/i
 @NgModule({
   declarations: [
     ReportsComponent,
-    childrenComponents,
+    maintenanceCostsComponents,
+    incidentMetricsComponents,
     MaintenanceCostComponent,
-    IncidentMetricsComponent
+    IncidentMetricsComponent,
   ],
   imports: [
     CommonModule,
@@ -36,6 +41,9 @@ import { IncidentMetricsComponent } from '@reports/components/incident-metrics/i
     MatSlideToggleModule,
     MatDividerModule
   ],
-  exports: [childrenComponents]
+  exports: [
+    maintenanceCostsComponents,
+    incidentMetricsComponents
+  ]
 })
 export class ReportsModule { }
