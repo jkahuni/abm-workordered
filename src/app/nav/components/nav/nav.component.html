@@ -38,6 +38,7 @@
         </ng-container>
       </ng-container>
     </div>
+
     <ng-template #loggedOut>
       <button
         mat-button
@@ -63,6 +64,7 @@
     </ng-template>
   </mat-toolbar>
 </div>
+
 <ng-container class="logged-in-drop-down-menu">
   <mat-menu #userMenu="matMenu" class="bg-success">
     <button mat-menu-item routerLink="/" color="" class="home-button">
@@ -70,9 +72,39 @@
       <span class="text-white">Home</span>
     </button>
     <mat-divider class="menu-items-divider"></mat-divider>
+
+    <button mat-menu-item [matMenuTriggerFor]="reportsMenu" color="" class="home-button">
+      <mat-icon class="text-white">bar_chart</mat-icon>
+      <span class="text-white">Reports</span>
+    </button>
+    <mat-divider class="menu-items-divider"></mat-divider>
+
+
+    <button mat-menu-item routerLink="/" color="" class="home-button">
+      <mat-icon class="text-white">table_chart</mat-icon>
+      <span class="text-white">Data</span>
+    </button>
+    <mat-divider class="menu-items-divider"></mat-divider>
+
     <button mat-menu-item (click)="logout()">
       <mat-icon class="text-white">logout</mat-icon>
       <span class="text-white">Logout</span>
     </button>
+  </mat-menu>
+</ng-container>
+
+<ng-container class="logged-in-drop-down-menu">
+  <mat-menu #reportsMenu="matMenu" class="bg-success">
+    <button mat-menu-item routerLink="/reports/maintenance-costs" color="" class="home-button">
+      <mat-icon class="text-white">attach_money</mat-icon>
+      <span class="text-white">Costs</span>
+    </button>
+    <mat-divider class="menu-items-divider"></mat-divider>
+
+    <button mat-menu-item routerLink="/reports/incident-metrics" color="" class="home-button">
+      <mat-icon class="text-white">access_time</mat-icon>
+      <span class="text-white">Time</span>
+    </button>
+   
   </mat-menu>
 </ng-container>
