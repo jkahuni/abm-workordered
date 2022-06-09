@@ -329,6 +329,9 @@ export class ImMttaSectionsPerMonthComponent implements OnInit, OnDestroy, OnCha
 
       }
 
+    } else {
+      this.updateChartPlotted.next(false);
+      this.loadingDefaultError = `No Data found. Please try reloading the page or confirm there is available data in the home page.`;
     }
   }
 

@@ -20,7 +20,6 @@ import { MaintenanceCostComponent } from '@reports/components/maintenance-cost/m
 import { IncidentMetricsComponent } from '@reports/components/incident-metrics/incident-metrics.component';
 
 
-
 @NgModule({
   declarations: [
     ReportsComponent,

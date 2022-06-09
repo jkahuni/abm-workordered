@@ -16,6 +16,12 @@ import { McMultipleSectionsOneMonthPeriodComponent } from '@reports/components/m
 // incident metrics components
 import { ImMttaPerSectionPerMonthComponent } from '@reports/components/incident-metrics/im-mtta-per-section-per-month/im-mtta-per-section-per-month.component';
 import { ImMttaSectionsPerMonthComponent } from '@reports/components/incident-metrics/im-mtta-sections-per-month/im-mtta-sections-per-month.component';
+import { ApproveMultipleSectionsOneMonthComponent } from '@reports/components/incident-metrics/mean-time-to-approve/approve-multiple-sections-one-month/approve-multiple-sections-one-month.component';
+import { ApproveOneSectionMultipleMonthsComponent } from '@reports/components/incident-metrics/mean-time-to-approve/approve-one-section-multiple-months/approve-one-section-multiple-months.component';
+import { ApproveOneSectionOneMonthComponent } from '@reports/components/incident-metrics/mean-time-to-approve/approve-one-section-one-month/approve-one-section-one-month.component';
+import { ApproveOneSectionOneWeekComponent } from '@reports/components/incident-metrics/mean-time-to-approve/approve-one-section-one-week/approve-one-section-one-week.component';
+
+
 
 
 
@@ -59,5 +65,10 @@ export const maintenanceCostsComponents = [
 
 export const incidentMetricsComponents = [
   ImMttaPerSectionPerMonthComponent,
-  ImMttaSectionsPerMonthComponent
+  ImMttaSectionsPerMonthComponent,
+  ApproveMultipleSectionsOneMonthComponent,
+  ApproveOneSectionMultipleMonthsComponent,
+  ApproveOneSectionOneMonthComponent,
+  ApproveOneSectionOneWeekComponent,
+
 ];
