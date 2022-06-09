@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { FormGroup, FormBuilder, FormArray } from '@angular/forms';
+import { FormGroup, FormBuilder, FormArray, FormControl } from '@angular/forms';
 import { CurrencyPipe } from '@angular/common';
 
 // rxjs
@@ -122,7 +122,7 @@ export class IssueSparesComponent implements OnInit {
       sparesUsedStatus: [workorder.sparesUsed.status ? 'true' : ''],
       sparesUsedArray: this.fb.array(workorder.sparesUsed.status ? [...this.getIssuedSpares(workorder.sparesUsed.spares)] : []),
       searchSparesInput: [''],
-      selectSparesUsed: [''],
+      selectSparesUsed: ['']
 
     });
 
@@ -143,14 +143,18 @@ export class IssueSparesComponent implements OnInit {
     const sparesArray: FormGroup[] = [];
     spares.map(
       (spare: IntSpareWithQuantities) => {
+
+        const { code, quantity, totalCost, unitCost, name } = spare;
+
         // console.log('SPARE ', spare);
         const form = this.fb.group({
-          code: [spare.code],
-          quantity: [spare.quantity],
-          totalCost: [spare.totalCost],
-          unitCost: [spare.unitCost],
-          name: [spare.name]
+          code,
+          quantity,
+          totalCost,
+          unitCost,
+          name,
         });
+        
         sparesArray.push(form);
 
         this.trackSpareQuantityChanges(form);
@@ -368,7 +372,7 @@ export class IssueSparesComponent implements OnInit {
         noSparesSelected: {
           errorMessage: `Please select spares.`
         }
-      })
+      });
     }
 
     else if (!this.form?.valid) {

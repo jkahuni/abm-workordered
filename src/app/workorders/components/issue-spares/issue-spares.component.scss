@@ -1,3 +1,8 @@
+$code-width: 25%;
+$quantity-width: 20%;
+$cost-width: 45%;
+$delete-button-width: 10%;
+
 .bootstrap-spinner-container {
     margin: auto;
     width: 350px;
@@ -66,24 +71,28 @@
     flex-direction: row;
     margin: 16px 0px 5px;
 
+    .code-label,
+    .total-cost-label,
+    .delete-btn-label,
+    .quantity-label {
+        color: black;
+        font-weight: bold;
+    }
+
     .code-label {
-        width: 30%;
-        color: green;
+        width: $code-width;
     }
 
     .quantity-label {
-        width: 15%;
-        color: green;
+        width: $quantity-width;
     }
 
     .total-cost-label {
-        width: 45%;
-        color: green;
+        width: $cost-width;
     }
 
     .delete-btn-label {
-        width: 10%;
-        color: green;
+        width: $delete-button-width;
     }
 }
 
@@ -91,19 +100,19 @@
     width: 100%;
 
     mat-form-field.code {
-        width: 30%;
+        width: $code-width;
     }
 
     mat-form-field.quantity {
-        width: 15%;
+        width: $quantity-width;
     }
 
     mat-form-field.total-cost {
-        width: 45%;
+        width: $cost-width;
     }
 
     mat-form-field.delete-btn {
-        width: 10%;
+        width: $delete-button-width;
         cursor: pointer;
     }
 }
@@ -149,4 +158,9 @@
     .action-button {
         width: 50%;
     }
+}
+
+.selected-spares-trigger {
+    opacity: 0.75;
+    font-size: 0.75em;
 }

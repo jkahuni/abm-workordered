@@ -241,7 +241,7 @@
         <ng-container *ngIf="sparesUsedStatus" formArrayName="sparesUsedArray">
           <!-- label -->
           <div *ngIf="sparesUsedArray?.length !== 0">
-            <mat-label
+            <mat-label class="fw-bold"
               [ngClass]="{
                 'invalid-spares-label': form.controls['sparesUsedArray']?.errors?.['invalidSpares']
               }"
@@ -278,27 +278,34 @@
           <ng-container
             *ngFor="let spareForm of sparesUsedArray.controls; let i = index"
           >
-            <div class="spare-form-row" [formGroup]="spareForm">
-              <mat-form-field class="code">
-                <input type="text" matInput readonly formControlName="code" />
-              </mat-form-field>
-              <mat-form-field class="quantity">
-                <input type="text" matInput formControlName="quantity" />
-              </mat-form-field>
-              <mat-form-field class="total-cost">
-                <input
-                  type="text"
-                  matInput
-                  readonly
-                  formControlName="totalCost"
-                />
-              </mat-form-field>
-              <mat-form-field class="delete-btn">
-                <input matInput />
-                <mat-icon matSuffix (click)="removeAddedSpare(i)"
-                  >delete
-                </mat-icon>
-              </mat-form-field>
+            <div [formGroup]="spareForm">
+              <div class="spare-form-row">
+                <mat-form-field class="code">
+                  <input type="text" matInput readonly formControlName="code" />
+                </mat-form-field>
+                <mat-form-field class="quantity">
+                  <input type="text" matInput formControlName="quantity" />
+                </mat-form-field>
+                <mat-form-field class="total-cost">
+                  <input
+                    type="text"
+                    matInput
+                    readonly
+                    formControlName="totalCost"
+                  />
+                </mat-form-field>
+                <mat-form-field class="delete-btn">
+                  <input matInput />
+                  <mat-icon matSuffix (click)="removeAddedSpare(i)"
+                    >delete
+                  </mat-icon>
+                </mat-form-field>
+              </div>
+              <div class="spare-form-row">
+                <mat-form-field>
+                  <input type="text" matInput readonly formControlName="name" />
+                </mat-form-field>
+              </div>
             </div>
           </ng-container>
 
@@ -368,9 +375,10 @@
 
           <mat-form-field>
             <mat-label>Spares</mat-label>
-            <mat-select formControlName="selectSparesUsed">
-              <mat-option selected>--search spares above</mat-option>
-              <mat-select-trigger>--select spares--</mat-select-trigger>
+            <mat-select formControlName="selectSparesUsed" multiple>
+              <mat-select-trigger
+                >--search and select spares--
+              </mat-select-trigger>
               <mat-option
                 *ngFor="let spare of spares"
                 [value]="spare"

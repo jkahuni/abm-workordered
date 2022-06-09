@@ -498,9 +498,7 @@
   </ng-container>
 
   <!-- spares issued -->
-  <ng-container
-    *ngIf="userCanSeeSpareCosts()"
-  >
+  <ng-container *ngIf="userCanSeeSpareCosts()">
     <ng-container
       *ngIf="workorder.sparesUsed.status"
       formArrayName="sparesUsedArray"
@@ -522,21 +520,33 @@
 
         <!-- issued spares -->
         <ng-container *ngFor="let spareForm of sparesUsedArray.controls">
-          <div class="spare-form-row" [formGroup]="spareForm">
-            <mat-form-field class="code">
-              <input type="text" matInput readonly formControlName="code" />
-            </mat-form-field>
-            <mat-form-field class="quantity">
-              <input type="text" matInput readonly formControlName="quantity" />
-            </mat-form-field>
-            <mat-form-field class="total-cost">
-              <input
-                type="text"
-                matInput
-                readonly
-                formControlName="totalCost"
-              />
-            </mat-form-field>
+          <div [formGroup]="spareForm">
+            <div class="spare-form-row">
+              <mat-form-field class="code">
+                <input type="text" matInput readonly formControlName="code" />
+              </mat-form-field>
+              <mat-form-field class="quantity">
+                <input
+                  type="text"
+                  matInput
+                  readonly
+                  formControlName="quantity"
+                />
+              </mat-form-field>
+              <mat-form-field class="total-cost">
+                <input
+                  type="text"
+                  matInput
+                  readonly
+                  formControlName="totalCost"
+                />
+              </mat-form-field>
+              <div class="spare-form-row">
+                <mat-form-field>
+                  <input type="text" matInput readonly formControlName="name" />
+                </mat-form-field>
+              </div>
+            </div>
           </div>
         </ng-container>
 

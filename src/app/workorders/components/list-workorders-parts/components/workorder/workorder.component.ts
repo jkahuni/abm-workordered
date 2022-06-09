@@ -92,11 +92,12 @@ export class WorkorderComponent implements OnInit, OnChanges {
   private getIssuedSpares(spares: IntSpareWithQuantities[]): FormGroup[] {
     const sparesArray: FormGroup[] = [];
     spares.map((spare: IntSpareWithQuantities) => {
-      const { code, quantity, totalCost } = spare;
+      const { code, quantity, totalCost, name} = spare;
       const form = this.fb.group({
         code,
         quantity,
-        totalCost
+        totalCost,
+        name
       });
       sparesArray.push(form);
     });

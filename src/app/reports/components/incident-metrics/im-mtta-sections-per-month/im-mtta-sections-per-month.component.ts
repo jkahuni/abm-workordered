@@ -259,8 +259,6 @@ export class ImMttaSectionsPerMonthComponent implements OnInit, OnDestroy, OnCha
                   yAdjust: 0,
                   backgroundColor: 'rgba(0,0,0,0.2)',
 
-
-
                 }
               },
             ],
