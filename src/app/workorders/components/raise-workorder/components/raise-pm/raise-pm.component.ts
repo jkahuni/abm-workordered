@@ -50,12 +50,18 @@ export class RaisePmComponent implements OnInit {
   defaultErrorMessage = `Error UPM-01 occured while configuring your workorder. 
   Please reload the page or report the error code to support for assistance.`;
 
+  workorderNumber!: string;
+  workorderUid!: string;
+
   ngOnInit(): void {
     this.showSpinner();
 
     this.userUid = this.route.snapshot.paramMap.get('userUid');
 
     this.now = dayjs().format();
+
+    this.workorderNumber = this.generateWorkorderNumber();
+    this.workorderUid = this.generateWorkorderUid();
 
     this.newWorkorderSetup();
   }
@@ -96,10 +102,10 @@ export class RaisePmComponent implements OnInit {
   }
 
   private generateWorkorderNumber(): string {
-    const date = dayjs(this.now).format('DD:MM:YY');
-    const time = this.formatTime();
+    const numberPrefix = 'pm-';
+    const numberSuffix = [...Array(6)].map(() => Math.random() * 10 | 0).join(``);
 
-    return date + '-' + time;
+    return numberPrefix + numberSuffix;
   }
 
   private generateWorkorderUid(): string {
@@ -111,7 +117,7 @@ export class RaisePmComponent implements OnInit {
       uidSuffix += characters.charAt(Math.floor(Math.random() * characters.length));
     }
 
-    const workorderUid = 'pm-' + this.generateWorkorderNumber() + uidSuffix;
+    const workorderUid = this.workorderNumber + uidSuffix;
 
     return workorderUid;
   }
@@ -207,13 +213,13 @@ export class RaisePmComponent implements OnInit {
   private createForm(): FormGroup {
     const form = this.fb.group({
       // hidden fields
-      workorderUid: [this.generateWorkorderUid()],
+      workorderUid: [this.workorderUid],
       raiser: [this.raiser],
       dateTimeRaised: [this.now],
       workorderType: ['PM'],
 
       // visible fields
-      workorderNumber: [this.generateWorkorderNumber()],
+      workorderNumber: [this.workorderNumber],
       raiserFullName: [this.raiser.fullName],
       dateRaised: [this.formatDate()],
       timeRaised: [this.formatTime()],
