@@ -119,6 +119,7 @@
           <div *ngIf="workorder.abnormalityCard.status">
             <mat-list-item role="listitem" class="long-button-text">
               <button
+                #assignTechniciansButton
                 class="action-button btn btn-link shadow-none"
                 type="button"
                 (click)="openModal('assignTechnicians')"
@@ -129,7 +130,7 @@
             </mat-list-item>
           </div>
         </div>
-
+        <!-- workorder escalated -->
         <div *ngIf="workorder.escalated?.status">
           <!-- approve workorder -->
           <mat-list-item role="listitem">
@@ -182,7 +183,7 @@
           </mat-list-item>
 
           <!-- assign technicians -->
-          <div *ngIf="workorder.abnormalityCard.status">
+          <div [hidden]="!workorder.abnormalityCard.status">
             <mat-list-item role="listitem" class="long-button-text">
               <button
                 class="action-button btn btn-link shadow-none"

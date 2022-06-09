@@ -31,6 +31,8 @@ export class WorkorderActionsComponent implements OnInit, OnChanges {
   @ViewChild('markingDoneButtonSpinner') markingDoneButtonSpinner!: ElementRef;
   @ViewChild('reviewingWorkorderButtonSpinner') reviewingWorkorderButtonSpinner!: ElementRef;
 
+  @ViewChild('assignTechniciansButton') assignTechniciansButton!: ElementRef;
+
   workorder!: IntWorkorder;
 
   // for router links
@@ -66,15 +68,18 @@ export class WorkorderActionsComponent implements OnInit, OnChanges {
     this.markingDone = false;
     this.reviewingWorkorder = false;
 
-    if (this.appprovingWorkorderButtonSpinner) { this.appprovingWorkorderButtonSpinner.nativeElement.style.display = 'none'; 
-  }
-    if (this.reviewingWorkorderButtonSpinner) { this.reviewingWorkorderButtonSpinner.nativeElement.style.display = 'none'; 
+    if (this.appprovingWorkorderButtonSpinner) {
+      this.appprovingWorkorderButtonSpinner.nativeElement.style.display = 'none';
+    }
+    if (this.reviewingWorkorderButtonSpinner) {
+      this.reviewingWorkorderButtonSpinner.nativeElement.style.display = 'none';
     }
     if (this.acknowledgingWorkorderButtonSpinner) {
       this.acknowledgingWorkorderButtonSpinner.nativeElement.style.display = 'none';
     }
-    if (this.markingDoneButtonSpinner) { this.markingDoneButtonSpinner.nativeElement.style.display = 'none'; 
-  }
+    if (this.markingDoneButtonSpinner) {
+      this.markingDoneButtonSpinner.nativeElement.style.display = 'none';
+    }
   }
 
   private updateWorkordersArray(uid: string, update: {}): void {
@@ -115,36 +120,46 @@ export class WorkorderActionsComponent implements OnInit, OnChanges {
   // workorder actions
   approve(): void {
     if (this.workorder) {
-      this.approvingWorkorder = true;
-
-      const now = dayjs().format();
-      const workorderUid = this.workorder.workorder.uid;
+      const technician = this.workorder.technician.uid;
+      const storesTechnician = this.workorder.storesTechnician.uid;
       const workorderType = this.workorder.workorder.type;
-      const workorderNumber = this.workorder.workorder.number;
 
-      const workorderUpdateData = {
-        approved: {
-          status: true,
-          dateTime: now
-        },
-        rejected: { status: false, dateTime: now }
+      if (workorderType === 'Abnormality Card' && !technician || !storesTechnician) {
+        if (this.assignTechniciansButton) {
+          this.assignTechniciansButton.nativeElement.click();
+        }
+      } else {
 
-      };
-      this.workordersService.updateWorkorder(workorderUid, workorderUpdateData)
-        .then(() => {
-          this.closeButtonSpinners();
-          this.updateWorkordersArray(workorderUid, workorderUpdateData);
+        this.approvingWorkorder = true;
 
-          this.toast.success(`Success. <b>${workorderType}</b> workorder <b>${workorderNumber}</b> approved successfully.`, { id: 'approve-workorder-success' });
+        const now = dayjs().format();
+        const workorderUid = this.workorder.workorder.uid;
+        const workorderNumber = this.workorder.workorder.number;
 
-        })
-        .catch(() => {
-          this.closeButtonSpinners();
+        const workorderUpdateData = {
+          approved: {
+            status: true,
+            dateTime: now
+          },
+          rejected: { status: false, dateTime: now }
 
-          this.toast.error(`Failed:
+        };
+        this.workordersService.updateWorkorder(workorderUid, workorderUpdateData)
+          .then(() => {
+            this.closeButtonSpinners();
+            this.updateWorkordersArray(workorderUid, workorderUpdateData);
+
+            this.toast.success(`Success. <b>${workorderType}</b> workorder <b>${workorderNumber}</b> approved successfully.`, { id: 'approve-workorder-success' });
+
+          })
+          .catch(() => {
+            this.closeButtonSpinners();
+
+            this.toast.error(`Failed:
              Approving <b>${workorderType}</b> workorder <b>${workorderNumber}</b> failed with error code <b>LW-ApW-04</b>. Please try again, or report the error code to support if the issue persists.`,
-            { autoClose: false, id: 'error-code-WL-04' });
-        });
+              { autoClose: false, id: 'error-code-WL-04' });
+          });
+      }
     }
   }
 
