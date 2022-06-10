@@ -9,7 +9,7 @@ import { takeUntil, Subject } from 'rxjs';
 
 
 // for chart
-import { ChartConfiguration, ChartType, Chart } from 'chart.js';
+import { ChartConfiguration, ChartType, Chart, TooltipPositionerMap } from 'chart.js';
 import DataLabelsPlugin from 'chartjs-plugin-datalabels';
 
 // dayjs
@@ -224,6 +224,7 @@ export class McOneSectionOneWeekPeriodComponent implements OnInit, OnChanges, On
   // returns mtnc costs [] for workoder
   // raised on specified day
   private filterWorkorders(dateParts: string): number[] {
+    // substring accepts start and end indices
     const date = Number(dateParts.substring(2).trim());
     const yearIndex = this.dateIndicesObject['yearIndex'];
 
@@ -303,6 +304,13 @@ export class McOneSectionOneWeekPeriodComponent implements OnInit, OnChanges, On
     Chart.defaults.font.family = 'Lato, "Open Sans", Arial, Helvetica, Noto, "Lucida Sans", sans-serif';
     Chart.defaults.font.size = 14;
     Chart.defaults.font.lineHeight = 1.4;
+
+    // const tooltipPlugin = Chart.registry.getPlugin('tooltip') as any;
+    // if (tooltipPlugin) {
+    //   tooltipPlugin.positioners.customPositioner = this.customTooltipPositioner;
+
+    // }
+
     const chart = new Chart(
       'mcOneSectionOneWeekPeriodChart',
       {
@@ -414,13 +422,62 @@ export class McOneSectionOneWeekPeriodComponent implements OnInit, OnChanges, On
                 if (+value === 0 && context.dataIndex === 0) {
                   return '';
                 } else {
-                  return value.toLocaleString('en-US', { minimumFractionDigits: 0 });
+                  return value.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
                 }
               },
               color: 'black',
               offset: 10
 
             },
+
+            tooltip: {
+              backgroundColor: 'rgba(77, 83, 96, 1)',
+              titleColor: 'white',
+              bodyColor: 'white',
+              footerColor: 'white',
+              displayColors: false,
+              // position: function (context) {
+
+              //   const dataPointYValue = context?.tooltip?.dataPoints?.[0]?.parsed?.y;
+              //   if (dataPointYValue) {
+              //     const comparisonValue = 1.2 * maximumCost;
+              //     const difference = comparisonValue - dataPointYValue;
+
+              //     if (dataPointYValue === maximumCost) {
+              //       // console.log('context', maximumCost);
+              //       // console.log('keys', dataPointYValue);
+              //       return 'customPositioner' as keyof TooltipPositionerMap;
+              //     }
+              //     return 'average';
+
+              //   }
+
+              //   return 'average';
+
+
+
+              // },
+              filter: (context, index, tooltipItems, data) => {
+                const yValue = Number(context.parsed.y);
+
+                return yValue === 0 ? false : true;
+              },
+              callbacks: {
+                title: (tooltipItem: any) => {
+                  return this.formatTooltipTitle(tooltipItem);
+                },
+                beforeBody: (context) => {
+                  if (context && context[0] && context[0].parsed.y > 0) {
+                    return 'W/o No : cost';
+                  }
+                  return '';
+                },
+                label: (tooltipItem: any) => {
+                  return [...this.extractTooltipLabels(tooltipItem)];
+                },
+                footer: this.generateTooltipFooter
+              }
+            }
           },
 
           // interaction.mode default = 'nearest'
@@ -429,19 +486,18 @@ export class McOneSectionOneWeekPeriodComponent implements OnInit, OnChanges, On
             axis: 'y'
           },
 
-          events: ['click'],
+          // events: ['click'],
 
-          onClick: (event) => {
-            const points = chart.getElementsAtEventForMode(event as unknown as Event, 'nearest', { intersect: true }, false);
-            if (points.length) {
-              const point = points[0];
-              if (point) {
-                const week = chart.data.labels?.[point.index] as string;
-                console.log(week);
-              }
-            }
+          // onClick: (event) => {
+          //   const points = chart.getElementsAtEventForMode(event as unknown as Event, 'nearest', { intersect: true }, false);
+          //   if (points.length) {
+          //     const point = points[0];
+          //     if (point) {
+          //       const week = chart.data.labels?.[point.index] as string;
+          //     }
+          //   }
 
-          }
+          // }
 
         }
       });
@@ -490,4 +546,111 @@ export class McOneSectionOneWeekPeriodComponent implements OnInit, OnChanges, On
 
   }
 
+  private formatTooltipTitle(tooltipItem: any): string {
+    if (tooltipItem && tooltipItem[0]) {
+      const label = tooltipItem[0].label;
+
+      // substr accepts only start index
+      // index can be - or +
+      const dateIndex = Number(label.substr(2).trim());
+
+      const yearIndex = this.dateIndicesObject['yearIndex'];
+
+      const monthIndex = this.dateIndicesObject['monthIndex'];
+
+      const formattedDate = dayjs().year(yearIndex).month(monthIndex).date(dateIndex).format('ddd DD, MMM YY');
+
+      return formattedDate;
+    }
+    return '';
+  }
+
+  // extracts workorders in each date
+  // for tooltip in chart
+  private extractTooltipLabels(tooltipItem: any): string[] {
+    if (tooltipItem) {
+      const date = tooltipItem.label;
+
+      // substr accepts only start index
+      // index can be - or +
+      const datePart = Number(date.substr(2).trim());
+
+      const yearIndex = this.dateIndicesObject['yearIndex'];
+
+      const monthIndex = this.dateIndicesObject['monthIndex'];
+
+      let workordersObject: string[] = [];
+
+      // filters all workorders for
+      // workorders in current month, year, and section
+      const filteredWorkorders = this.workorders.filter(
+        (workorder: IntWorkorder) => {
+          const section: string = workorder.section.name;
+
+          const workorderRaisedYear: number = dayjs(workorder.raised.dateTime).year();
+          const workorderRaisedMonth: number = dayjs(workorder.raised.dateTime).month();
+
+          return section === this.section && workorderRaisedYear === yearIndex && workorderRaisedMonth === monthIndex;
+        }
+      );
+
+      filteredWorkorders.forEach(
+        (workorder: IntWorkorder, index: number) => {
+          const raised = dayjs(workorder.raised.dateTime).date();
+          const workorderNumber = workorder.workorder.number;
+
+          if (raised === datePart) {
+            const spareCost = workorder.sparesUsed.status ? this.formatCostAsInteger(workorder.sparesUsed.totalCost) : 0;
+
+            const spareCostInMillions = spareCost / 1000000;
+
+            const formattedSpareCost = spareCostInMillions.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 4 });
+
+            workordersObject.push(`${index + 1}. ${workorderNumber}: ${formattedSpareCost}`);
+          }
+        }
+      );
+
+      return workordersObject;
+    }
+    return [''];
+  }
+
+  private generateTooltipFooter(tooltipItems: any): string {
+    if (tooltipItems && tooltipItems[0]) {
+      let total = 0;
+      let formattedTotal: string = '';
+
+      const workorders = tooltipItems[0].length;
+
+      if (workorders === 0) {
+        return '';
+      } else {
+
+        tooltipItems.forEach(
+          (tooltipItem: any) => {
+            const cost = tooltipItem.parsed.y;
+            total += cost;
+
+            formattedTotal = total.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+
+          }
+        );
+
+        return `Total: ${formattedTotal}`;
+      }
+    }
+
+    return '';
+  }
+
+  // custom tooltip position
+  // private customTooltipPositioner(elements: any, eventPosition: any): any {
+  //   const { x, y: currentY } = eventPosition;
+
+
+  //   const y = currentY + 10;
+
+  //   return { x, y };
+  // }
 }
