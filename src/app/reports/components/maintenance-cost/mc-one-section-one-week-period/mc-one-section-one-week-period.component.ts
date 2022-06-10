@@ -422,7 +422,7 @@ export class McOneSectionOneWeekPeriodComponent implements OnInit, OnChanges, On
                 if (+value === 0 && context.dataIndex === 0) {
                   return '';
                 } else {
-                  return value.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+                  return value.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 3 });
                 }
               },
               color: 'black',
@@ -638,8 +638,7 @@ export class McOneSectionOneWeekPeriodComponent implements OnInit, OnChanges, On
           (tooltipItem: any) => {
             const cost = tooltipItem.parsed.y;
             total += cost;
-
-            formattedTotal = total.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+            formattedTotal = total.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 3 });
 
           }
         );

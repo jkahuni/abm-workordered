@@ -234,7 +234,7 @@ export class McMultipleSectionsOneMonthPeriodComponent implements OnInit, OnDest
             textAlign: 'center',
 
             formatter: function (value) {
-              return value.toLocaleString('en-US', { minimumFractionDigits: 0 });
+              return value.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 3 });
 
             },
             color: 'black',

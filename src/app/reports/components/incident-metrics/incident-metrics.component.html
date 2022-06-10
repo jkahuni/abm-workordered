@@ -17,30 +17,47 @@
   </div>
 
   <!-- canvas objects -->
-  <app-im-mtta-sections-per-month
-    *ngIf="showSectionsMeanApprovalTimeForPerMonth"
+  <app-approve-multiple-sections-one-month
+    *ngIf="meanTimeToApprove && showApproveMultipleSectionsOneMonth"
     class="chart-container"
     [workorders]="workorders"
     [sections]="sections"
     [dateIndicesObject]="dateIndicesObject"
     [viableWorkorders]="viableWorkorders"
     (chartPlotted)="updateChartPlottedStatus($event)"
-  ></app-im-mtta-sections-per-month>
+  ></app-approve-multiple-sections-one-month>
 
   <!-- filter fields -->
   <div *ngIf="chartPlotted" class="filter-charts">
     <!-- select chart type -->
     <div class="select-chart-type">
-      <div class="filter-charts-label">Change Chart Type</div>
+      <div class="filter-charts-label">Change Charts</div>
+
+      <!-- change chart metrics -->
+      <div class="filter-chart-field">
+        <mat-form-field class="filter-chart-form-field" appearance="outline">
+          <mat-label>Select Metrics</mat-label>
+          <mat-select
+            [(ngModel)]="chartsType"
+            (selectionChange)="changeChartsType($event.value)"
+          >
+            <mat-option value="mean-time-to-approve">
+              Mean Time To Approve</mat-option
+            >
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <!-- change type of chart -->
       <div class="filter-chart-field">
         <mat-form-field class="filter-chart-form-field" appearance="outline">
           <mat-label>Select Chart</mat-label>
           <mat-select
             [(ngModel)]="chartType"
-            (selectionChange)="changeChart($event.value)"
+            (selectionChange)="changeChartType($event.value)"
           >
-            <mat-option value="sections-mean-approval-time-per-month">
-              Sections Approval Time</mat-option
+            <mat-option value="approve-multiple-sections-one-month">
+              Sections - 1 Month </mat-option
             >
           </mat-select>
         </mat-form-field>
@@ -60,7 +77,7 @@
       <!-- select multiple sections -->
       <div
         class="filter-chart-field"
-        *ngIf="showSectionsMeanApprovalTimeForPerMonth"
+        *ngIf="showApproveMultipleSectionsOneMonth"
       >
         <mat-form-field class="filter-chart-form-field" appearance="outline">
           <mat-label>Change Sections</mat-label>
@@ -94,7 +111,7 @@
       <!-- filter years -->
       <div
         class="filter-chart-field"
-        *ngIf="showSectionsMeanApprovalTimeForPerMonth"
+        *ngIf="showApproveMultipleSectionsOneMonth"
       >
         <mat-form-field class="filter-chart-form-field" appearance="outline">
           <mat-label>Change Year</mat-label>
@@ -112,7 +129,7 @@
       <!-- filter months -->
       <div
         class="filter-chart-field"
-        *ngIf="showSectionsMeanApprovalTimeForPerMonth"
+        *ngIf="showApproveMultipleSectionsOneMonth"
       >
         <mat-form-field class="filter-chart-form-field" appearance="outline">
           <mat-label>Change Month</mat-label>

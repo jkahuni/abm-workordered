@@ -375,7 +375,9 @@ export class McOneSectionOneMonthPeriodComponent implements OnInit, OnChanges, O
                 if (+value === 0 && context.dataIndex === 0) {
                   return '';
                 } else {
-                  return value.toLocaleString('en-US', { minimumFractionDigits: 0 });
+                  return value.toLocaleString('en-US', {
+                    minimumFractionDigits: 0, maximumFractionDigits: 3
+                  });
                 }
               },
               color: 'black',

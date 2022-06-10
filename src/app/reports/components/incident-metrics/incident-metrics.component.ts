@@ -26,9 +26,10 @@ export class IncidentMetricsComponent implements OnInit {
     { name: 'Pasting', formattedName: 'Pasting' },
     { name: 'Jar Formation', formattedName: 'Jar' },
     { name: 'Assembly Line', formattedName: 'PP Line' },
-    { name: 'IGO\'s', formattedName: 'IGO\'s' },
     { name: 'Acid Plant', formattedName: 'Acid' },
+    { name: 'IGO\'s', formattedName: 'IGO\'s' },
     { name: 'Hygro Cubicles', formattedName: 'Hygros' },
+    { name: 'Bomaksan Extractor', formattedName: 'Bomaksan' },
     { name: 'Tank Formation', formattedName: 'Tank' }
   ];
 
@@ -87,10 +88,16 @@ export class IncidentMetricsComponent implements OnInit {
 
   useCustomRange = false;
 
+  // children category
+  chartsType!: string;
+  // specific child
   chartType!: string;
 
+  // toggle children to show
+  meanTimeToApprove = true;
+
   // toggle child to show
-  showSectionsMeanApprovalTimeForPerMonth = true;
+  showApproveMultipleSectionsOneMonth = true;
 
   ngOnInit(): void {
     this.getWorkorders();
@@ -100,6 +107,7 @@ export class IncidentMetricsComponent implements OnInit {
     this.setFirstFiveSections();
     this.setInitialRandomSection();
     this.setDateIndicesObject();
+    this.setChartsType();
     this.setChartType();
 
   }
@@ -218,21 +226,50 @@ export class IncidentMetricsComponent implements OnInit {
   }
 
   private setChartType(): string {
-    if (this.showSectionsMeanApprovalTimeForPerMonth) {
-      return this.chartType = 'sections-mean-approval-time-per-month';
+    if (this.showApproveMultipleSectionsOneMonth) {
+      return this.chartType = 'approve-multiple-sections-one-month';
     }
 
     return this.chartType = 'unknown-chart';
   }
 
-  private hideAllCharts(): void {
-    this.showSectionsMeanApprovalTimeForPerMonth = false;
+  private setChartsType(): string {
+    if (this.meanTimeToApprove) {
+      return this.chartsType = 'mean-time-to-approve';
+    }
+
+    return this.chartsType = '';
+
   }
 
+  private disableAllChartsTypes(): void {
+    this.meanTimeToApprove = false;
+  }
+
+  private hideAllChildrenCharts(): void {
+    this.showApproveMultipleSectionsOneMonth = false;
+  }
+
+  changeChartsType(type: string): void {
+    this.disableAllChartsTypes();
+    if (type === 'mean-time-to-approve') {
+      this.meanTimeToApprove = true;
+    }
+    this.setChartsType();
+  }
+
+
   // change displayed chart through select
-  changeChart(type: string){
+  changeChartType(type: string): any {
+    this.hideAllChildrenCharts();
+    if (type === 'approve-multiple-sections-one-month') {
+      this.showApproveMultipleSectionsOneMonth = true;
+    }
+    this.setChartType();
     console.log('new chart', type);
   }
+
+
   // update fns
   updateSections(sections: IntNameAndFormattedName[]): any {
     const fallbackSections = [
