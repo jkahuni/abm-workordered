@@ -30,7 +30,7 @@ export class McOneSectionOneMonthPeriodComponent implements OnInit, OnChanges, O
         this.chartPlotted.emit(status);
         setTimeout(() => {
           this.loading = false;
-        }, 10)
+        });
         if (!status) {
           this.loadingFailed = true;
         }
@@ -269,143 +269,143 @@ export class McOneSectionOneMonthPeriodComponent implements OnInit, OnChanges, O
     const chart = new Chart(
       'mcOneSectionOneMonthPeriodChart',
       {
-      type,
-      data,
-      plugins: [DataLabelsPlugin],
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
+        type,
+        data,
+        plugins: [DataLabelsPlugin],
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
 
-        elements: {
-          line: {
-            tension: 0.4
-          }
-        },
-
-        scales: {
-          x: {
-            grid: {
-              display: false,
-              tickColor: 'black'
-            },
-            ticks: {
-              color: 'black',
-            },
-            title: {
-              color: 'black',
-              display: true,
-              text: 'Weeks'
+          elements: {
+            line: {
+              tension: 0.4
             }
           },
-          y: {
-            grid: {
-              display: false,
-              tickColor: 'black'
+
+          scales: {
+            x: {
+              grid: {
+                display: false,
+                tickColor: 'black'
+              },
+              ticks: {
+                color: 'black',
+              },
+              title: {
+                color: 'black',
+                display: true,
+                text: 'Weeks'
+              }
             },
-            ticks: {
-              color: 'black',
+            y: {
+              grid: {
+                display: false,
+                tickColor: 'black'
+              },
+              ticks: {
+                color: 'black',
+              },
+              title: {
+                color: 'black',
+                display: true,
+                text: 'Million Ksh'
+              },
+
+              suggestedMin: 0,
+              suggestedMax: maximumCost * 1.1,
+              beginAtZero: true,
+
+            }
+          },
+
+          plugins: {
+            legend: {
+              display: false
             },
             title: {
-              color: 'black',
               display: true,
-              text: 'Million Ksh'
+              text: ['Weekly Maintenance Costs',
+                this.generateSectionAndMonthTitle()
+              ]
             },
+            datalabels: {
+              display: 'auto',
+              anchor: (context) => {
+                const pointIndex = context.dataIndex;
+                const contextIndex = context.datasetIndex;
 
-            suggestedMin: 0,
-            suggestedMax: maximumCost * 1.1,
-            beginAtZero: true,
+                if (pointIndex === 0) {
+                  const currentPointData = data?.datasets[contextIndex]?.data[pointIndex];
+                  const nextPointData = context.chart.data?.datasets[contextIndex]?.data[pointIndex + 1];
 
-          }
-        },
+                  return currentPointData && nextPointData &&
+                    currentPointData < nextPointData ? 'start' : 'end';
+                }
 
-        plugins: {
-          legend: {
-            display: false
+                else {
+                  return 'end';
+                }
+              },
+
+              align: (context) => {
+                const pointIndex = context.dataIndex;
+                const contextIndex = context.datasetIndex;
+                const lastDataPoint = context.chart.data?.datasets[contextIndex]?.data?.length - 1;
+
+                if (pointIndex === 0) {
+                  return 'right';
+                }
+
+                else if (pointIndex === lastDataPoint) {
+                  const currentPointData = context.chart.data.datasets[contextIndex].data[pointIndex];
+
+                  return 'top';
+                }
+                else {
+                  const currentPointData = context.chart.data.datasets[contextIndex].data[pointIndex];
+                  return currentPointData ? 'top' : 'end';
+                }
+              },
+
+              textAlign: 'center',
+
+              formatter: function (value, context) {
+                // value falls on y-axis and 
+                // value = 0
+                if (+value === 0 && context.dataIndex === 0) {
+                  return '';
+                } else {
+                  return value.toLocaleString('en-US', { minimumFractionDigits: 0 });
+                }
+              },
+              color: 'black',
+              offset: 10
+
+            },
           },
-          title: {
-            display: true,
-            text: ['Weekly Maintenance Costs',
-              this.generateSectionAndMonthTitle()
-            ]
+
+          // interaction.mode default = 'nearest'
+          interaction: {
+            mode: 'nearest',
+            axis: 'y'
           },
-          datalabels: {
-            display: 'auto',
-            anchor: (context) => {
-              const pointIndex = context.dataIndex;
-              const contextIndex = context.datasetIndex;
 
-              if (pointIndex === 0) {
-                const currentPointData = data?.datasets[contextIndex]?.data[pointIndex];
-                const nextPointData = context.chart.data?.datasets[contextIndex]?.data[pointIndex + 1];
+          events: ['click'],
 
-                return currentPointData && nextPointData &&
-                  currentPointData < nextPointData ? 'start' : 'end';
+          onClick: (event) => {
+            const points = chart.getElementsAtEventForMode(event as unknown as Event, 'nearest', { intersect: true }, false);
+            if (points.length) {
+              const point = points[0];
+              if (point) {
+                const week = chart.data.labels?.[point.index] as string;
+                this.switchToOneSectionOneWeekPeriod(week);
               }
-
-              else {
-                return 'end';
-              }
-            },
-
-            align: (context) => {
-              const pointIndex = context.dataIndex;
-              const contextIndex = context.datasetIndex;
-              const lastDataPoint = context.chart.data?.datasets[contextIndex]?.data?.length - 1;
-
-              if (pointIndex === 0) {
-                return 'right';
-              }
-
-              else if (pointIndex === lastDataPoint) {
-                const currentPointData = context.chart.data.datasets[contextIndex].data[pointIndex];
-
-                return 'top';
-              }
-              else {
-                const currentPointData = context.chart.data.datasets[contextIndex].data[pointIndex];
-                return currentPointData ? 'top' : 'end';
-              }
-            },
-
-            textAlign: 'center',
-
-            formatter: function (value, context) {
-              // value falls on y-axis and 
-              // value = 0
-              if (+value === 0 && context.dataIndex === 0) {
-                return '';
-              } else {
-                return value.toLocaleString('en-US', { minimumFractionDigits: 0 });
-              }
-            },
-            color: 'black',
-            offset: 10
-
-          },
-        },
-
-        // interaction.mode default = 'nearest'
-        interaction: {
-          mode: 'nearest',
-          axis: 'y'
-        },
-
-        events: ['click'],
-
-        onClick: (event) => {
-          const points = chart.getElementsAtEventForMode(event as unknown as Event, 'nearest', { intersect: true }, false);
-          if (points.length) {
-            const point = points[0];
-            if (point) {
-              const week = chart.data.labels?.[point.index] as string;
-              this.switchToOneSectionOneWeekPeriod(week);
             }
+
           }
 
         }
-
-      }
-    });
+      });
 
     return chart;
 
@@ -413,56 +413,56 @@ export class McOneSectionOneMonthPeriodComponent implements OnInit, OnChanges, O
 
   // generate chart data
   private generateMaintenanceCostForOneMonthPeriod(): void {
-    // if (this.workorders.length > 0) {
-    // variables
-    let maintenanceCostsArray: number[] = [];
+    if (this.workorders.length) {
+      // variables
+      let maintenanceCostsArray: number[] = [];
 
-    // constants
-    const weekLabels: string[] = this.constructLabelsArray();
+      // constants
+      const weekLabels: string[] = this.constructLabelsArray();
 
-    // get workorders for each week
-    // then reduce to get their maintenance costs
-    weekLabels.forEach(
-      (weekLabel: string) => {
-        const workorders = this.filterWorkordersInSectionAndMonthAndWeek(weekLabel);
+      // get workorders for each week
+      // then reduce to get their maintenance costs
+      weekLabels.forEach(
+        (weekLabel: string) => {
+          const workorders = this.filterWorkordersInSectionAndMonthAndWeek(weekLabel);
 
-        const maintenanceCost: number = workorders
-          .reduce(
-            (finalSparesCost: number, initialSpareCost: number) => finalSparesCost + initialSpareCost
-            , 0
-          );
+          const maintenanceCost: number = workorders
+            .reduce(
+              (finalSparesCost: number, initialSpareCost: number) => finalSparesCost + initialSpareCost
+              , 0
+            );
 
-        maintenanceCostsArray.push(maintenanceCost);
+          maintenanceCostsArray.push(maintenanceCost);
+        }
+      );
+
+      // allows reusing canvas
+      if (this.chart) {
+        this.chart.destroy();
       }
-    );
 
-    // allows reusing canvas
-    if (this.chart) {
-      this.chart.destroy();
-    }
+      this.chart = this.createOneMonthPeriodChart(weekLabels, maintenanceCostsArray);
 
-    this.chart = this.createOneMonthPeriodChart(weekLabels, maintenanceCostsArray);
+      // updates loading status on parent
+      if (this.chart) {
+        this.updateChartPlotted.next(true);
+      }
 
-    // updates loading status on parent
-    if (this.chart) {
-      this.updateChartPlotted.next(true);
+      else {
+        this.updateChartPlotted.next(false);
+        this.loadingDefaultError = `Plotting chart failed with error code MC-C-OMP-01. Please try reloading the page or report the error code if the issue persists.`;
+      }
     }
 
     else {
       this.updateChartPlotted.next(false);
-      this.loadingDefaultError = `Plotting chart failed with error code MC-C-OMP-01. Please try reloading the page or report the error code if the issue persists.`;
+      this.loadingDefaultError = `Plotting chart failed with error code MC-C-OMP-02. Please try reloading the page or report the error code if the issue persists.`;
     }
-    // }
-
-    // else {
-    //   this.updateChartPlotted.next(false);
-    //   this.loadingDefaultError = `Plotting chart failed with error code MC-C-OMP-02. Please try reloading the page or report the error code if the issue persists.`;
-    // }
 
   }
 
   // show chart for selected week = days
-  private switchToOneSectionOneWeekPeriod(week: string ) {
+  private switchToOneSectionOneWeekPeriod(week: string) {
     const oneWeekPeriodData: IntSwitchChart = {
       type: 'one-section-one-week-period',
       section: this.section,

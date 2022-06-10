@@ -30,7 +30,7 @@ export class McOneSectionMultipleMonthsPeriodComponent implements OnInit, OnDest
         this.chartPlotted.emit(status);
         setTimeout(() => {
           this.loading = false;
-        }, 10)
+        });
         if (!status) {
           this.loadingFailed = true;
         }
@@ -81,7 +81,7 @@ export class McOneSectionMultipleMonthsPeriodComponent implements OnInit, OnDest
   loading = true;
   loadingFailed = false;
   loadingDefaultError!: string;
-  loadingFallbackError = `Plotting chart failed with error code U-MC-FMP-01. Please try reloading the page or report the error code if the issue persists.`;
+  loadingFallbackError = `Plotting chart failed with error code U-MC-MMP-01. Please try reloading the page or report the error code if the issue persists.`;
 
   ngOnInit(): void {
   }
@@ -437,50 +437,51 @@ export class McOneSectionMultipleMonthsPeriodComponent implements OnInit, OnDest
   }
 
   private generateMaitenanceCostForFourMonthsPeriod(): void {
-    // chart variables
-    let monthsLabels: string[] = [];
-    let maintenanceCostArray: number[] = [];
+    if (this.workorders.length) {
+      // chart variables
+      let monthsLabels: string[] = [];
+      let maintenanceCostArray: number[] = [];
 
-    this.multipleMonthsDatesArray = this.generateDateIndicesArray();
+      this.multipleMonthsDatesArray = this.generateDateIndicesArray();
 
-    // get the mtnc costs per section per month
-    this.multipleMonthsDatesArray.forEach(
-      (datesIndex: IntDateIndices) => {
-        const yearIndex = datesIndex['yearIndex'];
-        const monthIndex = datesIndex['monthIndex'];
-        const monthAndTwoYearDigitLabel = dayjs().year(yearIndex).month(monthIndex).format('MMM YY');
+      // get the mtnc costs per section per month
+      this.multipleMonthsDatesArray.forEach(
+        (datesIndex: IntDateIndices) => {
+          const yearIndex = datesIndex['yearIndex'];
+          const monthIndex = datesIndex['monthIndex'];
+          const monthAndTwoYearDigitLabel = dayjs().year(yearIndex).month(monthIndex).format('MMM YY');
 
-        const maintenanceCost = this.filterWorkordersInSectionMonthAndYear(monthIndex, yearIndex)
-          .reduce((totalCost: number, initialCost: number) =>
-            totalCost + initialCost
-            , 0);
+          const maintenanceCost = this.filterWorkordersInSectionMonthAndYear(monthIndex, yearIndex)
+            .reduce((totalCost: number, initialCost: number) =>
+              totalCost + initialCost
+              , 0);
 
-        monthsLabels.push(monthAndTwoYearDigitLabel);
-        maintenanceCostArray.push(maintenanceCost);
+          monthsLabels.push(monthAndTwoYearDigitLabel);
+          maintenanceCostArray.push(maintenanceCost);
+        }
+      );
+
+      // allows reusing canvas
+      if (this.chart) {
+        this.chart.destroy();
       }
-    );
+      this.chart = this.createChart(monthsLabels, maintenanceCostArray);
 
-    // allows reusing canvas
-    if (this.chart) {
-      this.chart.destroy();
-    }
-    this.chart = this.createChart(monthsLabels, maintenanceCostArray);
+      // updates loading status on parent
+      if (this.chart) {
+        this.updateChartPlotted.next(true);
+      }
 
-    // updates loading status on parent
-    if (this.chart) {
-      this.updateChartPlotted.next(true);
+      else {
+        this.updateChartPlotted.next(false);
+        this.loadingDefaultError = `Plotting chart failed with error code MC-C-MMP-01. Please try reloading the page or report the error code if the issue persists.`;
+      }
     }
 
     else {
       this.updateChartPlotted.next(false);
-      this.loadingDefaultError = `Plotting chart failed with error code MC-C-FMP-01. Please try reloading the page or report the error code if the issue persists.`;
+      this.loadingDefaultError = `Plotting chart failed with error code MC-C-MMP-02. Please try reloading the page or report the error code if the issue persists.`;
     }
-    // }
-
-    // else {
-    //   this.updateChartPlotted.next(false);
-    //   this.loadingDefaultError = `Plotting chart failed with error code MC-C-FMP-02. Please try reloading the page or report the error code if the issue persists.`;
-    // }
   }
 
   // show chart for selected month (weeks)

@@ -30,7 +30,7 @@ export class McOneSectionOneWeekPeriodComponent implements OnInit, OnChanges, On
         this.chartPlotted.emit(status);
         setTimeout(() => {
           this.loading = false;
-        }, 10)
+        });
         if (!status) {
           this.loadingFailed = true;
         }
@@ -508,38 +508,45 @@ export class McOneSectionOneWeekPeriodComponent implements OnInit, OnChanges, On
 
   // generate and tie chart data together
   private generateMaintenanceCostForOneWeekPeriod(): void {
-    let maintenanceCostsArray: number[] = [];
-    let labels: string[] = [];
+    if (this.workorders.length) {
+      let maintenanceCostsArray: number[] = [];
+      let labels: string[] = [];
 
-    const datesObject: { [key: string]: string[] } = this.extractDatesInEachWeek();
+      const datesObject: { [key: string]: string[] } = this.extractDatesInEachWeek();
 
-    const datesLabelsArray: string[] = this.constructLabelsArray(datesObject);
+      const datesLabelsArray: string[] = this.constructLabelsArray(datesObject);
 
-    datesLabelsArray.forEach(
-      (date: string) => {
-        const workorders: number[] = this.filterWorkorders(date);
+      datesLabelsArray.forEach(
+        (date: string) => {
+          const workorders: number[] = this.filterWorkorders(date);
 
-        const maintenanceCost: number = workorders.reduce(
-          (finalCost: number, initialCost: number) => finalCost + initialCost, 0
-        );
+          const maintenanceCost: number = workorders.reduce(
+            (finalCost: number, initialCost: number) => finalCost + initialCost, 0
+          );
 
-        labels.push(date);
+          labels.push(date);
 
-        maintenanceCostsArray.push(maintenanceCost);
+          maintenanceCostsArray.push(maintenanceCost);
+        }
+      );
+
+      if (this.chart) {
+        this.chart.destroy();
       }
-    );
 
-    if (this.chart) {
-      this.chart.destroy();
+      this.chart = this.createOneWeekPeriodChart(labels, maintenanceCostsArray);
+
+      if (this.chart) {
+        this.updateChartPlotted.next(true);
+      } else {
+        this.updateChartPlotted.next(false);
+        this.loadingDefaultError = `Plotting chart failed with error code MC-C-OWP-01. Please try reloading the page or report the error code if the issue persists.`;
+      }
     }
-
-    this.chart = this.createOneWeekPeriodChart(labels, maintenanceCostsArray);
-
-    if (this.chart) {
-      this.updateChartPlotted.next(true);
-    } else {
+    else {
       this.updateChartPlotted.next(false);
-      this.loadingDefaultError = `Plotting chart failed with error code MC-C-OWP-01. Please try reloading the page or report the error code if the issue persists.`;
+      this.loadingDefaultError = `Plotting chart failed with error code MC-C-OWP-02. This might happen when there was an issue loading workorders. Please try reloading the page or report the error code if the issue persists.`;
+
     }
 
 

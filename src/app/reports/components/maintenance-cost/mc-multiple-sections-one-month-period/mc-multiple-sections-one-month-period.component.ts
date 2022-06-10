@@ -31,7 +31,7 @@ export class McMultipleSectionsOneMonthPeriodComponent implements OnInit, OnDest
         this.chartPlotted.emit(status);
         setTimeout(() => {
           this.loading = false;
-        }, 10)
+        }, 8)
         if (!status) {
           this.loadingFailed = true;
         }
@@ -295,47 +295,47 @@ export class McMultipleSectionsOneMonthPeriodComponent implements OnInit, OnDest
 
   // get workorders data
   private generateMaintenanceCostForSectionsAndMonth(): void {
-    // if (this.workorders.length > 0) {
-    // chart variables
-    let sectionsLabels: string[] = [];
-    let maintenanceCostArray: number[] = [];
+    if (this.workorders.length) {
+      // chart variables
+      let sectionsLabels: string[] = [];
+      let maintenanceCostArray: number[] = [];
 
-    this.sections.forEach(
-      (section: IntNameAndFormattedName) => {
-        const sectionName = section['name'];
-        const formattedSectionName = section['formattedName'];
+      this.sections.forEach(
+        (section: IntNameAndFormattedName) => {
+          const sectionName = section['name'];
+          const formattedSectionName = section['formattedName'];
 
 
-        const maintenanceCost = this.filterWorkordersInMonthAndSection(sectionName)
-          .reduce((finalCost: number, initialCost: number) => finalCost + initialCost, 0);
+          const maintenanceCost = this.filterWorkordersInMonthAndSection(sectionName)
+            .reduce((finalCost: number, initialCost: number) => finalCost + initialCost, 0);
 
-        sectionsLabels.push(formattedSectionName);
-        maintenanceCostArray.push(maintenanceCost);
+          sectionsLabels.push(formattedSectionName);
+          maintenanceCostArray.push(maintenanceCost);
 
-      });
+        });
 
-    // destroy chart instance
-    // allows reusing canvas
-    if (this.chart) {
-      this.chart.destroy();
+      // destroy chart instance
+      // allows reusing canvas
+      if (this.chart) {
+        this.chart.destroy();
+      }
+
+      this.chart = this.createChart(sectionsLabels, maintenanceCostArray);
+
+      // updates loading status on parent
+      if (this.chart) {
+        this.updateChartPlotted.next(true);
+
+      } else {
+        this.updateChartPlotted.next(false);
+        this.loadingDefaultError = `Plotting chart failed with error code MC-C-SPM-01. Please try reloading the page or report the error code if the issue persists.`;
+      }
     }
 
-    this.chart = this.createChart(sectionsLabels, maintenanceCostArray);
-
-    // updates loading status on parent
-    if (this.chart) {
-      this.updateChartPlotted.next(true);
-
-    } else {
+    else {
       this.updateChartPlotted.next(false);
-      this.loadingDefaultError = `Plotting chart failed with error code MC-C-SPM-01. Please try reloading the page or report the error code if the issue persists.`;
+      this.loadingDefaultError = `Plotting chart failed with error code MC-C-SPM-02. Please try reloading the page or report the error code if the issue persists.`;
     }
-    // }
-
-    // else {
-    //   this.updateChartPlotted.next(false);
-    //   this.loadingDefaultError = `Plotting chart failed with error code MC-C-SPM-02. Please try reloading the page or report the error code if the issue persists.`;
-    // }
   }
 
   // activate one month period chart
