@@ -1,9 +1,17 @@
 import { Component, OnInit } from '@angular/core';
-import { IntDateIndices, IntNameAndFormattedName } from '@reports/models/reports.models';
-import { IntWorkorder } from '@workorders/models/workorders.models';
-import { WorkordersService } from '@workorders/services/workorders.service';
-import * as dayjs from 'dayjs';
 import { takeUntil, Subject } from 'rxjs';
+
+
+// interfaces
+import { IntDateIndices, IntNameAndFormattedName, IntSwitchChart, IntDateRangeLimits } from '@reports/models/reports.models';
+import { IntWorkorder } from '@workorders/models/workorders.models';
+
+// services
+import { WorkordersService } from '@workorders/services/workorders.service';
+
+
+import * as dayjs from 'dayjs';
+import { MatSlideToggleChange } from '@angular/material/slide-toggle';
 
 @Component({
   selector: 'app-incident-metrics',
@@ -76,9 +84,6 @@ export class IncidentMetricsComponent implements OnInit {
     'Tool Change'
   ];
 
-  defaultYearIndex!: number;
-  defaultMonthIndex!: number;
-
   loading = true;
   chartPlotted = false;
   loadingWorkordersFailed = false;
@@ -86,7 +91,22 @@ export class IncidentMetricsComponent implements OnInit {
   otherError!: string;
   fallbackError = `Getting workorders data failed with error code U-IM-C-01. Please try reloading the page or report the error code to support to have the issue fixed if it persists.`;
 
+  // for section over a one month period
   useCustomRange = false;
+
+  totalMonthsPeriod = 4;
+  totalMonthPeriods: number[] = [4, 6, 9, 12];
+
+  dateRangeLimits!: IntDateRangeLimits;
+  defaultYearIndex!: number;
+  defaultMonthIndex!: number;
+
+  firstYear!: number;
+  firstMonth!: string;
+  lastYear!: number;
+  lastMonth!: string;
+  firstDate!: IntDateIndices;
+  lastDate!: IntDateIndices;
 
   // children category
   chartsType!: string;
@@ -98,6 +118,8 @@ export class IncidentMetricsComponent implements OnInit {
 
   // toggle child to show
   showApproveMultipleSectionsOneMonth = true;
+  showApproveOneSectionMultipleMonths = false;
+  showApproveOneSectionOneMonth = false;
 
   ngOnInit(): void {
     this.getWorkorders();
@@ -107,8 +129,8 @@ export class IncidentMetricsComponent implements OnInit {
     this.setFirstFiveSections();
     this.setInitialRandomSection();
     this.setDateIndicesObject();
-    this.setChartsType();
-    this.setChartType();
+    this.updateChartsType();
+    this.updateChartType();
 
   }
 
@@ -160,6 +182,12 @@ export class IncidentMetricsComponent implements OnInit {
       monthIndex,
       yearIndex
     };
+
+
+    this.defaultYearIndex = yearIndex;
+    this.defaultMonthIndex = monthIndex;
+
+
     return this.dateIndicesObject = dateIndices;
   }
 
@@ -217,23 +245,7 @@ export class IncidentMetricsComponent implements OnInit {
       });
   }
 
-  private updateMonthAndYearDefaults(): any {
-    const yearIndex = this.year;
-    const monthIndex = this.generateMonthIndex(this.month);
-
-    this.defaultYearIndex = yearIndex;
-    this.defaultMonthIndex = monthIndex;
-  }
-
-  private setChartType(): string {
-    if (this.showApproveMultipleSectionsOneMonth) {
-      return this.chartType = 'approve-multiple-sections-one-month';
-    }
-
-    return this.chartType = 'unknown-chart';
-  }
-
-  private setChartsType(): string {
+  private updateChartsType(): string {
     if (this.meanTimeToApprove) {
       return this.chartsType = 'mean-time-to-approve';
     }
@@ -242,12 +254,33 @@ export class IncidentMetricsComponent implements OnInit {
 
   }
 
+  private updateChartType(): string {
+    let chartType: string = '';
+
+    if (this.showApproveMultipleSectionsOneMonth) {
+      chartType = 'approve-multiple-sections-one-month';
+    }
+
+    else if (this.showApproveOneSectionMultipleMonths) {
+      chartType = 'approve-one-section-multiple-months';
+    }
+
+    else {
+
+      chartType = 'unknown-chart';
+    };
+
+    return this.chartType = chartType;
+  }
+
   private disableAllChartsTypes(): void {
     this.meanTimeToApprove = false;
   }
 
   private hideAllChildrenCharts(): void {
     this.showApproveMultipleSectionsOneMonth = false;
+    this.showApproveOneSectionMultipleMonths = false;
+    this.showApproveOneSectionOneMonth = false;
   }
 
   changeChartsType(type: string): void {
@@ -255,7 +288,7 @@ export class IncidentMetricsComponent implements OnInit {
     if (type === 'mean-time-to-approve') {
       this.meanTimeToApprove = true;
     }
-    this.setChartsType();
+    this.updateChartsType();
   }
 
 
@@ -265,13 +298,19 @@ export class IncidentMetricsComponent implements OnInit {
     if (type === 'approve-multiple-sections-one-month') {
       this.showApproveMultipleSectionsOneMonth = true;
     }
-    this.setChartType();
-    console.log('new chart', type);
+
+    else if (type === 'approve-one-section-multiple-months') {
+      this.showApproveOneSectionMultipleMonths = true;
+    }
+    else if (type === 'approve-one-section-one-month') {
+      this.showApproveOneSectionOneMonth = true;
+    }
+    this.updateChartType();
   }
 
 
   // update fns
-  updateSections(sections: IntNameAndFormattedName[]): any {
+  updateSections(sections: IntNameAndFormattedName[]): IntNameAndFormattedName[] {
     const fallbackSections = [
       { name: 'Grid Casting', formattedName: 'Casting' },
       { name: 'Sovema', formattedName: 'Sovema' },
@@ -279,14 +318,18 @@ export class IncidentMetricsComponent implements OnInit {
       { name: 'Jar Formation', formattedName: 'Jar' },
       { name: 'Assembly Line', formattedName: 'PP Line' },
     ];
-    this.sections = sections ? sections : fallbackSections;
+    return this.sections = sections ? sections : fallbackSections;
+  }
+
+  updateSection(section: string): string {
+    const fallbackSection = 'Grid Casting';
+    return this.section = section ? section : fallbackSection;
   }
 
   updateYear(year: number): void {
     const fallbackYear = dayjs().year();
     this.year = year ? year : fallbackYear;
     this.setDateIndicesObject();
-    this.updateMonthAndYearDefaults();
   }
 
   // update week to display
@@ -294,7 +337,95 @@ export class IncidentMetricsComponent implements OnInit {
     const fallbackMonth = dayjs().format('MMM');
     this.month = month ? month : fallbackMonth;
     this.setDateIndicesObject();
-    this.updateMonthAndYearDefaults();
+  }
+
+  // For one section multiple months
+  updateUseCustomRange(event: MatSlideToggleChange): boolean {
+    const emptyIndices: IntDateIndices = { monthIndex: 0, yearIndex: dayjs().year() };
+    const resetDateRangeLimits: IntDateRangeLimits = {
+      firstDate: emptyIndices,
+      lastDate: emptyIndices,
+      limitsUpdated: false
+    };
+
+    return this.useCustomRange = event.checked ? true : false;
+
+  }
+
+  // output from child component
+  // updates the ng-models on template
+  updateDateRangeLimitsFromChild(dateLimits: IntDateRangeLimits): any {
+
+    const firstDate: IntDateIndices = dateLimits['firstDate'];
+    const lastDate: IntDateIndices = dateLimits['lastDate'];
+
+    const firstYearIndex = firstDate['yearIndex'];
+    const firstMonthIndex = firstDate['monthIndex'];
+    const firstMonthString = dayjs().year(firstYearIndex).month(firstMonthIndex).format('MMM');
+
+    const lastYearIndex = lastDate['yearIndex'];
+    const lastMonthIndex = lastDate['monthIndex'];
+    const lastMonthString = dayjs().year(lastYearIndex).month(lastMonthIndex).format('MMM');
+
+    // update values
+    setTimeout(() => {
+      this.firstYear = firstYearIndex;
+      this.firstMonth = firstMonthString;
+
+      this.lastYear = lastYearIndex;
+      this.lastMonth = lastMonthString;
+    });
+  }
+
+  updateChildsDateRangeLimits({ firstDate, lastDate }: { firstDate: IntDateIndices, lastDate: IntDateIndices }): any {
+    const dateRangeLimits: IntDateRangeLimits = {
+      firstDate,
+      lastDate,
+      limitsUpdated: true
+    };
+
+    return this.dateRangeLimits = dateRangeLimits;
+  }
+
+  // updates single portions of the dateRangeLimits
+  updateDateRangeLimitParts(data: string | number, type: string): void {
+    let firstYearIndex: number = this.firstYear;
+    let firstMonthIndex: number = this.generateMonthIndex(this.firstMonth);
+    let lastYearIndex: number = this.lastYear;
+    let lastMonthIndex: number = this.generateMonthIndex(this.lastMonth);
+
+    if (type === 'first-year') {
+      firstYearIndex = Number(data);
+    }
+
+    else if (type === 'first-month') {
+      firstMonthIndex = this.generateMonthIndex(String(data));
+    }
+
+    else if (type === 'last-year') {
+      lastYearIndex = Number(data);
+    }
+
+    else if (type === 'last-month') {
+      lastMonthIndex = this.generateMonthIndex(String(data));
+    }
+
+    const firstDate: IntDateIndices = {
+      yearIndex: firstYearIndex,
+      monthIndex: firstMonthIndex
+    };
+    const lastDate: IntDateIndices = {
+      yearIndex: lastYearIndex,
+      monthIndex: lastMonthIndex
+    };
+
+    this.updateChildsDateRangeLimits({ firstDate, lastDate });
+  }
+
+  // updates total sections to plot over
+  updateTotalMonthsPeriod(totalMonthsPeriod: number): number {
+    const fallbackTotalMonthsPeriod = 4;
+    return this.totalMonthsPeriod = totalMonthsPeriod ? totalMonthsPeriod : fallbackTotalMonthsPeriod;
   }
 
   // emitted from different components
@@ -308,4 +439,15 @@ export class IncidentMetricsComponent implements OnInit {
     )
   }
 
-}
+  // switch chart
+  switchChart(newChartData: IntSwitchChart): void {
+    const type = newChartData['type'];
+    const section = newChartData['section'];
+    const month = newChartData['month'];
+
+    month ? this.updateMonth(month) : (null);
+    section ? this.updateSection(section) : (null);
+
+    this.changeChartType(type);
+  }
+}  

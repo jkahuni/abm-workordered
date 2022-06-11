@@ -140,141 +140,159 @@
         </mat-form-field>
       </div>
 
-      <!-- filter sections -->
-      <div
-        class="filter-chart-field"
+      <!-- filter section -->
+      <ng-container
         *ngIf="
           showOneSectionMultipleMonthsPeriodChart ||
           showOneSectionOneMonthPeriodChart ||
           showOneSectionOneWeekPeriodChart
         "
       >
-        <mat-form-field class="filter-chart-form-field" appearance="outline">
-          <mat-label>Change Section</mat-label>
-          <mat-select
-            [(ngModel)]="section"
-            (selectionChange)="updateSection($event.value)"
-          >
-            <mat-option
-              *ngFor="let section of factorySections"
-              value="{{ section.name }}"
-              >{{ section.name }}</mat-option
-            >
-          </mat-select>
-        </mat-form-field>
-      </div>
-
-      <!-- toggle whether or not to -->
-      <!-- use custom dates range -->
-      <div
-        *ngIf="showOneSectionMultipleMonthsPeriodChart"
-        class="filter-chart-field slider-toggle"
-      >
-        <mat-slide-toggle
-          color="primary"
-          (change)="updateUseCustomRange($event)"
-          aria-labelledby="filter chart using custom dates"
-          >{{
-            useCustomRange ? "Custom dates" : "Custom dates?"
-          }}</mat-slide-toggle
+        <div
+          class="filter-chart-field"
         >
-      </div>
-
-      <!-- filter starting year -->
-      <div
-        class="filter-chart-field"
-        *ngIf="showOneSectionMultipleMonthsPeriodChart && useCustomRange"
-      >
-        <mat-form-field class="filter-chart-form-field" appearance="outline">
-          <mat-label>Change First Year</mat-label>
-          <mat-select
-            [(ngModel)]="firstYear"
-            (selectionChange)="updateFirstYear($event.value)"
-          >
-            <mat-option *ngFor="let year of years" [value]="year">{{
-              year
-            }}</mat-option>
-          </mat-select>
-        </mat-form-field>
-      </div>
-
-      <!-- filter starting month -->
-      <div
-        class="filter-chart-field"
-        *ngIf="showOneSectionMultipleMonthsPeriodChart && useCustomRange"
-      >
-        <mat-form-field class="filter-chart-form-field" appearance="outline">
-          <mat-label>Change First Month</mat-label>
-          <mat-select
-            [(ngModel)]="firstMonth"
-            (selectionChange)="updateFirstMonth($event.value)"
-          >
-            <mat-option
-              *ngFor="let month of months"
-              value="{{ month.formattedName }}"
-              >{{ month.name }}</mat-option
+          <mat-form-field class="filter-chart-form-field" appearance="outline">
+            <mat-label>Change Section</mat-label>
+            <mat-select
+              [(ngModel)]="section"
+              (selectionChange)="updateSection($event.value)"
             >
-          </mat-select>
-        </mat-form-field>
-      </div>
+              <mat-option
+                *ngFor="let section of factorySections"
+                value="{{ section.name }}"
+                >{{ section.name }}</mat-option
+              >
+            </mat-select>
+          </mat-form-field>
+        </div>
 
-      <!-- filter last year -->
-      <div
-        class="filter-chart-field"
-        *ngIf="showOneSectionMultipleMonthsPeriodChart && useCustomRange"
-      >
-        <mat-form-field class="filter-chart-form-field" appearance="outline">
-          <mat-label>Change Last Year</mat-label>
-          <mat-select
-            [(ngModel)]="lastYear"
-            (selectionChange)="updateLastYear($event.value)"
-          >
-            <mat-option *ngFor="let year of years" [value]="year">{{
-              year
-            }}</mat-option>
-          </mat-select>
-        </mat-form-field>
-      </div>
+        <!-- exclusive to one section multiple months -->
+        <ng-container *ngIf="
+            showOneSectionMultipleMonthsPeriodChart
+          ">
+          <!-- update total months period -->
+          <ng-container>
+            <div class="filter-chart-field" *ngIf="!useCustomRange">
+              <mat-form-field
+                class="filter-chart-form-field"
+                appearance="outline"
+              >
+                <mat-label>Change Total Months</mat-label>
+                <mat-select
+                  [(ngModel)]="totalMonthsPeriod"
+                  (selectionChange)="updateTotalMonthsPeriod($event.value)"
+                >
+                  <mat-option
+                    *ngFor="let period of totalMonthPeriods"
+                    [value]="period"
+                    >{{ period }}</mat-option
+                  >
+                </mat-select>
+              </mat-form-field>
+            </div>
+          </ng-container>
 
-      <!-- filter last month -->
-      <div
-        class="filter-chart-field"
-        *ngIf="showOneSectionMultipleMonthsPeriodChart && useCustomRange"
-      >
-        <mat-form-field class="filter-chart-form-field" appearance="outline">
-          <mat-label>Change Last Month</mat-label>
-          <mat-select
-            [(ngModel)]="lastMonth"
-            (selectionChange)="updateLastMonth($event.value)"
-          >
-            <mat-option
-              *ngFor="let month of months"
-              value="{{ month.formattedName }}"
-              >{{ month.name }}</mat-option
+          <!-- toggle whether or not to -->
+          <!-- use custom dates range -->
+          <div class="filter-chart-field slider-toggle">
+            <mat-slide-toggle
+              color="primary"
+              (change)="updateUseCustomRange($event)"
+              aria-labelledby="filter chart using custom dates"
+              >{{
+                useCustomRange ? "Custom dates" : "Custom dates?"
+              }}</mat-slide-toggle
             >
-          </mat-select>
-        </mat-form-field>
-      </div>
+          </div>
 
-      <!-- update total months period -->
-      <div
-        class="filter-chart-field"
-        *ngIf="showOneSectionMultipleMonthsPeriodChart && !useCustomRange"
-      >
-        <mat-form-field class="filter-chart-form-field" appearance="outline">
-          <mat-label>Change Total Months</mat-label>
-          <mat-select
-            [(ngModel)]="totalMonthsPeriod"
-            (selectionChange)="updateTotalMonthsPeriod($event.value)"
-          >
-            <mat-option
-              *ngFor="let period of totalMonthPeriods"
-              [value]="period"
-              >{{ period }}</mat-option
-            >
-          </mat-select>
-        </mat-form-field>
-      </div>
+          <!-- change date range parts -->
+          <ng-container *ngIf="useCustomRange">
+            <!-- first year -->
+            <div class="filter-chart-field">
+              <mat-form-field
+                class="filter-chart-form-field"
+                appearance="outline"
+              >
+                <mat-label>Change First Year</mat-label>
+                <mat-select
+                  [(ngModel)]="firstYear"
+                  (selectionChange)="
+                    updateDateRangeLimitParts($event.value, 'first-year')
+                  "
+                >
+                  <mat-option *ngFor="let year of years" [value]="year">{{
+                    year
+                  }}</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+
+            <!-- first month -->
+            <div class="filter-chart-field">
+              <mat-form-field
+                class="filter-chart-form-field"
+                appearance="outline"
+              >
+                <mat-label>Change First Month</mat-label>
+                <mat-select
+                  [(ngModel)]="firstMonth"
+                  (selectionChange)="
+                    updateDateRangeLimitParts($event.value, 'first-month')
+                  "
+                >
+                  <mat-option
+                    *ngFor="let month of months"
+                    value="{{ month.formattedName }}"
+                    >{{ month.name }}</mat-option
+                  >
+                </mat-select>
+              </mat-form-field>
+            </div>
+
+            <!-- last year -->
+            <div class="filter-chart-field">
+              <mat-form-field
+                class="filter-chart-form-field"
+                appearance="outline"
+              >
+                <mat-label>Change Last Year</mat-label>
+                <mat-select
+                  [(ngModel)]="lastYear"
+                  (selectionChange)="
+                    updateDateRangeLimitParts($event.value, 'last-year')
+                  "
+                >
+                  <mat-option *ngFor="let year of years" [value]="year">{{
+                    year
+                  }}</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+
+            <!-- last month -->
+            <div class="filter-chart-field">
+              <mat-form-field
+                class="filter-chart-form-field"
+                appearance="outline"
+              >
+                <mat-label>Change Last Month</mat-label>
+                <mat-select
+                  [(ngModel)]="lastMonth"
+                  (selectionChange)="
+                    updateDateRangeLimitParts($event.value, 'last-month')
+                  "
+                >
+                  <mat-option
+                    *ngFor="let month of months"
+                    value="{{ month.formattedName }}"
+                    >{{ month.name }}</mat-option
+                  >
+                </mat-select>
+              </mat-form-field>
+            </div>
+          </ng-container>
+        </ng-container>
+      </ng-container>
 
       <!-- filter years -->
       <div

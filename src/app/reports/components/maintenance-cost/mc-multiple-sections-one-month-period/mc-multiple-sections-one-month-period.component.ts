@@ -88,8 +88,8 @@ export class McMultipleSectionsOneMonthPeriodComponent implements OnInit, OnDest
   // transform TYPE name, formattedName 
   // to TYPE name
   private generateSectionName(formattedSectionName: string): string {
-    const section = this.sections.filter((section: { name: string, formattedName: string }) => section.formattedName === formattedSectionName)
-      .map((section: { name: string, formattedName: string }) => section.name)
+    const section = this.sections.filter((section: IntNameAndFormattedName ) => section.formattedName === formattedSectionName)
+      .map((section: IntNameAndFormattedName) => section.name)
       .reduce((final, initial) => initial);
     return section;
   }

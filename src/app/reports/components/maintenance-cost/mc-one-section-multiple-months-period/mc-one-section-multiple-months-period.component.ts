@@ -96,7 +96,7 @@ export class McOneSectionMultipleMonthsPeriodComponent implements OnInit, OnDest
     const defaultYearIndex = changes['defaultSelectedYear']?.currentValue;
     const defaultMonthIndex = changes['defaultSelectedMonth']?.currentValue;
 
-    // first time use cusotm date range is changed
+    // tracks custom range changes from true to false
     const previousCustomRangeValue = changes['customDatesRange']?.previousValue;
     const currentCustomRangeValue = changes['customDatesRange']?.currentValue;
 
@@ -133,19 +133,16 @@ export class McOneSectionMultipleMonthsPeriodComponent implements OnInit, OnDest
 
   // resetting month periods and final data points
   private resetDataPoints(): void {
-    const yearIndex = this.defaultYearIndex;;
-    const monthIndex = this.defaultMonthIndex;;
-
     const dateIndices: IntDateIndices = {
-      yearIndex,
-      monthIndex
+      yearIndex: this.defaultYearIndex,
+      monthIndex: this.defaultMonthIndex
     };
 
     this.dateIndicesObject = dateIndices;
     this.totalMonthsPeriod = 4;
   }
 
-  // with limits updated by parent
+  // limits updated by parent
   private updateDateIndicesObject(): any {
     // object to hold the data
     const firstDateObject: IntDateIndices = this.dateRangeLimits['firstDate'];
@@ -188,6 +185,16 @@ export class McOneSectionMultipleMonthsPeriodComponent implements OnInit, OnDest
       );
   }
 
+  // updates parent limits
+  private updateDateRangeLimitsOnParent(datesArray: IntDateIndices[]): void {
+    const firstDate = datesArray[0];
+    const lastDate = datesArray[datesArray.length - 1];
+
+    const dateRangeLimits: IntDateRangeLimits = { firstDate, lastDate, limitsUpdated: false };
+
+    this.updateDateRangeLimits.emit(dateRangeLimits);
+  }
+
   private generateDateIndicesArray(): IntDateIndices[] {
     let totalMonths = this.totalMonthsPeriod - 1;
 
@@ -211,20 +218,9 @@ export class McOneSectionMultipleMonthsPeriodComponent implements OnInit, OnDest
       totalMonths--;
 
     }
-    this.setFirstAndLastDateRanges(monthsIndicesArray);
+    this.updateDateRangeLimitsOnParent(monthsIndicesArray);
     return monthsIndicesArray;
   }
-
-  // updates parent limits
-  private setFirstAndLastDateRanges(datesArray: IntDateIndices[]): void {
-    const firstDate = datesArray[0];
-    const lastDate = datesArray[datesArray.length - 1];
-
-    const dateRangeLimits: IntDateRangeLimits = { firstDate, lastDate, limitsUpdated: false };
-
-    this.updateDateRangeLimits.emit(dateRangeLimits);
-  }
-
 
   private formatCostAsInteger(cost: any): number {
     if (cost) {

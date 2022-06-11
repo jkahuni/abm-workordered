@@ -159,12 +159,12 @@ export class ApproveMultipleSectionsOneMonthComponent implements OnInit, OnDestr
     Chart.defaults.font.family = 'Lato, "Open Sans", Arial, Helvetica, Noto, "Lucida Sans", sans-serif';
     Chart.defaults.font.size = 14;
     Chart.defaults.font.lineHeight = 1.4;
-    Chart.register(annotationPlugin);
+    Chart.register(annotationPlugin , DataLabelsPlugin);
 
     const chart = new Chart('approveMultipleSectionsOneMonth', {
       type,
       data,
-      plugins: [DataLabelsPlugin],
+      // plugins: [DataLabelsPlugin],
       options: {
         responsive: true,
         maintainAspectRatio: false,
@@ -280,7 +280,7 @@ export class ApproveMultipleSectionsOneMonthComponent implements OnInit, OnDestr
             const point = points[0];
             if (point) {
               const section = chart.data.labels?.[point.index] as string;
-              console.log(section, this.dateIndicesObject, this.formattedDate);
+              this.switchToOneSectionMultipleMonthsChart(section);
             }
           }
 
@@ -327,7 +327,6 @@ export class ApproveMultipleSectionsOneMonthComponent implements OnInit, OnDestr
 
       if (this.chart) {
         this.updateChartPlotted.next(true);
-
       }
 
     } else {
@@ -343,6 +342,23 @@ export class ApproveMultipleSectionsOneMonthComponent implements OnInit, OnDestr
     }
 
     return rate;
+  }
+
+  private switchToOneSectionMultipleMonthsChart(formattedSectionName: string): void {
+
+    const section = this.sections.filter((section: IntNameAndFormattedName) => 
+      section.formattedName === formattedSectionName
+    ).map((section: IntNameAndFormattedName) =>
+      section.name )
+      .reduce((final, initial) => initial);
+
+    const switchChartData = {
+      type: 'approve-one-section-multiple-months',
+      section
+    };
+
+    this.switchChart.emit(switchChartData);
+
   }
 
 }

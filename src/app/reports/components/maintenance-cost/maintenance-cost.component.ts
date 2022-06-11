@@ -138,6 +138,7 @@ export class MaintenanceCostComponent implements OnInit, OnDestroy {
     this.updateChartType();
     this.getWorkorders();
 
+
     // sets default dateIndices
     this.setDateIndicesObject();
 
@@ -187,10 +188,15 @@ export class MaintenanceCostComponent implements OnInit, OnDestroy {
   private setDateIndicesObject(): IntDateIndices {
     const yearIndex = this.year;
     const monthIndex = this.generateMonthIndex(this.month);
+
     const dateIndices: IntDateIndices = {
       monthIndex,
       yearIndex
     };
+
+    this.defaultYearIndex = yearIndex;
+    this.defaultMonthIndex = monthIndex;
+
     return this.dateIndicesObject = dateIndices;
   }
 
@@ -280,14 +286,6 @@ export class MaintenanceCostComponent implements OnInit, OnDestroy {
   }
 
   // EXCLUSIVELY FOR ONE SECTION OVER MULTIPLE MONTHS CHART
-  private updateMonthAndYearDefaults(): any {
-    const yearIndex = this.year;
-    const monthIndex = this.generateMonthIndex(this.month);
-
-    this.defaultYearIndex = yearIndex;
-    this.defaultMonthIndex = monthIndex;
-  }
-
   // enables smooth transition from
   // EX: months that have 5 weeks to those with 4
   private conditionallyUpdateWeek(): void {
@@ -338,7 +336,7 @@ export class MaintenanceCostComponent implements OnInit, OnDestroy {
   }
 
   // EXCLUSIVELY FOR ONE SECTION OVER MULTIPLE MONTHS CHART
-  updateUseCustomRange(event: MatSlideToggleChange): void {
+  updateUseCustomRange(event: MatSlideToggleChange): boolean {
     const emptyIndices: IntDateIndices = { monthIndex: 0, yearIndex: dayjs().year() };
     const resetDateRangeLimits: IntDateRangeLimits = {
       firstDate: emptyIndices,
@@ -346,19 +344,27 @@ export class MaintenanceCostComponent implements OnInit, OnDestroy {
       limitsUpdated: false
     };
 
-    if (event.checked) {
-      this.useCustomRange = true;
-    }
+    return this.useCustomRange = event.checked ? true : false;
+  }
 
-    else {
-      this.setDateIndicesObject();
+  // updates total sections to plot over
+  updateTotalMonthsPeriod(totalMonthsPeriod: number): number {
+    const fallbackTotalMonthsPeriod = 4;
+    return this.totalMonthsPeriod = totalMonthsPeriod ? totalMonthsPeriod : fallbackTotalMonthsPeriod;
+  }
 
-      this.dateRangeLimits = resetDateRangeLimits;
-      this.totalMonthsPeriod = 4;
+  // updates selected year
+  updateYear(year: number): void {
+    const fallbackYear = dayjs().year();
+    this.year = year ? year : fallbackYear;
+    this.setDateIndicesObject();
+  }
 
-      this.useCustomRange = false;
-    }
-
+  // update week to display
+  updateMonth(month: string): void {
+    const fallbackMonth = dayjs().format('MMM');
+    this.month = month ? month : fallbackMonth;
+    this.setDateIndicesObject();
   }
 
   // output from child component
@@ -397,84 +403,39 @@ export class MaintenanceCostComponent implements OnInit, OnDestroy {
     return this.dateRangeLimits = dateRangeLimits;
   }
 
-  // 4 fn's below update individual portions
-  // of the dateRangeLimits
-  updateFirstYear(year: number): void {
-    const firstDate: IntDateIndices = {
-      yearIndex: year,
-      monthIndex: this.generateMonthIndex(this.firstMonth)
-    };
+  // update specific parts of date range limits
+  updateDateRangeLimitParts(data: string | number, type: string): void {
+    let firstYearIndex: number = this.firstYear;
+    let firstMonthIndex: number = this.generateMonthIndex(this.firstMonth);
+    let lastYearIndex: number = this.lastYear;
+    let lastMonthIndex: number = this.generateMonthIndex(this.lastMonth);
 
+    if (type === 'first-year') {
+      firstYearIndex = Number(data);
+    }
+
+    else if (type === 'first-month') {
+      firstMonthIndex = this.generateMonthIndex(String(data));
+    }
+
+    else if (type === 'last-year') {
+      lastYearIndex = Number(data);
+    }
+
+    else if (type === 'last-month') {
+      lastMonthIndex = this.generateMonthIndex(String(data));
+    }
+
+    const firstDate: IntDateIndices = {
+      yearIndex: firstYearIndex,
+      monthIndex: firstMonthIndex
+    };
     const lastDate: IntDateIndices = {
-      yearIndex: this.lastYear,
-      monthIndex: this.generateMonthIndex(this.lastMonth)
+      yearIndex: lastYearIndex,
+      monthIndex: lastMonthIndex
     };
 
     this.updateChildsDateRangeLimits({ firstDate, lastDate });
-  }
-
-  updateFirstMonth(month: string): void {
-    const firstDate: IntDateIndices = {
-      yearIndex: this.firstYear,
-      monthIndex: this.generateMonthIndex(month)
-    };
-
-    const lastDate: IntDateIndices = {
-      yearIndex: this.lastYear,
-      monthIndex: this.generateMonthIndex(this.lastMonth)
-    };
-
-    this.updateChildsDateRangeLimits({ firstDate, lastDate });
-  }
-
-  updateLastYear(year: number): void {
-    const firstDate: IntDateIndices = {
-      yearIndex: this.firstYear,
-      monthIndex: this.generateMonthIndex(this.firstMonth)
-    };
-
-    const lastDate: IntDateIndices = {
-      yearIndex: year,
-      monthIndex: this.generateMonthIndex(this.lastMonth)
-    };
-
-    this.updateChildsDateRangeLimits({ firstDate, lastDate });
-  }
-
-  updateLastMonth(month: string): void {
-    const firstDate: IntDateIndices = {
-      yearIndex: this.firstYear,
-      monthIndex: this.generateMonthIndex(this.firstMonth)
-    };
-
-    const lastDate: IntDateIndices = {
-      yearIndex: this.lastYear,
-      monthIndex: this.generateMonthIndex(month)
-    };
-
-    this.updateChildsDateRangeLimits({ firstDate, lastDate });
-  }
-
-  // updates total sections to plot over
-  updateTotalMonthsPeriod(totalMonthsPeriod: number): number {
-    const fallbackTotalMonthsPeriod = 4;
-    return this.totalMonthsPeriod = totalMonthsPeriod ? totalMonthsPeriod : fallbackTotalMonthsPeriod;
-  }
-
-  // updates selected year
-  updateYear(year: number): void {
-    const fallbackYear = dayjs().year();
-    this.year = year ? year : fallbackYear;
-    this.setDateIndicesObject();
-    this.updateMonthAndYearDefaults();
-  }
-
-  // update week to display
-  updateMonth(month: string): void {
-    const fallbackMonth = dayjs().format('MMM');
-    this.month = month ? month : fallbackMonth;
-    this.setDateIndicesObject();
-    this.updateMonthAndYearDefaults();
   }
 
   // updates displayed week
@@ -489,7 +450,6 @@ export class MaintenanceCostComponent implements OnInit, OnDestroy {
     this.conditionallyUpdateWeek();
   }
 
-
   // emitted from different components
   updateChartPlottedStatus(status: boolean): boolean {
     return status ? (
@@ -497,8 +457,8 @@ export class MaintenanceCostComponent implements OnInit, OnDestroy {
       this.loading = false
     ) : (
       this.chartPlotted = false,
-        this.loading = false
-      )
+      this.loading = false
+    )
   }
 
   // show different chart
@@ -508,13 +468,11 @@ export class MaintenanceCostComponent implements OnInit, OnDestroy {
     const month = data['month'];
     const week = data['week'];
     const weeks = data['weeks'];
-    this.section = section ? section : this.section;
-    month ? (
-      this.month = month,
-      this.setDateIndicesObject()
-    ) : (null);
-    this.week = week ? week : this.week;
-    this.weeks = weeks ? weeks : this.weeks;
+
+    section ? this.updateSection(section) : (null);
+    month ? this.updateMonth(month) : (null);
+    week ? this.updateWeek(week) : (null);
+    weeks ? this.updateWeeks(weeks) : (null);
 
     this.changeDisplayedChart(type);
   }
