@@ -89,7 +89,6 @@
             ><mat-option value="one-section-one-month-period">
               1 Section - 1 Month</mat-option
             ><mat-option
-              [hidden]="!showOneSectionOneMonthPeriodChart"
               value="one-section-one-week-period"
             >
               1 Section - 1 Week</mat-option
@@ -148,9 +147,7 @@
           showOneSectionOneWeekPeriodChart
         "
       >
-        <div
-          class="filter-chart-field"
-        >
+        <div class="filter-chart-field">
           <mat-form-field class="filter-chart-form-field" appearance="outline">
             <mat-label>Change Section</mat-label>
             <mat-select
@@ -167,9 +164,7 @@
         </div>
 
         <!-- exclusive to one section multiple months -->
-        <ng-container *ngIf="
-            showOneSectionMultipleMonthsPeriodChart
-          ">
+        <ng-container *ngIf="showOneSectionMultipleMonthsPeriodChart">
           <!-- update total months period -->
           <ng-container>
             <div class="filter-chart-field" *ngIf="!useCustomRange">
@@ -294,66 +289,66 @@
         </ng-container>
       </ng-container>
 
-      <!-- filter years -->
-      <div
+      <!-- filter years & months & weeks-->
+      <ng-container
         *ngIf="
-          showOneSectionOneMonthPeriodChart ||
           showMultipleSectionsOneMonthChart ||
+          showOneSectionOneMonthPeriodChart ||
           showOneSectionOneWeekPeriodChart
         "
-        class="filter-chart-field"
       >
-        <mat-form-field class="filter-chart-form-field" appearance="outline">
-          <mat-label>Change Year</mat-label>
-          <mat-select
-            [(ngModel)]="year"
-            (selectionChange)="updateYear($event.value)"
-          >
-            <mat-option *ngFor="let year of years" [value]="year">{{
-              year
-            }}</mat-option>
-          </mat-select>
-        </mat-form-field>
-      </div>
-
-      <!-- filter months -->
-      <div
-        *ngIf="
-          showOneSectionOneMonthPeriodChart ||
-          showMultipleSectionsOneMonthChart ||
-          showOneSectionOneWeekPeriodChart
-        "
-        class="filter-chart-field"
-      >
-        <mat-form-field class="filter-chart-form-field" appearance="outline">
-          <mat-label>Change Month</mat-label>
-          <mat-select
-            [(ngModel)]="month"
-            (selectionChange)="updateMonth($event.value)"
-          >
-            <mat-option
-              *ngFor="let month of months"
-              value="{{ month.formattedName }}"
-              >{{ month.name }}</mat-option
+        <!-- years -->
+        <div class="filter-chart-field">
+          <mat-form-field class="filter-chart-form-field" appearance="outline">
+            <mat-label>Change Year</mat-label>
+            <mat-select
+              [(ngModel)]="year"
+              (selectionChange)="updateYear($event.value)"
             >
-          </mat-select>
-        </mat-form-field>
-      </div>
+              <mat-option *ngFor="let year of years" [value]="year">{{
+                year
+              }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
 
-      <!-- filter weeks -->
-      <div *ngIf="showOneSectionOneWeekPeriodChart" class="filter-chart-field">
-        <mat-form-field class="filter-chart-form-field" appearance="outline">
-          <mat-label>Change Week</mat-label>
-          <mat-select
-            [(ngModel)]="week"
-            (selectionChange)="updateWeek($event.value)"
-          >
-            <mat-option *ngFor="let week of weeks" [value]="week">{{
-              week
-            }}</mat-option>
-          </mat-select>
-        </mat-form-field>
-      </div>
+        <!-- months -->
+        <div class="filter-chart-field">
+          <mat-form-field class="filter-chart-form-field" appearance="outline">
+            <mat-label>Change Month</mat-label>
+            <mat-select
+              [(ngModel)]="month"
+              (selectionChange)="updateMonth($event.value)"
+            >
+              <mat-option
+                *ngFor="let month of months"
+                value="{{ month.formattedName }}"
+                >{{ month.name }}</mat-option
+              >
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <!--  weeks -->
+        <ng-container *ngIf="showOneSectionOneWeekPeriodChart">
+          <div class="filter-chart-field">
+            <mat-form-field
+              class="filter-chart-form-field"
+              appearance="outline"
+            >
+              <mat-label>Change Week</mat-label>
+              <mat-select
+                [(ngModel)]="week"
+                (selectionChange)="updateWeek($event.value)"
+              >
+                <mat-option *ngFor="let week of weeks" [value]="week">{{
+                  week
+                }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </ng-container>
+      </ng-container>
     </div>
   </div>
 </div>

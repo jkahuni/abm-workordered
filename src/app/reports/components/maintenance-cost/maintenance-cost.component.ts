@@ -137,11 +137,10 @@ export class MaintenanceCostComponent implements OnInit, OnDestroy {
     this.setInitialRandomSection();
     this.updateChartType();
     this.getWorkorders();
-
+    this.setInitialWeekAndWeeks();
 
     // sets default dateIndices
     this.setDateIndicesObject();
-
   }
 
   // set current year as default
@@ -257,6 +256,20 @@ export class MaintenanceCostComponent implements OnInit, OnDestroy {
     return this.section = section.name;
   }
 
+  private setInitialWeekAndWeeks(): void {
+    this.week = 'Week 1';
+
+    let defaultTotalWeeks = 5;
+    let weeks: string[] = [];
+
+    for (let i = 1; i <= defaultTotalWeeks; i++) {
+      weeks.push(`Week ${i}`);
+
+    }
+
+    this.weeks = weeks;
+  }
+
   private getWorkorders(): void {
     this.workordersService.$allWorkorders
       .pipe(takeUntil(this.onDestroy))
@@ -285,7 +298,6 @@ export class MaintenanceCostComponent implements OnInit, OnDestroy {
     this.showMultipleSectionsOneMonthChart = false
   }
 
-  // EXCLUSIVELY FOR ONE SECTION OVER MULTIPLE MONTHS CHART
   // enables smooth transition from
   // EX: months that have 5 weeks to those with 4
   private conditionallyUpdateWeek(): void {
@@ -360,7 +372,6 @@ export class MaintenanceCostComponent implements OnInit, OnDestroy {
     this.setDateIndicesObject();
   }
 
-  // update week to display
   updateMonth(month: string): void {
     const fallbackMonth = dayjs().format('MMM');
     this.month = month ? month : fallbackMonth;

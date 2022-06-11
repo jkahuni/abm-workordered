@@ -89,7 +89,7 @@ export class ApproveMultipleSectionsOneMonthComponent implements OnInit, OnDestr
     const monthIndex = this.dateIndicesObject['monthIndex'];
     const yearIndex = this.dateIndicesObject['yearIndex'];
 
-    const formattedDate = dayjs().year(yearIndex).month(monthIndex).format('MMMM YY');
+    const formattedDate = dayjs().year(yearIndex).month(monthIndex).format('MMMM YYYY');
 
     return this.formattedDate = formattedDate;
   }
@@ -202,7 +202,7 @@ export class ApproveMultipleSectionsOneMonthComponent implements OnInit, OnDestr
             },
 
             suggestedMin: 0,
-            suggestedMax: maximumMean * 1.3,
+            suggestedMax: maximumMean * 1.2,
             beginAtZero: true,
 
           }
@@ -221,13 +221,9 @@ export class ApproveMultipleSectionsOneMonthComponent implements OnInit, OnDestr
           },
           datalabels: {
             display: 'auto',
-            anchor: () => {
-              return 'end';
-            },
+            anchor: 'end',
 
-            align: () => {
-              return 'top';
-            },
+            align: 'end',
 
             textAlign: 'center',
 
@@ -238,7 +234,7 @@ export class ApproveMultipleSectionsOneMonthComponent implements OnInit, OnDestr
 
             },
             color: 'black',
-            offset: 5
+            offset: 0
 
           },
 
@@ -285,7 +281,6 @@ export class ApproveMultipleSectionsOneMonthComponent implements OnInit, OnDestr
           }
 
         }
-
       }
     });
 

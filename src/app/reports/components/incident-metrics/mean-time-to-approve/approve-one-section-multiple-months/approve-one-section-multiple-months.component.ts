@@ -339,7 +339,7 @@ export class ApproveOneSectionMultipleMonthsComponent implements OnInit, OnChang
               },
 
               suggestedMin: 0,
-              suggestedMax: maximumMean * 1.3,
+              suggestedMax: maximumMean * 1.2,
               beginAtZero: true,
 
             }
@@ -512,8 +512,6 @@ export class ApproveOneSectionMultipleMonthsComponent implements OnInit, OnChang
       month
     };
 
-    console.log('DATA --> ', switchChartData);
-
-    // this.switchChart.emit(switchChartData);
+    this.switchChart.emit(switchChartData);
   }
 }

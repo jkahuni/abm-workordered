@@ -10,6 +10,7 @@ export class ApproveOneSectionOneWeekComponent implements OnInit {
   constructor() { }
 
   ngOnInit(): void {
+    console.log('NIKO NDANI PIA');
   }
 
 }

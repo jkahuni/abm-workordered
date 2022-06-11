@@ -90,8 +90,7 @@ export class McOneSectionOneMonthPeriodComponent implements OnInit, OnChanges, O
     const monthIndex = this.dateIndicesObject['monthIndex'];
     const yearIndex = this.dateIndicesObject['yearIndex'];
 
-    // format as dayjs object to allow further manipulations
-    const formattedMonthYear: string = dayjs().year(yearIndex).month(monthIndex).format('MMM YY');
+    const formattedMonthYear: string = dayjs().year(yearIndex).month(monthIndex).format('MMM YYYY');
 
     return `${this.section}: ${formattedMonthYear}`;
 
@@ -136,8 +135,6 @@ export class McOneSectionOneMonthPeriodComponent implements OnInit, OnChanges, O
       let day = currentDate;
 
       const weekLabel: string = `Week ${week}`;
-
-      // const weekLabel = week === 1 ? 'Week 1' : week === 2 ? 'Week 2' : week === 3 ? 'Week 3' : week === 4 ? 'Week 4' : week === 5 ? 'Week 5' : week === 6 ? 'Week 6' : week === 7 ? 'Week 7' : 'Week U';
 
       while (day <= daysInMonth + 1) {
         if ((lastDayOfWeek - dayIndexInTheWeek) + 1 === 0 || day === daysInMonth + 1) {
@@ -477,5 +474,4 @@ export class McOneSectionOneMonthPeriodComponent implements OnInit, OnChanges, O
 
 
   }
-
 }

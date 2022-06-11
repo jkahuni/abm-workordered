@@ -108,6 +108,10 @@ export class IncidentMetricsComponent implements OnInit {
   firstDate!: IntDateIndices;
   lastDate!: IntDateIndices;
 
+  // for one week chart
+  week!: string;
+  weeks!: string[];
+
   // children category
   chartsType!: string;
   // specific child
@@ -120,6 +124,7 @@ export class IncidentMetricsComponent implements OnInit {
   showApproveMultipleSectionsOneMonth = true;
   showApproveOneSectionMultipleMonths = false;
   showApproveOneSectionOneMonth = false;
+  showApproveOneSectionOneWeek = false;
 
   ngOnInit(): void {
     this.getWorkorders();
@@ -131,6 +136,7 @@ export class IncidentMetricsComponent implements OnInit {
     this.setDateIndicesObject();
     this.updateChartsType();
     this.updateChartType();
+    this.setInitialWeekAndWeeks();
 
   }
 
@@ -184,6 +190,7 @@ export class IncidentMetricsComponent implements OnInit {
     };
 
 
+    // updates defaults on one section multiple months
     this.defaultYearIndex = yearIndex;
     this.defaultMonthIndex = monthIndex;
 
@@ -222,6 +229,20 @@ export class IncidentMetricsComponent implements OnInit {
     const section: IntNameAndFormattedName = this.factorySections[Math.floor(Math.random() * this.factorySections.length)];
 
     return this.section = section.name;
+  }
+
+  private setInitialWeekAndWeeks(): void {
+    this.week = 'Week 1';
+
+    let defaultTotalWeeks = 5;
+    let weeks: string[] = [];
+
+    for (let i = 1; i <= defaultTotalWeeks; i++) {
+      weeks.push(`Week ${i}`);
+
+    }
+
+    this.weeks = weeks;
   }
 
   private getWorkorders(): void {
@@ -265,10 +286,18 @@ export class IncidentMetricsComponent implements OnInit {
       chartType = 'approve-one-section-multiple-months';
     }
 
+    else if (this.showApproveOneSectionOneMonth) {
+      chartType = 'approve-one-section-one-month';
+    }
+
+    else if (this.showApproveOneSectionOneWeek) {
+      chartType = 'approve-one-section-one-week';
+    }
+
     else {
 
       chartType = 'unknown-chart';
-    };
+    }
 
     return this.chartType = chartType;
   }
@@ -281,6 +310,7 @@ export class IncidentMetricsComponent implements OnInit {
     this.showApproveMultipleSectionsOneMonth = false;
     this.showApproveOneSectionMultipleMonths = false;
     this.showApproveOneSectionOneMonth = false;
+    this.showApproveOneSectionOneWeek = false;
   }
 
   changeChartsType(type: string): void {
@@ -304,6 +334,10 @@ export class IncidentMetricsComponent implements OnInit {
     }
     else if (type === 'approve-one-section-one-month') {
       this.showApproveOneSectionOneMonth = true;
+    }
+
+    else if (type === 'approve-one-section-one-week') {
+      this.showApproveOneSectionOneWeek = true;
     }
     this.updateChartType();
   }
@@ -337,6 +371,30 @@ export class IncidentMetricsComponent implements OnInit {
     const fallbackMonth = dayjs().format('MMM');
     this.month = month ? month : fallbackMonth;
     this.setDateIndicesObject();
+  }
+
+  updateWeek(week: string): string {
+    const fallbackWeek = 'Week 1';
+    this.week = week ? week : fallbackWeek;
+
+    return this.week;
+  }
+
+  // enables smooth transition from
+  // EX: months that have 5 weeks to those with 4
+  private conditionallyUpdateWeek(): void {
+    if (this.week && this.weeks) {
+      const weekPresent = this.weeks.includes(this.week);
+      if (!weekPresent) {
+        this.week = this.weeks[this.weeks.length - 1];
+      }
+    }
+  }
+
+  updateWeeks(weeks: string[]): void {
+    this.weeks = weeks;
+    this.conditionallyUpdateWeek();
+
   }
 
   // For one section multiple months
@@ -444,9 +502,14 @@ export class IncidentMetricsComponent implements OnInit {
     const type = newChartData['type'];
     const section = newChartData['section'];
     const month = newChartData['month'];
+    const week = newChartData['week'];
+    const weeks = newChartData['weeks'];
 
-    month ? this.updateMonth(month) : (null);
-    section ? this.updateSection(section) : (null);
+    month ? this.updateMonth(month) : null;
+    section ? this.updateSection(section) : null;
+    week ? this.updateWeek(week) : null;
+    weeks ? this.updateWeeks(weeks) : null;
+
 
     this.changeChartType(type);
   }
