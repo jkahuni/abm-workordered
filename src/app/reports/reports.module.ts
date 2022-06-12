@@ -5,7 +5,11 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import {
   ReportsRoutingModule,
   maintenanceCostsComponents,
-  incidentMetricsComponents
+  incidentMetricsComponents,
+  acknowlegeMetricsComponents,
+  approveMetricsComponents,
+  mttrMetricsComponents,
+  mtbfMetricsComponents
 } from '@reports/reports-routing.module';
 import { NgChartsModule } from 'ng2-charts';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
@@ -19,7 +23,6 @@ import { ReportsComponent } from '@reports/reports.component';
 import { MaintenanceCostComponent } from '@reports/components/maintenance-cost/maintenance-cost.component';
 import { IncidentMetricsComponent } from '@reports/components/incident-metrics/incident-metrics.component';
 
-
 @NgModule({
   declarations: [
     ReportsComponent,
@@ -27,6 +30,10 @@ import { IncidentMetricsComponent } from '@reports/components/incident-metrics/i
     incidentMetricsComponents,
     MaintenanceCostComponent,
     IncidentMetricsComponent,
+    acknowlegeMetricsComponents,
+    approveMetricsComponents,
+    mttrMetricsComponents,
+    mtbfMetricsComponents
   ],
   imports: [
     CommonModule,
@@ -42,7 +49,11 @@ import { IncidentMetricsComponent } from '@reports/components/incident-metrics/i
   ],
   exports: [
     maintenanceCostsComponents,
-    incidentMetricsComponents
+    incidentMetricsComponents,
+    acknowlegeMetricsComponents,
+    approveMetricsComponents,
+    mttrMetricsComponents,
+    mtbfMetricsComponents
   ]
 })
 export class ReportsModule { }
