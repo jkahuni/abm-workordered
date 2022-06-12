@@ -187,9 +187,9 @@ export class HomeComponent implements OnInit {
         (err: any) => {
           this.hideSpinnerOnError();
           if (err.code === 'failed-precondition') {
-            this.indexingError = `Error of code IND-H-02. Please report this error to support to have it fixed.`;
+            this.indexingError = `Error of code IND-H-02 occured. Please report this error to support to have it fixed.`;
           } else {
-            this.otherError = `Error of code H-02. Please reload the page or report this error to support to have it fixed if it persists`;
+            this.otherError = `Error of code H-02 occured. Please reload the page or report this error to support to have it fixed if it persists`;
           }
         }
       );
@@ -206,9 +206,9 @@ export class HomeComponent implements OnInit {
             .catch((err: any) => {
               this.hideSpinnerOnError();
               if (err.code === 'failed-precondition') {
-                this.indexingError = `Error of code IND-H-01. Please report this error to support to have it fixed.`;
+                this.indexingError = `Error of code IND-H-01 occured. Please report this error to support to have it fixed.`;
               } else {
-                this.otherError = `Error of code H-01. Please try reloading this page or report this error to support to have the issue fixed if it persists.`;
+                this.otherError = `Error of code H-01 occured. Please try reloading this page or report this error to support to have the issue fixed if it persists.`;
               }
             });
         }

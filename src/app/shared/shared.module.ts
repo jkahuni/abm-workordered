@@ -18,6 +18,7 @@ import { MatRadioModule } from '@angular/material/radio';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
+import { MatExpansionModule } from '@angular/material/expansion';
 
 // fx layout module
 import { FlexLayoutModule } from '@angular/flex-layout';
@@ -49,7 +50,8 @@ import { ValidateSentenceFormatDirective } from '@shared/directives/validate-sen
     MatDatepickerModule,
     MatNativeDateModule,
     MatSidenavModule,
-    NgxSpinnerModule
+    NgxSpinnerModule,
+    MatExpansionModule
   ], 
   exports: [
     ValidateSentenceFormatDirective,
@@ -71,7 +73,8 @@ import { ValidateSentenceFormatDirective } from '@shared/directives/validate-sen
     MatDatepickerModule,
     MatNativeDateModule,
     MatSidenavModule,
-    NgxSpinnerModule
+    NgxSpinnerModule,
+    MatExpansionModule
   ]
 })
 export class SharedModule { }
