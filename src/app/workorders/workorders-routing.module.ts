@@ -35,18 +35,18 @@ import { CloseServiceComponent } from '@workorders/components/close-workorder/co
 import { CloseToolChangeComponent } from '@workorders/components/close-workorder/components/close-tool-change/close-tool-change.component';
 
 // exportable components
-import { WorkorderComponent } from '@workorders/components/list-workorders-parts/components/workorder/workorder.component';
-import { HelpModalComponent } from '@workorders/components/list-workorders-parts/components/help-modal/help-modal.component';
-import { RejectWorkorderModalComponent } from '@workorders/components/list-workorders-parts/components/reject-workorder-modal/reject-workorder-modal.component';
-import { SupervisorsHandoverModalComponent } from '@workorders/components/list-workorders-parts/components/supervisors-handover-modal/supervisors-handover-modal.component';
-import { ChangeTechniciansModalComponent } from '@workorders/components/list-workorders-parts/components/change-technicians-modal/change-technicians-modal.component';
-import { AssignTechniciansModalComponent } from '@workorders/components/list-workorders-parts/components/assign-technicians-modal/assign-technicians-modal.component';
-import { TechniciansHandoverModalComponent } from '@workorders/components/list-workorders-parts/components/technicians-handover-modal/technicians-handover-modal.component';
-import { StoreTechniciansHandoverModalComponent } from '@workorders/components/list-workorders-parts/components/store-technicians-handover-modal/store-technicians-handover-modal.component';
-import { ReviewWorkordersModalComponent } from '@workorders/components/list-workorders-parts/components/review-workorders-modal/review-workorders-modal.component';
-import { RaiseConcernModalComponent } from '@workorders/components/list-workorders-parts/components/raise-concern-modal/raise-concern-modal.component';
-import { WorkorderActionsComponent } from '@workorders/components/list-workorders-parts/components/workorder-actions/workorder-actions.component';
-import { WorkorderNumbersComponent } from '@workorders/components/list-workorders-parts/components/workorder-numbers/workorder-numbers.component';
+import { WorkorderComponent } from '@workorders/components/list-workorders-children/components/workorder/workorder.component';
+import { HelpModalComponent } from '@workorders/components/list-workorders-children/components/help-modal/help-modal.component';
+import { RejectWorkorderModalComponent } from '@workorders/components/list-workorders-children/components/reject-workorder-modal/reject-workorder-modal.component';
+import { SupervisorsHandoverModalComponent } from '@workorders/components/list-workorders-children/components/supervisors-handover-modal/supervisors-handover-modal.component';
+import { ChangeTechniciansModalComponent } from '@workorders/components/list-workorders-children/components/change-technicians-modal/change-technicians-modal.component';
+import { AssignTechniciansModalComponent } from '@workorders/components/list-workorders-children/components/assign-technicians-modal/assign-technicians-modal.component';
+import { TechniciansHandoverModalComponent } from '@workorders/components/list-workorders-children/components/technicians-handover-modal/technicians-handover-modal.component';
+import { StoreTechniciansHandoverModalComponent } from '@workorders/components/list-workorders-children/components/store-technicians-handover-modal/store-technicians-handover-modal.component';
+import { ReviewWorkordersModalComponent } from '@workorders/components/list-workorders-children/components/review-workorders-modal/review-workorders-modal.component';
+import { RaiseConcernModalComponent } from '@workorders/components/list-workorders-children/components/raise-concern-modal/raise-concern-modal.component';
+import { WorkorderActionsComponent } from '@workorders/components/list-workorders-children/components/workorder-actions/workorder-actions.component';
+import { WorkorderNumbersComponent } from '@workorders/components/list-workorders-children/components/workorder-numbers/workorder-numbers.component';
 
 
 
