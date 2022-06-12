@@ -54,12 +54,23 @@
             The raiser and the new technicians will then be notified.
           </p>
 
-          <p class="mt-2" *ngIf="workorder?.abnormalityCard?.status">
-            <strong>Assign Technicians:- </strong> You want to assign
-            engineering and stores technicians to handle the abnormality raised.
-            This will automatically treat the workorder as approved. The raiser
-            and technicians will then be notified.
-          </p>
+          <ng-container *ngIf="workorder?.escalated?.status">
+            <p class="mt-2">
+              <strong>Re-Assign Technicians:- </strong> You want to return the
+              workorder to the technicians named. This will treat the workorder
+              as if it has been approved at that time. Only the technicians will
+              be notified.
+            </p>
+          </ng-container>
+
+          <ng-container *ngIf="workorder?.abnormalityCard?.status">
+            <p class="mt-2">
+              <strong>Assign Technicians:- </strong> You want to assign
+              engineering and stores technicians to handle the abnormality
+              raised. This will automatically treat the workorder as approved.
+              The raiser and technicians will then be notified.
+            </p>
+          </ng-container>
         </div>
 
         <!-- TECHNICIANS ACTIONS -->

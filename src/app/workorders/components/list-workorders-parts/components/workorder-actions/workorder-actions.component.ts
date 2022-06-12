@@ -43,6 +43,7 @@ export class WorkorderActionsComponent implements OnInit, OnChanges {
   acknowledgingWorkorder = false;
   markingDone = false;
   reviewingWorkorder = false;
+  reasigningTechnicians = false;
 
 
   ngOnInit(): void {
@@ -67,6 +68,7 @@ export class WorkorderActionsComponent implements OnInit, OnChanges {
     this.acknowledgingWorkorder = false;
     this.markingDone = false;
     this.reviewingWorkorder = false;
+    this.reasigningTechnicians = false;
 
     if (this.appprovingWorkorderButtonSpinner) {
       this.appprovingWorkorderButtonSpinner.nativeElement.style.display = 'none';
@@ -160,6 +162,44 @@ export class WorkorderActionsComponent implements OnInit, OnChanges {
               { autoClose: false, id: 'error-code-WL-04' });
           });
       }
+    }
+  }
+
+  reassignTechnicins(): void {
+    if (this.workorder) {
+
+      this.reasigningTechnicians = true;
+
+      const now = dayjs().format();
+
+      const workorderUid = this.workorder.workorder.uid;
+      const workorderNumber = this.workorder.workorder.number;
+      const workorderType = this.workorder.workorder.type;
+
+      const workorderUpdateData = {
+        approved: {
+          status: true,
+          dateTime: now
+        },
+        rejected: { status: false, dateTime: now },
+        escalated: { status: false, dateTime: now }
+
+      };
+      this.workordersService.updateWorkorder(workorderUid, workorderUpdateData)
+        .then(() => {
+          this.closeButtonSpinners();
+          this.updateWorkordersArray(workorderUid, workorderUpdateData);
+
+          this.toast.success(`Success. <b>${workorderType}</b> workorder <b>${workorderNumber}</b> reassigned to technicians successfully.`, { id: 'reasign-workorder-success' });
+
+        })
+        .catch(() => {
+          this.closeButtonSpinners();
+
+          this.toast.error(`Failed:
+             Reassigning <b>${workorderType}</b> workorder <b>${workorderNumber}</b> to technicians failed with error code <b>LW-RAW-04</b>. Please try again, or report the error code to support if the issue persists.`,
+            { autoClose: false, id: 'error-code-WL-004' });
+        });
     }
   }
 

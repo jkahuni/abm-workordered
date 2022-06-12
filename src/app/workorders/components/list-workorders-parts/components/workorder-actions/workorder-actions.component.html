@@ -46,6 +46,7 @@
     <mat-action-list role="list">
       <!-- SUPERVISOR ACTIONS -->
       <div *ngIf="userType === 'supervisor'">
+        <!-- workorder not escalated -->
         <div *ngIf="!workorder.escalated?.status">
           <!-- approve workorder -->
           <mat-list-item role="listitem">
@@ -130,6 +131,7 @@
             </mat-list-item>
           </div>
         </div>
+
         <!-- workorder escalated -->
         <div *ngIf="workorder.escalated?.status">
           <!-- approve workorder -->
@@ -179,6 +181,38 @@
             >
               Change Technicians
             </button>
+            <mat-divider></mat-divider>
+          </mat-list-item>
+
+          <!-- re-assign technicians -->
+          <mat-list-item role="listitem" class="long-button-text">
+            <div *ngIf="reasigningTechnicians">
+              <button
+                class="action-button btn btn-sm btn-success shadow-none"
+                type="button"
+                disabled
+              >
+                <span
+                  #reassigningTechniciansButtonSpinner
+                  class="spinner-border spinner-border-sm"
+                  role="status"
+                  aria-hidden="true"
+                >
+                </span>
+                Reassigning..
+              </button>
+            </div>
+
+            <div *ngIf="!reasigningTechnicians">
+              <button
+                class="action-button btn btn-link shadow-none"
+                type="button"
+                (click)="reassignTechnicins()"
+              >
+                Re-assign Technicians
+              </button>
+            </div>
+
             <mat-divider></mat-divider>
           </mat-list-item>
 

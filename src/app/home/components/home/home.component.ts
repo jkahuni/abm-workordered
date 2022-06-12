@@ -16,24 +16,12 @@ import { IntUser, IntWorkorder } from '@workorders/models/workorders.models';
 //  firebase and firestore
 import { User, Auth, onAuthStateChanged } from '@angular/fire/auth';
 
-
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss']
 })
 export class HomeComponent implements OnInit {
-
-  constructor(
-    // for resending verification email
-    private authenticationService: AuthenticationService,
-    private workordersService: WorkordersService,
-    private spinner: NgxSpinnerService,
-    private auth: Auth,
-    private toast: HotToastService,
-    private router: Router,
-  ) { }
-
   // used in the template and in resending verification code
   user!: User | null;
 
@@ -71,7 +59,21 @@ export class HomeComponent implements OnInit {
   otherError!: string;
   defaultError = `Error of code UHE-01 occured. Please try reloading this page or report this error code to support to have the issue fixed if it persists.`;
 
+  constructor(
+    // for resending verification email
+    private authenticationService: AuthenticationService,
+    private workordersService: WorkordersService,
+    private spinner: NgxSpinnerService,
+    private auth: Auth,
+    private toast: HotToastService,
+    private router: Router,
+  ) { }
+
   ngOnInit(): void {
+    this.homeSetup();
+  }
+
+  private homeSetup(): void {
     onAuthStateChanged(this.auth,
       (user: User | null) => {
         this.user = user;
@@ -81,12 +83,12 @@ export class HomeComponent implements OnInit {
             this.loading = false;
 
           } else {
-            this.getAllWorkorders();
-            this.getUserAndWorkorders(this.userUid);
+            this.getWorkorders();
+            this.usersWorkordersSetup(this.userUid);
           }
         } else {
           this.loading = false;
-          
+
         }
       },
       (err: any) => {
@@ -142,17 +144,11 @@ export class HomeComponent implements OnInit {
   }
 
   // get user and their specific workorders
-  private getUserAndWorkorders(userUid: string): void {
+  private usersWorkordersSetup(userUid: string): void {
     this.workordersService.getUser(userUid)
       .then((firestoreUser: IntUser) => {
         if (firestoreUser.group === 'Supervisor') {
-          this.filterRaisedWorkorders();
-          this.filterUnverifiedWorkorders();
-          this.filterApprovedWorkorders();
-          this.filterRejectedWorkorders();
-          this.filterEscalatedWorkorders();
           this.isSupervisor = true;
-          this.hideSpinnerOnSuccess();
         }
 
         else if (firestoreUser.group === 'Technician') {
@@ -160,11 +156,8 @@ export class HomeComponent implements OnInit {
           if (firestoreUser.technicianGroup === 'Electrical'
             ||
             firestoreUser.technicianGroup === 'Mechanical') {
-            this.filterEngTechnicianOpenWorkorders();
-            this.filterEngTechnicianClosedWorkorders();
             this.isEngineeringTechnician = true;
             this.technicianType = 'engineering';
-            this.hideSpinnerOnSuccess();
           }
 
           // stores technician
@@ -173,29 +166,23 @@ export class HomeComponent implements OnInit {
             ||
             firestoreUser.technicianGroup === 'PM Planning'
           ) {
-            this.filterStoreTechnicianOpenWorkorders();
-            this.filterStoreTechnicianClosedWorkorders();
             this.isStoresTechnician = true;
             this.technicianType = 'stores';
-            this.hideSpinnerOnSuccess();
           }
         }
 
         else if (firestoreUser.group === 'Manager' && firestoreUser.managerGroup === 'Engineering') {
-          this.filterUnReviewedWorkorders();
-          this.filterReviewedWorkorders();
           this.isEngineeringManager = true;
-          this.hideSpinnerOnSuccess();
         }
 
         else {
-          this.filterRaisedWorkorders();
-          this.filterOtherApprovedWorkorders();
-          this.filterOtherRejectedWorkorders();
           this.isOperatorOrOperatorLike = true;
-          this.hideSpinnerOnSuccess();
+
         }
-      })
+      }
+      )
+      .then(() => this.filterWorkorders()
+      )
       .catch(
         (err: any) => {
           this.hideSpinnerOnError();
@@ -209,7 +196,7 @@ export class HomeComponent implements OnInit {
   }
 
   // get all wokrorders first
-  private getAllWorkorders(): void {
+  private getWorkorders(): void {
     this.workordersService.$allWorkorders.subscribe(
       (workorders: IntWorkorder[] | null) => {
         if (workorders) {
@@ -229,280 +216,113 @@ export class HomeComponent implements OnInit {
     );
   }
 
-  // SUPERVISORS WORKORDERS
-  private filterRaisedWorkorders(): IntWorkorder[] | null {
-    if (this.workorders) {
-      this.raisedWorkorders = this.workorders.filter(
-        (workorder: IntWorkorder) => {
-          if (workorder.raiser.uid === this.userUid) {
-            return true;
+  private filterWorkorders(): any {
+    let raisedWorkorders: IntWorkorder[] = [];
+    let unverifiedWorkorders: IntWorkorder[] = [];
+    let approvedWorkorders: IntWorkorder[] = [];
+    let rejectedWorkorders: IntWorkorder[] = [];
+    let escalatedWorkorders: IntWorkorder[] = [];
+    let openWorkorders: IntWorkorder[] = [];
+    let closedWorkorders: IntWorkorder[] = [];
+    let reviewedWorkorders: IntWorkorder[] = [];
+    let unreviewedWorkorders: IntWorkorder[] = [];
+
+    for (let workorder of this.workorders) {
+      const raiser = workorder.raiser.uid;
+      const supervisor = workorder.supervisor.uid;
+      const technician = workorder.technician.uid;
+      const storesTechnician = workorder.storesTechnician.uid;
+      const approved = workorder.approved.status;
+      const rejected = workorder.rejected.status;
+      const escalated = workorder.escalated?.status;
+      const closed = workorder.closed.status;
+      const reviewed = workorder.review?.status;
+
+      // raised, approved, rejected
+      if (this.isOperatorOrOperatorLike) {
+        if (raiser === this.userUid) {
+          raisedWorkorders.push(workorder);
+
+          if (approved && !rejected) {
+            approvedWorkorders.push(workorder);
           }
-          return false;
-        }
-      );
-      return this.raisedWorkorders;
-    }
-    return null;
-  }
 
-  private filterUnverifiedWorkorders(): IntWorkorder[] | null {
-    if (this.workorders) {
-      this.unverifiedWorkorders = this.workorders.filter(
-        (workorder: IntWorkorder) => {
-          const approved = workorder.approved.status;
-          const rejected = workorder.rejected.status;
-          const supervisor = workorder.supervisor.uid;
-
-          if (!approved && !rejected && supervisor === this.userUid) { return true; }
-
-          return false;
-        }
-      );
-      return this.unverifiedWorkorders;
-    }
-
-    return null;
-  }
-
-  private filterApprovedWorkorders(): IntWorkorder[] | null {
-    if (this.workorders) {
-      this.approvedWorkorders = this.workorders.filter(
-        (workorder: IntWorkorder) => {
-          const approved = workorder.approved.status;
-          const rejected = workorder.rejected.status;
-          const supervisor = workorder.supervisor.uid;
-
-          if (
-            approved === true &&
-            rejected === false &&
-            supervisor === this.userUid) {
-            return true;
-          } return false;
-        }
-      );
-      return this.approvedWorkorders;
-    }
-    return null;
-  }
-
-  private filterRejectedWorkorders(): IntWorkorder[] | null {
-    if (this.workorders) {
-      this.rejectedWorkorders = this.workorders.filter(
-        (workorder: IntWorkorder) => {
-          const approved = workorder.approved.status;
-          const rejected = workorder.rejected.status;
-          const supervisor = workorder.supervisor.uid;
-
-          if (
-            approved === false &&
-            rejected === true &&
-            supervisor === this.userUid) {
-            return true;
-          } return false;
-        }
-      );
-      return this.rejectedWorkorders;
-    }
-
-    return null;
-  }
-
-  private filterEscalatedWorkorders(): IntWorkorder[] | null {
-    if (this.workorders) {
-      this.escalatedWorkorders = this.workorders.filter(
-        (workorder: IntWorkorder) => workorder.escalated?.status
-      );
-
-      return this.escalatedWorkorders;
-    }
-
-    return null;
-  }
-
-  // OPERATORS WORKORDERS
-  private filterOtherApprovedWorkorders(): IntWorkorder[] | null {
-    if (this.workorders) {
-      this.approvedWorkorders = this.workorders.filter(
-        (workorder: IntWorkorder) => {
-          const approved = workorder.approved.status;
-          const rejected = workorder.rejected.status;
-          const raiser = workorder.raiser.uid;
-
-          if (
-            approved === true &&
-            rejected === false &&
-            raiser === this.userUid
-          ) {
-            return true;
+          if (rejected && !approved) {
+            rejectedWorkorders.push(workorder);
           }
-          return false;
         }
-      );
-      return this.approvedWorkorders;
-    }
-    return null;
-  }
+      }
 
-  private filterOtherRejectedWorkorders(): IntWorkorder[] | null {
-    if (this.workorders) {
-      this.rejectedWorkorders = this.workorders.filter(
-        (workorder: IntWorkorder) => {
-          const approved = workorder.approved.status;
-          const rejected = workorder.rejected.status;
-          const raiser = workorder.raiser.uid;
+      // raised, unverified, escalated, approved, rejected
+      else if (this.isSupervisor) {
+        if (raiser === this.userUid) {
+          raisedWorkorders.push(workorder);
+        }
 
-          if (
-            approved === false &&
-            rejected === true &&
-            raiser === this.userUid
-          ) {
-            return true;
+        if (supervisor === this.userUid) {
+          if (!approved && !rejected) {
+            unverifiedWorkorders.push(workorder);
           }
-          return false;
-        }
-      );
-      return this.rejectedWorkorders;
-    }
-    return null;
-  }
 
-  // ENG TECHNICIANS WORKORDERS
-  private filterEngTechnicianOpenWorkorders(): IntWorkorder[] | null {
-    if (this.workorders) {
-      this.engTechnicianOpenWorkorders = this.workorders.filter(
-        (workorder: IntWorkorder) => {
-          const approved = workorder.approved.status;
-          const rejected = workorder.rejected.status;
-          const closed = workorder.closed.status;
-          const technician = workorder.technician.uid;
+          if (approved && !rejected) {
+            approvedWorkorders.push(workorder);
+          }
 
-          if (
-            approved === true &&
-            rejected === false &&
-            closed === false &&
-            technician === this.userUid
+          if (!approved && rejected) {
+            rejectedWorkorders.push(workorder);
+          }
 
-          ) { return true; }
+          if ((escalated !== undefined || escalated !== null) && escalated) {
+            escalatedWorkorders.push(workorder);
+          }
 
-          return false;
 
         }
-      );
-      return this.engTechnicianOpenWorkorders;
-    }
+      }
 
-    return null;
-  }
+      // open, closed
+      else if (this.isEngineeringTechnician || this.isStoresTechnician) {
+        if ((technician === this.userUid) || (storesTechnician === this.userUid)) {
+          if (approved && !rejected) {
+            if (!closed) {
+              openWorkorders.push(workorder);
+            }
 
-  private filterEngTechnicianClosedWorkorders(): IntWorkorder[] | null {
-    if (this.workorders) {
-      this.engTechnicianClosedWorkorders = this.workorders.filter(
-        (workorder: IntWorkorder) => {
-          const approved = workorder.approved.status;
-          const rejected = workorder.rejected.status;
-          const closed = workorder.closed.status;
-          const technician = workorder.technician.uid;
+            else {
+              closedWorkorders.push(workorder);
+            }
 
-          if (
-            approved === true &&
-            rejected === false &&
-            closed === true &&
-            technician === this.userUid
-
-          ) { return true; }
-
-          return false;
-
+          }
         }
-      );
-      return this.engTechnicianClosedWorkorders;
-    }
+      }
 
-    return null;
-  }
-
-  // STORES TECHNICIANS WORKORDERS
-  private filterStoreTechnicianOpenWorkorders(): IntWorkorder[] | null {
-    if (this.workorders) {
-      this.storesTechnicianOpenWorkorders = this.workorders.filter(
-        (workorder: IntWorkorder) => {
-          const approved = workorder.approved.status;
-          const rejected = workorder.rejected.status;
-          const closed = workorder.closed.status;
-          const stores = workorder.storesTechnician.uid;
-
-          if (
-            approved === true &&
-            rejected === false &&
-            closed === false &&
-            stores === this.userUid
-          ) { return true; }
-
-          return false;
-        });
-      return this.storesTechnicianOpenWorkorders;
-    }
-    return null;
-  }
-
-  private filterStoreTechnicianClosedWorkorders(): IntWorkorder[] | null {
-    if (this.workorders) {
-      this.storesTechnicianClosedWorkorders = this.workorders.filter(
-        (workorder: IntWorkorder) => {
-          const approved = workorder.approved.status;
-          const rejected = workorder.rejected.status;
-          const closed = workorder.closed.status;
-          const stores = workorder.storesTechnician.uid;
-
-          if (
-            approved === true &&
-            rejected === false &&
-            closed === true &&
-            stores === this.userUid
-          ) { return true; }
-
-          return false;
-        });
-
-      return this.storesTechnicianClosedWorkorders;
-    }
-    return null;
-  }
-
-  // MANAGERS WORKORDERS
-  private filterReviewedWorkorders(): IntWorkorder[] | null {
-    if (this.workorders) {
-      this.reviewedWorkorders = this.workorders.filter(
-        (workorder: IntWorkorder) => {
-          const reviewed = workorder.review?.status;
-          // status => reviewed
-
-          if (reviewed) { return true; }
-
-          return false;
+      // reviewed, unreviewed
+      else if (this.isEngineeringManager) {
+        if (reviewed) {
+          reviewedWorkorders.push(workorder);
         }
-      );
 
-      return this.reviewedWorkorders;
-    }
-    return null;
-  }
-
-  private filterUnReviewedWorkorders(): IntWorkorder[] | null {
-    if (this.workorders) {
-      this.unReviewedWorkorders = this.workorders.filter(
-        (workorder: IntWorkorder) => {
-          const reviewed = workorder.review?.status;
-          // sttaus => accepted, denied, cancelled
-          if (!reviewed || reviewed === '') { return true; }
-
-          return false;
+        else if (!reviewed || reviewed === '') {
+          unreviewedWorkorders.push(workorder);
         }
-      );
 
-      return this.unReviewedWorkorders;
+      }
     }
-    return null;
+
+    this.raisedWorkorders = raisedWorkorders;
+    this.unverifiedWorkorders = unverifiedWorkorders;
+    this.approvedWorkorders = approvedWorkorders;
+    this.rejectedWorkorders = rejectedWorkorders;
+    this.escalatedWorkorders = escalatedWorkorders;
+    this.engTechnicianOpenWorkorders = openWorkorders;
+    this.engTechnicianClosedWorkorders = closedWorkorders;
+    this.storesTechnicianOpenWorkorders = openWorkorders;
+    this.storesTechnicianClosedWorkorders = closedWorkorders;
+    this.unReviewedWorkorders = unreviewedWorkorders;
+    this.reviewedWorkorders = reviewedWorkorders;
+
+    this.hideSpinnerOnSuccess();
+
   }
 
   resendVerificationCode(): any {

@@ -1,8 +1,6 @@
-<mat-card
-  class="home-page-card"
->
+<mat-card class="home-page-card">
   <mat-card-header class="mx-auto">
-    <mat-card-title> ABM Workordered Home </mat-card-title>
+    <mat-card-title>Workordered Home </mat-card-title>
   </mat-card-header>
 
   <mat-card-content>
@@ -100,15 +98,17 @@
               </div>
 
               <!-- escalated workorders -->
-              <div>
-                <a
-                  type="button"
-                  class="btn btn-outline-danger home-nav-button shadow-none"
-                  [routerLink]="['/workorders/supervisor/escalated', userUid]"
-                  >Escalated Workorders - (
-                  {{ escalatedWorkorders ? escalatedWorkorders.length : 0 }} )
-                </a>
-              </div>
+              <ng-container *ngIf="escalatedWorkorders.length">
+                <div>
+                  <a
+                    type="button"
+                    class="btn btn-outline-danger home-nav-button shadow-none"
+                    [routerLink]="['/workorders/supervisor/escalated', userUid]"
+                    >Escalated Workorders - (
+                    {{ escalatedWorkorders ? escalatedWorkorders.length : 0 }} )
+                  </a>
+                </div>
+              </ng-container>
 
               <!-- raised workorders -->
               <div>
@@ -320,12 +320,12 @@
       <div *ngIf="!user">
         <p>Hello there,</p>
         <p>
-          It is great to have you on board the ABM Workordered family, where
-          your world of paper-less workorders awaits.
+          It is great to have you on board the Workordered family, where your
+          world of paper-less workorders awaits.
         </p>
         <p>
-          You are joining other individuals driven by our GREAT culture, to
-          easily raise and track workorders in their daily operations.
+          You are joining other individuals looking to easily raise and/or track
+          workorders in their daily operations.
         </p>
         <p>
           For whatever reason you are joining us, we have something for you.
