@@ -404,7 +404,7 @@ export class ApproveOneSectionMultipleMonthsComponent implements OnInit, OnChang
                   return 'N/A';
                 } else {
                   return value.toLocaleString('en-US', {
-                    minimumFractionDigits: 1, maximumFractionDigits: 1
+                    minimumFractionDigits: 0, maximumFractionDigits: 1
                   });
                 }
               },

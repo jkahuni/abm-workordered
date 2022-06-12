@@ -176,10 +176,10 @@ export class ApproveOneSectionOneMonthComponent implements OnInit, OnChanges, On
         const approved = workorder.approved.status;
         const raised = dayjs(workorder.raised.dateTime);
         const workorderType = workorder.workorder.type;
-        const workorderIsViable = this.viableWorkorders.includes(workorderType);
+        const typeIsViable = this.viableWorkorders.includes(workorderType);
         const dateIsViable = dates.includes(raised.format('MMM DD, YYYY'));
 
-        return workorderIsViable &&
+        return typeIsViable &&
           dateIsViable &&
           approved &&
           section === this.section &&
@@ -353,7 +353,7 @@ export class ApproveOneSectionOneMonthComponent implements OnInit, OnChanges, On
                   return 'N/A';
                 } else {
                   return value.toLocaleString('en-US', {
-                    minimumFractionDigits: 1, maximumFractionDigits: 1
+                    minimumFractionDigits: 0, maximumFractionDigits: 1
                   });
                 }
               },

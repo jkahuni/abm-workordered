@@ -64,6 +64,13 @@
     <ng-container *ngIf="showApproveOneSectionOneWeek">
       <app-approve-one-section-one-week
         class="chart-container"
+        [workorders]="workorders"
+        [section]="section"
+        [dateIndicesObject]="dateIndicesObject"
+        [week]="week"
+        [viableWorkorders]="viableWorkorders"
+        (chartPlotted)="updateChartPlottedStatus($event)"
+        (updateWeeks)="updateWeeks($event)"
       ></app-approve-one-section-one-week>
     </ng-container>
   </ng-container>

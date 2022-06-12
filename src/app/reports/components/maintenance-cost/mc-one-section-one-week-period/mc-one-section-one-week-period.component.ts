@@ -45,7 +45,6 @@ export class McOneSectionOneWeekPeriodComponent implements OnInit, OnChanges, On
       });
   }
 
-
   private onDestroy = new Subject<void>();
   private updateChartPlotted: Subject<boolean> = new Subject<boolean>();
   private updateTotalWeeks: Subject<string[]> = new Subject<string[]>();
@@ -278,7 +277,7 @@ export class McOneSectionOneWeekPeriodComponent implements OnInit, OnChanges, On
   }
 
   // create the chart
-  private createOneWeekPeriodChart(labels: string[], maintenanceCostsArray: number[]): Chart {
+  private createChart(labels: string[], maintenanceCostsArray: number[]): Chart {
     const type: ChartType = 'line';
 
     const data: ChartConfiguration['data'] = {
@@ -534,7 +533,7 @@ export class McOneSectionOneWeekPeriodComponent implements OnInit, OnChanges, On
         this.chart.destroy();
       }
 
-      this.chart = this.createOneWeekPeriodChart(labels, maintenanceCostsArray);
+      this.chart = this.createChart(labels, maintenanceCostsArray);
 
       if (this.chart) {
         this.updateChartPlotted.next(true);
@@ -554,7 +553,7 @@ export class McOneSectionOneWeekPeriodComponent implements OnInit, OnChanges, On
   }
 
   private formatTooltipTitle(tooltipItem: any): string {
-    if (tooltipItem && tooltipItem[0]) {
+    if (tooltipItem && tooltipItem[0] && tooltipItem[0].label) {
       const label = tooltipItem[0].label;
 
       // substr accepts only start index
@@ -628,23 +627,16 @@ export class McOneSectionOneWeekPeriodComponent implements OnInit, OnChanges, On
       let total = 0;
       let formattedTotal: string = '';
 
-      const workorders = tooltipItems[0].length;
 
-      if (workorders === 0) {
-        return '';
-      } else {
+      tooltipItems.forEach(
+        (tooltipItem: any) => {
+          const cost = tooltipItem.parsed.y;
+          total += cost;
+          formattedTotal = total.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 3 });
 
-        tooltipItems.forEach(
-          (tooltipItem: any) => {
-            const cost = tooltipItem.parsed.y;
-            total += cost;
-            formattedTotal = total.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 3 });
-
-          }
-        );
-
-        return `Total: ${formattedTotal}`;
-      }
+        }
+      );
+      return `Total: ${formattedTotal}`;
     }
 
     return '';

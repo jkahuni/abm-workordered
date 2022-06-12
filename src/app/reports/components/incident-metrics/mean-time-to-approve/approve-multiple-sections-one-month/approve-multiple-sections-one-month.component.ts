@@ -229,7 +229,7 @@ export class ApproveMultipleSectionsOneMonthComponent implements OnInit, OnDestr
 
             formatter: (value) => {
               if (+value === 0) { return 'N/A' }
-              const formattedValue = value.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+              const formattedValue = value.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 1 });
               return formattedValue;
 
             },

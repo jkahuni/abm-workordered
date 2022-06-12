@@ -394,7 +394,6 @@ export class IncidentMetricsComponent implements OnInit {
   updateWeeks(weeks: string[]): void {
     this.weeks = weeks;
     this.conditionallyUpdateWeek();
-
   }
 
   // For one section multiple months
