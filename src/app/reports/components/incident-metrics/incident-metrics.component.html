@@ -1,387 +1,496 @@
-<div class="chart-container-wrapper" *ngIf="!loadingWorkordersFailed">
-  <!-- spinner -->
-  <div *ngIf="loading" class="chart-container">
-    <div class="bootstrap-spinner-container-wrapper">
-      <div class="bootstrap-spinner-container">
-        <div class="bootstrap-spinner">
-          <div
-            #loadingSpinner
-            class="spinner-border"
-            style="width: 2rem; height: 2rem"
-            role="status"
-          ></div>
-          <span class="loading-tag"><strong>Plotting Chart...</strong></span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- canvas objects -->
-  <!-- mean time to approve charts -->
-  <ng-container *ngIf="meanTimeToApprove">
-    <ng-container *ngIf="showApproveMultipleSectionsOneMonth">
-      <app-approve-multiple-sections-one-month
-        class="chart-container"
-        [workorders]="workorders"
-        [sections]="sections"
-        [dateIndicesObject]="dateIndicesObject"
-        [viableWorkorders]="viableWorkorders"
-        (chartPlotted)="updateChartPlottedStatus($event)"
-        (switchChart)="switchChart($event)"
-      ></app-approve-multiple-sections-one-month>
-    </ng-container>
-
-    <ng-container *ngIf="showApproveOneSectionMultipleMonths">
-      <app-approve-one-section-multiple-months
-        class="chart-container"
-        [workorders]="workorders"
-        [section]="section"
-        [viableWorkorders]="viableWorkorders"
-        [dateIndicesObject]="dateIndicesObject"
-        [totalMonthsPeriod]="totalMonthsPeriod"
-        [useCustomRange]="useCustomRange"
-        [dateRangeLimits]="dateRangeLimits"
-        [defaultYearIndex]="defaultYearIndex"
-        [defaultMonthIndex]="defaultMonthIndex"
-        (chartPlotted)="updateChartPlottedStatus($event)"
-        (switchChart)="switchChart($event)"
-        (updateDateRangeLimits)="updateDateRangeLimitsFromChild($event)"
-      ></app-approve-one-section-multiple-months>
-    </ng-container>
-
-    <ng-container *ngIf="showApproveOneSectionOneMonth">
-      <app-approve-one-section-one-month
-        class="chart-container"
-        [workorders]="workorders"
-        [section]="section"
-        [dateIndicesObject]="dateIndicesObject"
-        [viableWorkorders]="viableWorkorders"
-        (chartPlotted)="updateChartPlottedStatus($event)"
-        (switchChart)="switchChart($event)"
-      ></app-approve-one-section-one-month>
-    </ng-container>
-
-    <ng-container *ngIf="showApproveOneSectionOneWeek">
-      <app-approve-one-section-one-week
-        class="chart-container"
-        [workorders]="workorders"
-        [section]="section"
-        [dateIndicesObject]="dateIndicesObject"
-        [week]="week"
-        [viableWorkorders]="viableWorkorders"
-        (chartPlotted)="updateChartPlottedStatus($event)"
-        (updateWeeks)="updateWeeks($event)"
-      ></app-approve-one-section-one-week>
-    </ng-container>
-  </ng-container>
-
-  <!-- filter fields -->
-  <div *ngIf="chartPlotted" class="filter-charts">
-    <!-- select chart type -->
-    <div class="select-chart-type">
-      <div class="filter-charts-label">Change Charts</div>
-
-      <!-- change incident metrics category-->
-      <div class="filter-chart-field">
-        <mat-form-field class="filter-chart-form-field" appearance="outline">
-          <mat-label>Select Metrics</mat-label>
-          <mat-select
-            [(ngModel)]="chartsType"
-            (selectionChange)="changeChartsType($event.value)"
-          >
-            <mat-option value="mean-time-to-approve">
-              Mean Time To Approve</mat-option
-            >
-          </mat-select>
-        </mat-form-field>
-      </div>
-
-      <!-- change type of chart -->
-      <div class="filter-chart-field">
-        <mat-form-field class="filter-chart-form-field" appearance="outline">
-          <mat-label>Select Chart</mat-label>
-          <mat-select
-            [(ngModel)]="chartType"
-            (selectionChange)="changeChartType($event.value)"
-          >
-            <mat-option value="approve-multiple-sections-one-month">
-              Sections - 1 Month
-            </mat-option>
-            <mat-option value="approve-one-section-multiple-months">
-              1 Section - Many Months
-            </mat-option>
-            <mat-option value="approve-one-section-one-month">
-              1 Section - 1 Month
-            </mat-option>
-            <mat-option value="approve-one-section-one-week">
-              1 Section - 1 Week
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-      </div>
-    </div>
-
-    <!-- divide the two parts -->
-    <!-- hidden in small screens -->
-    <div class="divide-filter-chart-parts">
-      <mat-divider></mat-divider>
-    </div>
-
-    <!-- filter charts -->
-    <div class="filter-chart-parameters">
-      <div class="filter-charts-label">Change Chart Values</div>
-
-      <!-- change multiple sections one month -->
-      <ng-container *ngIf="showApproveMultipleSectionsOneMonth">
-        <div class="filter-chart-field">
-          <mat-form-field class="filter-chart-form-field" appearance="outline">
-            <mat-label>Change Sections</mat-label>
-            <mat-select
-              multiple
-              [(ngModel)]="sections"
-              (selectionChange)="updateSections($event.value)"
-            >
-              <mat-select-trigger>
-                {{ sections ? sections[0]["formattedName"] : "" }}
-                <span
-                  *ngIf="sections && sections.length > 1"
-                  class="select-multiple-sections-trigger"
-                >
-                  (+{{ sections && sections.length - 1 }}
-                  {{
-                    sections && sections.length === 2 ? "other" : "others"
-                  }})</span
-                >
-              </mat-select-trigger>
-
-              <mat-option
-                *ngFor="let section of factorySections"
-                [value]="section"
-                >{{ section.name }}</mat-option
+<ng-container *ngIf="!loadingWorkordersFailed">
+  <div class="chart-container-wrapper">
+    <!-- spinner -->
+    <ng-container *ngIf="loading">
+      <div class="chart-container">
+        <div class="bootstrap-spinner-container-wrapper">
+          <div class="bootstrap-spinner-container">
+            <div class="bootstrap-spinner">
+              <div
+                #loadingSpinner
+                class="spinner-border"
+                style="width: 2rem; height: 2rem"
+                role="status"
+              ></div>
+              <span class="loading-tag"
+                ><strong>Plotting Chart...</strong></span
               >
-            </mat-select>
-          </mat-form-field>
-        </div>
-      </ng-container>
-
-      <!-- change one section -->
-      <ng-container
-        *ngIf="
-          showApproveOneSectionMultipleMonths ||
-          showApproveOneSectionOneMonth ||
-          showApproveOneSectionOneWeek
-        "
-      >
-        <!-- filter section -->
-        <div class="filter-chart-field">
-          <mat-form-field class="filter-chart-form-field" appearance="outline">
-            <mat-label>Change Section</mat-label>
-            <mat-select
-              [(ngModel)]="section"
-              (selectionChange)="updateSection($event.value)"
-            >
-              <mat-option
-                *ngFor="let section of factorySections"
-                value="{{ section.name }}"
-                >{{ section.name }}</mat-option
-              >
-            </mat-select>
-          </mat-form-field>
-        </div>
-      </ng-container>
-
-      <!-- change total months -->
-      <!-- change individual date range parts -->
-      <ng-container *ngIf="showApproveOneSectionMultipleMonths">
-        <!-- change total months period -->
-        <ng-container *ngIf="!useCustomRange">
-          <div class="filter-chart-field">
-            <mat-form-field
-              class="filter-chart-form-field"
-              appearance="outline"
-            >
-              <mat-label>Change Total Months</mat-label>
-              <mat-select
-                [(ngModel)]="totalMonthsPeriod"
-                (selectionChange)="updateTotalMonthsPeriod($event.value)"
-              >
-                <mat-option
-                  *ngFor="let period of totalMonthPeriods"
-                  [value]="period"
-                  >{{ period }}</mat-option
-                >
-              </mat-select>
-            </mat-form-field>
+            </div>
           </div>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- canvas objects -->
+    <ng-container>
+      <!-- mean time to approve charts -->
+      <ng-container *ngIf="meanTimeToApprove">
+        <ng-container *ngIf="multipleSections">
+          <app-approve-multiple-sections
+            class="chart-container"
+            [workorders]="workorders"
+            [sections]="sections"
+            [dateIndicesObject]="dateIndicesObject"
+            [viableWorkorders]="viableWorkorders"
+            (chartPlotted)="updateChartPlottedStatus($event)"
+            (switchChart)="switchChart($event)"
+          ></app-approve-multiple-sections>
         </ng-container>
 
-        <div class="filter-chart-field slider-toggle">
-          <mat-slide-toggle
-            color="primary"
-            (change)="updateUseCustomRange($event)"
-            aria-labelledby="filter chart using custom dates"
-            >{{
-              useCustomRange ? "Custom dates" : "Custom dates?"
-            }}</mat-slide-toggle
-          >
-        </div>
+        <ng-container *ngIf="sectionMultipleMonths">
+          <app-approve-section-multiple-months
+            class="chart-container"
+            [workorders]="workorders"
+            [section]="section"
+            [viableWorkorders]="viableWorkorders"
+            [dateIndicesObject]="dateIndicesObject"
+            [totalMonthsPeriod]="totalMonthsPeriod"
+            [useCustomRange]="useCustomRange"
+            [dateRangeLimits]="dateRangeLimits"
+            [defaultYearIndex]="defaultYearIndex"
+            [defaultMonthIndex]="defaultMonthIndex"
+            (chartPlotted)="updateChartPlottedStatus($event)"
+            (switchChart)="switchChart($event)"
+            (updateDateRangeLimits)="updateDateRangeLimitsFromChild($event)"
+          ></app-approve-section-multiple-months>
+        </ng-container>
 
-        <!-- change date range parts -->
-        <ng-container *ngIf="useCustomRange">
-          <!-- first year -->
-          <div class="filter-chart-field">
-            <mat-form-field
-              class="filter-chart-form-field"
-              appearance="outline"
-            >
-              <mat-label>Change First Year</mat-label>
-              <mat-select
-                [(ngModel)]="firstYear"
-                (selectionChange)="
-                  updateDateRangeLimitParts($event.value, 'first-year')
-                "
-              >
-                <mat-option *ngFor="let year of years" [value]="year">{{
-                  year
-                }}</mat-option>
-              </mat-select>
-            </mat-form-field>
-          </div>
+        <ng-container *ngIf="sectionOneMonth">
+          <app-approve-section-one-month
+            class="chart-container"
+            [workorders]="workorders"
+            [section]="section"
+            [dateIndicesObject]="dateIndicesObject"
+            [viableWorkorders]="viableWorkorders"
+            (chartPlotted)="updateChartPlottedStatus($event)"
+            (switchChart)="switchChart($event)"
+          ></app-approve-section-one-month>
+        </ng-container>
 
-          <!-- first month -->
-          <div class="filter-chart-field">
-            <mat-form-field
-              class="filter-chart-form-field"
-              appearance="outline"
-            >
-              <mat-label>Change First Month</mat-label>
-              <mat-select
-                [(ngModel)]="firstMonth"
-                (selectionChange)="
-                  updateDateRangeLimitParts($event.value, 'first-month')
-                "
-              >
-                <mat-option
-                  *ngFor="let month of months"
-                  value="{{ month.formattedName }}"
-                  >{{ month.name }}</mat-option
-                >
-              </mat-select>
-            </mat-form-field>
-          </div>
-
-          <!-- last year -->
-          <div class="filter-chart-field">
-            <mat-form-field
-              class="filter-chart-form-field"
-              appearance="outline"
-            >
-              <mat-label>Change Last Year</mat-label>
-              <mat-select
-                [(ngModel)]="lastYear"
-                (selectionChange)="
-                  updateDateRangeLimitParts($event.value, 'last-year')
-                "
-              >
-                <mat-option *ngFor="let year of years" [value]="year">{{
-                  year
-                }}</mat-option>
-              </mat-select>
-            </mat-form-field>
-          </div>
-
-          <!-- last month -->
-          <div class="filter-chart-field">
-            <mat-form-field
-              class="filter-chart-form-field"
-              appearance="outline"
-            >
-              <mat-label>Change Last Month</mat-label>
-              <mat-select
-                [(ngModel)]="lastMonth"
-                (selectionChange)="
-                  updateDateRangeLimitParts($event.value, 'last-month')
-                "
-              >
-                <mat-option
-                  *ngFor="let month of months"
-                  value="{{ month.formattedName }}"
-                  >{{ month.name }}</mat-option
-                >
-              </mat-select>
-            </mat-form-field>
-          </div>
+        <ng-container *ngIf="sectionOneWeek">
+          <app-approve-section-one-week
+            class="chart-container"
+            [workorders]="workorders"
+            [section]="section"
+            [dateIndicesObject]="dateIndicesObject"
+            [week]="week"
+            [viableWorkorders]="viableWorkorders"
+            (chartPlotted)="updateChartPlottedStatus($event)"
+            (updateWeeks)="updateWeeks($event)"
+          ></app-approve-section-one-week>
         </ng-container>
       </ng-container>
 
-      <!-- change years and months -->
-      <ng-container
-        *ngIf="
-          showApproveMultipleSectionsOneMonth ||
-          showApproveOneSectionOneMonth ||
-          showApproveOneSectionOneWeek
-        "
-      >
-        <!-- filter years -->
-        <div class="filter-chart-field">
-          <mat-form-field class="filter-chart-form-field" appearance="outline">
-            <mat-label>Change Year</mat-label>
-            <mat-select
-              [(ngModel)]="year"
-              (selectionChange)="updateYear($event.value)"
-            >
-              <mat-option *ngFor="let year of years" [value]="year">{{
-                year
-              }}</mat-option>
-            </mat-select>
-          </mat-form-field>
-        </div>
+      <!-- mean time to acknowledge -->
+      <ng-container *ngIf="meanTimeToAcknowledge">
+        <ng-container *ngIf="multipleSections">
+          <app-acknowledge-multiple-sections
+            class="chart-container"
+          ></app-acknowledge-multiple-sections>
+        </ng-container>
 
-        <!-- filter months -->
-        <div class="filter-chart-field">
-          <mat-form-field class="filter-chart-form-field" appearance="outline">
-            <mat-label>Change Month</mat-label>
-            <mat-select
-              [(ngModel)]="month"
-              (selectionChange)="updateMonth($event.value)"
-            >
-              <mat-option
-                *ngFor="let month of months"
-                value="{{ month.formattedName }}"
-                >{{ month.name }}</mat-option
-              >
-            </mat-select>
-          </mat-form-field>
-        </div>
+        <ng-container *ngIf="sectionMultipleMonths">
+          <app-acknowledge-section-multiple-months
+            class="chart-container"
+          ></app-acknowledge-section-multiple-months>
+        </ng-container>
 
-        <!-- filter weeks -->
-        <ng-container *ngIf="showApproveOneSectionOneWeek">
+        <ng-container *ngIf="sectionOneMonth">
+          <app-acknowledge-section-one-month
+            class="chart-container"
+          ></app-acknowledge-section-one-month>
+        </ng-container>
+
+        <ng-container *ngIf="sectionOneWeek">
+          <app-acknowledge-section-one-week
+            class="chart-container"
+          ></app-acknowledge-section-one-week>
+        </ng-container>
+      </ng-container>
+
+      <!-- mttr -->
+      <ng-container *ngIf="meanTimeToRepair">
+        <ng-container *ngIf="multipleSections">
+          <app-mttr-multiple-sections
+            class="chart-container"
+          ></app-mttr-multiple-sections>
+        </ng-container>
+
+        <ng-container *ngIf="sectionMultipleMonths">
+          <app-mttr-section-multiple-months
+            class="chart-container"
+          ></app-mttr-section-multiple-months>
+        </ng-container>
+
+        <ng-container *ngIf="sectionOneMonth">
+          <app-mttr-section-one-month
+            class="chart-container"
+          ></app-mttr-section-one-month>
+        </ng-container>
+
+        <ng-container *ngIf="sectionOneWeek">
+          <app-mttr-section-one-week
+            class="chart-container"
+          ></app-mttr-section-one-week>
+        </ng-container>
+      </ng-container>
+
+      <!-- mtbf -->
+      <ng-container *ngIf="meanTimeBeforeFailure">
+        <ng-container *ngIf="multipleSections">
+          <app-mtbf-multiple-sections
+            class="chart-container"
+          ></app-mtbf-multiple-sections>
+        </ng-container>
+
+        <ng-container *ngIf="sectionMultipleMonths">
+          <app-mtbf-section-multiple-months
+            class="chart-container"
+          ></app-mtbf-section-multiple-months>
+        </ng-container>
+
+        <ng-container *ngIf="sectionOneMonth">
+          <app-mtbf-section-one-month
+            class="chart-container"
+          ></app-mtbf-section-one-month>
+        </ng-container>
+
+        <ng-container *ngIf="sectionOneWeek">
+          <app-mtbf-section-one-week
+            class="chart-container"
+          ></app-mtbf-section-one-week>
+        </ng-container>
+      </ng-container>
+    </ng-container>
+
+    <!-- filter fields -->
+    <ng-container *ngIf="chartPlotted">
+      <div class="filter-charts">
+        <!-- select chart type -->
+        <div class="select-chart-type">
+          <div class="filter-charts-label">Change Charts</div>
+
+          <!-- change incident metrics category-->
           <div class="filter-chart-field">
             <mat-form-field
               class="filter-chart-form-field"
               appearance="outline"
             >
-              <mat-label>Change Week</mat-label>
+              <mat-label>Select Metrics</mat-label>
               <mat-select
-                [(ngModel)]="week"
-                (selectionChange)="updateWeek($event.value)"
+                [(ngModel)]="chartsType"
+                (selectionChange)="changeChartsType($event.value)"
               >
-                <mat-option *ngFor="let week of weeks" [value]="week">{{
-                  week
-                }}</mat-option>
+                <mat-option value="mean-time-to-approve">
+                  Approve Mean Time</mat-option
+                >
+                <mat-option value="mean-time-to-acknowledge">
+                  Acknowledge Mean Time</mat-option
+                >
+                <mat-option value="mean-time-to-repair"> MTTR</mat-option>
+
+                <mat-option value="mean-time-before-failure"> MTBF</mat-option>
               </mat-select>
             </mat-form-field>
           </div>
-        </ng-container>
-      </ng-container>
+
+          <!-- change type of chart -->
+          <div class="filter-chart-field">
+            <mat-form-field
+              class="filter-chart-form-field"
+              appearance="outline"
+            >
+              <mat-label>Select Chart</mat-label>
+              <mat-select
+                [(ngModel)]="chartType"
+                (selectionChange)="changeChartType($event.value)"
+              >
+                <mat-option value="multiple-sections">
+                  Sections - 1 Month
+                </mat-option>
+                <mat-option value="section-multiple-months">
+                  1 Section - Many Months
+                </mat-option>
+                <mat-option value="section-one-month">
+                  1 Section - 1 Month
+                </mat-option>
+                <mat-option value="section-one-week">
+                  1 Section - 1 Week
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- divide the two parts -->
+        <!-- hidden in small screens -->
+        <div class="divide-filter-chart-parts">
+          <mat-divider></mat-divider>
+        </div>
+
+        <!-- filter charts -->
+        <div class="filter-chart-parameters">
+          <div class="filter-charts-label">Change Chart Values</div>
+
+          <!-- change multiple sections one month -->
+          <ng-container *ngIf="multipleSections">
+            <div class="filter-chart-field">
+              <mat-form-field
+                class="filter-chart-form-field"
+                appearance="outline"
+              >
+                <mat-label>Change Sections</mat-label>
+                <mat-select
+                  multiple
+                  [(ngModel)]="sections"
+                  (selectionChange)="updateSections($event.value)"
+                >
+                  <mat-select-trigger>
+                    {{ sections ? sections[0]["formattedName"] : "" }}
+                    <span
+                      *ngIf="sections && sections.length > 1"
+                      class="select-multiple-sections-trigger"
+                    >
+                      (+{{ sections && sections.length - 1 }}
+                      {{
+                        sections && sections.length === 2 ? "other" : "others"
+                      }})</span
+                    >
+                  </mat-select-trigger>
+
+                  <mat-option
+                    *ngFor="let section of factorySections"
+                    [value]="section"
+                    >{{ section.name }}</mat-option
+                  >
+                </mat-select>
+              </mat-form-field>
+            </div>
+          </ng-container>
+
+          <!-- change one section -->
+          <ng-container
+            *ngIf="sectionMultipleMonths || sectionOneMonth || sectionOneWeek"
+          >
+            <!-- filter section -->
+            <div class="filter-chart-field">
+              <mat-form-field
+                class="filter-chart-form-field"
+                appearance="outline"
+              >
+                <mat-label>Change Section</mat-label>
+                <mat-select
+                  [(ngModel)]="section"
+                  (selectionChange)="updateSection($event.value)"
+                >
+                  <mat-option
+                    *ngFor="let section of factorySections"
+                    value="{{ section.name }}"
+                    >{{ section.name }}</mat-option
+                  >
+                </mat-select>
+              </mat-form-field>
+            </div>
+          </ng-container>
+
+          <!-- change total months -->
+          <!-- change individual date range parts -->
+          <ng-container *ngIf="sectionMultipleMonths">
+            <!-- change total months period -->
+            <ng-container *ngIf="!useCustomRange">
+              <div class="filter-chart-field">
+                <mat-form-field
+                  class="filter-chart-form-field"
+                  appearance="outline"
+                >
+                  <mat-label>Change Total Months</mat-label>
+                  <mat-select
+                    [(ngModel)]="totalMonthsPeriod"
+                    (selectionChange)="updateTotalMonthsPeriod($event.value)"
+                  >
+                    <mat-option
+                      *ngFor="let period of totalMonthPeriods"
+                      [value]="period"
+                      >{{ period }}</mat-option
+                    >
+                  </mat-select>
+                </mat-form-field>
+              </div>
+            </ng-container>
+
+            <div class="filter-chart-field slider-toggle">
+              <mat-slide-toggle
+                color="primary"
+                (change)="updateUseCustomRange($event)"
+                aria-labelledby="filter chart using custom dates"
+                >{{
+                  useCustomRange ? "Custom dates" : "Custom dates?"
+                }}</mat-slide-toggle
+              >
+            </div>
+
+            <!-- change date range parts -->
+            <ng-container *ngIf="useCustomRange">
+              <!-- first year -->
+              <div class="filter-chart-field">
+                <mat-form-field
+                  class="filter-chart-form-field"
+                  appearance="outline"
+                >
+                  <mat-label>Change First Year</mat-label>
+                  <mat-select
+                    [(ngModel)]="firstYear"
+                    (selectionChange)="
+                      updateDateRangeLimitParts($event.value, 'first-year')
+                    "
+                  >
+                    <mat-option *ngFor="let year of years" [value]="year">{{
+                      year
+                    }}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+
+              <!-- first month -->
+              <div class="filter-chart-field">
+                <mat-form-field
+                  class="filter-chart-form-field"
+                  appearance="outline"
+                >
+                  <mat-label>Change First Month</mat-label>
+                  <mat-select
+                    [(ngModel)]="firstMonth"
+                    (selectionChange)="
+                      updateDateRangeLimitParts($event.value, 'first-month')
+                    "
+                  >
+                    <mat-option
+                      *ngFor="let month of months"
+                      value="{{ month.formattedName }}"
+                      >{{ month.name }}</mat-option
+                    >
+                  </mat-select>
+                </mat-form-field>
+              </div>
+
+              <!-- last year -->
+              <div class="filter-chart-field">
+                <mat-form-field
+                  class="filter-chart-form-field"
+                  appearance="outline"
+                >
+                  <mat-label>Change Last Year</mat-label>
+                  <mat-select
+                    [(ngModel)]="lastYear"
+                    (selectionChange)="
+                      updateDateRangeLimitParts($event.value, 'last-year')
+                    "
+                  >
+                    <mat-option *ngFor="let year of years" [value]="year">{{
+                      year
+                    }}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+
+              <!-- last month -->
+              <div class="filter-chart-field">
+                <mat-form-field
+                  class="filter-chart-form-field"
+                  appearance="outline"
+                >
+                  <mat-label>Change Last Month</mat-label>
+                  <mat-select
+                    [(ngModel)]="lastMonth"
+                    (selectionChange)="
+                      updateDateRangeLimitParts($event.value, 'last-month')
+                    "
+                  >
+                    <mat-option
+                      *ngFor="let month of months"
+                      value="{{ month.formattedName }}"
+                      >{{ month.name }}</mat-option
+                    >
+                  </mat-select>
+                </mat-form-field>
+              </div>
+            </ng-container>
+          </ng-container>
+
+          <!-- change years and months -->
+          <ng-container
+            *ngIf="multipleSections || sectionOneMonth || sectionOneWeek"
+          >
+            <!-- filter years -->
+            <div class="filter-chart-field">
+              <mat-form-field
+                class="filter-chart-form-field"
+                appearance="outline"
+              >
+                <mat-label>Change Year</mat-label>
+                <mat-select
+                  [(ngModel)]="year"
+                  (selectionChange)="updateYear($event.value)"
+                >
+                  <mat-option *ngFor="let year of years" [value]="year">{{
+                    year
+                  }}</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+
+            <!-- filter months -->
+            <div class="filter-chart-field">
+              <mat-form-field
+                class="filter-chart-form-field"
+                appearance="outline"
+              >
+                <mat-label>Change Month</mat-label>
+                <mat-select
+                  [(ngModel)]="month"
+                  (selectionChange)="updateMonth($event.value)"
+                >
+                  <mat-option
+                    *ngFor="let month of months"
+                    value="{{ month.formattedName }}"
+                    >{{ month.name }}</mat-option
+                  >
+                </mat-select>
+              </mat-form-field>
+            </div>
+
+            <!-- filter weeks -->
+            <ng-container *ngIf="sectionOneWeek">
+              <div class="filter-chart-field">
+                <mat-form-field
+                  class="filter-chart-form-field"
+                  appearance="outline"
+                >
+                  <mat-label>Change Week</mat-label>
+                  <mat-select
+                    [(ngModel)]="week"
+                    (selectionChange)="updateWeek($event.value)"
+                  >
+                    <mat-option *ngFor="let week of weeks" [value]="week">{{
+                      week
+                    }}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+            </ng-container>
+          </ng-container>
+        </div>
+      </div>
+    </ng-container>
+  </div>
+</ng-container>
+
+<ng-container *ngIf="loadingWorkordersFailed">
+  <div class="chart-container-wrapper">
+    <div class="chart-container">
+      {{
+        indexingError ? indexingError : otherError ? otherError : fallbackError
+      }}
     </div>
   </div>
-</div>
-
-<div *ngIf="loadingWorkordersFailed" class="chart-container-wrapper">
-  <div class="chart-container">
-    {{
-      indexingError ? indexingError : otherError ? otherError : fallbackError
-    }}
-  </div>
-</div>
+</ng-container>

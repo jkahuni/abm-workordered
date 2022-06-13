@@ -5,7 +5,6 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import {
   ReportsRoutingModule,
   maintenanceCostsComponents,
-  incidentMetricsComponents,
   acknowlegeMetricsComponents,
   approveMetricsComponents,
   mttrMetricsComponents,
@@ -27,7 +26,6 @@ import { IncidentMetricsComponent } from '@reports/components/incident-metrics/i
   declarations: [
     ReportsComponent,
     maintenanceCostsComponents,
-    incidentMetricsComponents,
     MaintenanceCostComponent,
     IncidentMetricsComponent,
     acknowlegeMetricsComponents,
@@ -49,7 +47,6 @@ import { IncidentMetricsComponent } from '@reports/components/incident-metrics/i
   ],
   exports: [
     maintenanceCostsComponents,
-    incidentMetricsComponents,
     acknowlegeMetricsComponents,
     approveMetricsComponents,
     mttrMetricsComponents,

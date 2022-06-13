@@ -1,1 +1,11 @@
-<p>approve-section-one-week works!</p>
+<canvas
+  baseChart
+  id="approveSectionOneWeek"
+  [hidden]="loading || loadingFailed"
+>
+  {{ chart }}
+</canvas>
+
+<div *ngIf="!loading && loadingFailed">
+  {{ loadingDefaultError ? loadingDefaultError : loadingFallbackError }}
+</div>

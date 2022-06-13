@@ -26,11 +26,6 @@ import { ApproveSectionMultipleMonthsComponent } from '@reports/components/incid
 import { ApproveSectionOneMonthComponent } from '@reports/components/incident-metrics/mean-time-to-approve/approve-section-one-month/approve-section-one-month.component';
 import { ApproveSectionOneWeekComponent } from '@reports/components/incident-metrics/mean-time-to-approve/approve-section-one-week/approve-section-one-week.component';
 
-import { ApproveMultipleSectionsOneMonthComponent } from '@reports/components/incident-metrics/mean-time-to-approve/approve-multiple-sections-one-month/approve-multiple-sections-one-month.component';
-import { ApproveOneSectionMultipleMonthsComponent } from '@reports/components/incident-metrics/mean-time-to-approve/approve-one-section-multiple-months/approve-one-section-multiple-months.component';
-import { ApproveOneSectionOneMonthComponent } from '@reports/components/incident-metrics/mean-time-to-approve/approve-one-section-one-month/approve-one-section-one-month.component';
-import { ApproveOneSectionOneWeekComponent } from '@reports/components/incident-metrics/mean-time-to-approve/approve-one-section-one-week/approve-one-section-one-week.component';
-
 // mttr
 import { MttrMultipleSectionsComponent } from '@reports/components/incident-metrics/mean-time-to-repair/mttr-multiple-sections/mttr-multiple-sections.component';
 import { MttrSectionOneMonthComponent } from '@reports/components/incident-metrics/mean-time-to-repair/mttr-section-one-month/mttr-section-one-month.component';
@@ -79,13 +74,6 @@ export const maintenanceCostsComponents = [
   McOneSectionMultipleMonthsPeriodComponent,
   McOneSectionOneMonthPeriodComponent,
   McOneSectionOneWeekPeriodComponent,
-];
-
-export const incidentMetricsComponents = [
-  ApproveMultipleSectionsOneMonthComponent,
-  ApproveOneSectionMultipleMonthsComponent,
-  ApproveOneSectionOneMonthComponent,
-  ApproveOneSectionOneWeekComponent,
 ];
 
 export const acknowlegeMetricsComponents = [

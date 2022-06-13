@@ -20,10 +20,6 @@ import { MatSlideToggleChange } from '@angular/material/slide-toggle';
 })
 export class IncidentMetricsComponent implements OnInit {
 
-  constructor(
-    private workordersService: WorkordersService
-  ) { }
-
   private onDestroy: Subject<void> = new Subject<void>();
 
   workorders!: IntWorkorder[];
@@ -118,15 +114,24 @@ export class IncidentMetricsComponent implements OnInit {
   chartType!: string;
 
   // toggle children to show
-  meanTimeToApprove = true;
+  meanTimeToApprove = false;
+  meanTimeToAcknowledge = false;
+  meanTimeToRepair = false;
+  meanTimeBeforeFailure = false;
 
   // toggle child to show
-  showApproveMultipleSectionsOneMonth = true;
-  showApproveOneSectionMultipleMonths = false;
-  showApproveOneSectionOneMonth = false;
-  showApproveOneSectionOneWeek = false;
+  multipleSections = false;
+  sectionMultipleMonths = false;
+  sectionOneMonth = false;
+  sectionOneWeek = false;
+
+  constructor(
+    private workordersService: WorkordersService
+  ) { }
+
 
   ngOnInit(): void {
+    this.setInitialChartsAndChart();
     this.getWorkorders();
     this.setYearsArray();
     this.setCurrentYear();
@@ -134,10 +139,7 @@ export class IncidentMetricsComponent implements OnInit {
     this.setFirstFiveSections();
     this.setInitialRandomSection();
     this.setDateIndicesObject();
-    this.updateChartsType();
-    this.updateChartType();
     this.setInitialWeekAndWeeks();
-
   }
 
   // set current year as default
@@ -266,82 +268,75 @@ export class IncidentMetricsComponent implements OnInit {
       });
   }
 
-  private updateChartsType(): string {
-    if (this.meanTimeToApprove) {
-      return this.chartsType = 'mean-time-to-approve';
-    }
-
-    return this.chartsType = '';
-
-  }
-
-  private updateChartType(): string {
-    let chartType: string = '';
-
-    if (this.showApproveMultipleSectionsOneMonth) {
-      chartType = 'approve-multiple-sections-one-month';
-    }
-
-    else if (this.showApproveOneSectionMultipleMonths) {
-      chartType = 'approve-one-section-multiple-months';
-    }
-
-    else if (this.showApproveOneSectionOneMonth) {
-      chartType = 'approve-one-section-one-month';
-    }
-
-    else if (this.showApproveOneSectionOneWeek) {
-      chartType = 'approve-one-section-one-week';
-    }
-
-    else {
-
-      chartType = 'unknown-chart';
-    }
-
-    return this.chartType = chartType;
-  }
-
-  private disableAllChartsTypes(): void {
-    this.meanTimeToApprove = false;
-  }
-
   private hideAllChildrenCharts(): void {
-    this.showApproveMultipleSectionsOneMonth = false;
-    this.showApproveOneSectionMultipleMonths = false;
-    this.showApproveOneSectionOneMonth = false;
-    this.showApproveOneSectionOneWeek = false;
+    this.multipleSections = false
+    this.sectionMultipleMonths = false;
+    this.sectionOneMonth = false;
+    this.sectionOneWeek = false;
+  }
+
+  private hideAllChartsTypes(): void {
+    this.meanTimeToApprove = false;
+    this.meanTimeToAcknowledge = false;
+    this.meanTimeToRepair = false;
+    this.meanTimeBeforeFailure = false;
+  }
+
+  private setInitialChartsAndChart(): void {
+    this.meanTimeToApprove = true;
+    this.multipleSections = true;
+    this.chartsType = 'mean-time-to-approve';
+    this.chartType = 'multiple-sections';
+  }
+
+  private setDefaultsForNewChartsType(): void {
+    this.hideAllChildrenCharts();
+    this.multipleSections = true;
+    this.chartType = 'multiple-sections';
+
   }
 
   changeChartsType(type: string): void {
-    this.disableAllChartsTypes();
+    this.hideAllChartsTypes();
     if (type === 'mean-time-to-approve') {
       this.meanTimeToApprove = true;
     }
-    this.updateChartsType();
-  }
 
+    else if (type === 'mean-time-to-acknowledge') {
+      this.meanTimeToAcknowledge = true;
+    }
+    else if (type === 'mean-time-to-repair') {
+      this.meanTimeToRepair = true;
+    }
+    else if (type === 'mean-time-before-failure') {
+      this.meanTimeBeforeFailure = true;
+    }
+
+    this.chartsType = type;
+    this.setDefaultsForNewChartsType();
+  }
 
   // change displayed chart through select
   changeChartType(type: string): any {
     this.hideAllChildrenCharts();
-    if (type === 'approve-multiple-sections-one-month') {
-      this.showApproveMultipleSectionsOneMonth = true;
+
+    if (type === 'multiple-sections') {
+      this.multipleSections = true;
     }
 
-    else if (type === 'approve-one-section-multiple-months') {
-      this.showApproveOneSectionMultipleMonths = true;
-    }
-    else if (type === 'approve-one-section-one-month') {
-      this.showApproveOneSectionOneMonth = true;
+    else if (type === 'section-multiple-months') {
+      this.sectionMultipleMonths = true;
     }
 
-    else if (type === 'approve-one-section-one-week') {
-      this.showApproveOneSectionOneWeek = true;
+    else if (type === 'section-one-month') {
+      this.sectionOneMonth = true;
     }
-    this.updateChartType();
+
+    else if (type === 'section-one-week') {
+      this.sectionOneWeek = true;
+    }
+    this.chartType = type;
   }
-
 
   // update fns
   updateSections(sections: IntNameAndFormattedName[]): IntNameAndFormattedName[] {
