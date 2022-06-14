@@ -273,6 +273,7 @@ export class IncidentMetricsComponent implements OnInit {
     this.sectionMultipleMonths = false;
     this.sectionOneMonth = false;
     this.sectionOneWeek = false;
+    this.useCustomRange = false;
   }
 
   private hideAllChartsTypes(): void {
@@ -296,8 +297,10 @@ export class IncidentMetricsComponent implements OnInit {
 
   }
 
-  changeChartsType(type: string): void {
+  changeChartsType(type: string): string  {
+    this.loading = true;
     this.hideAllChartsTypes();
+
     if (type === 'mean-time-to-approve') {
       this.meanTimeToApprove = true;
     }
@@ -314,10 +317,12 @@ export class IncidentMetricsComponent implements OnInit {
 
     this.chartsType = type;
     this.setDefaultsForNewChartsType();
+    return this.chartsType;
   }
 
   // change displayed chart through select
-  changeChartType(type: string): any {
+  // and through interacting with chart data points
+  changeChartType(type: string): string {
     this.hideAllChildrenCharts();
 
     if (type === 'multiple-sections') {
@@ -335,7 +340,8 @@ export class IncidentMetricsComponent implements OnInit {
     else if (type === 'section-one-week') {
       this.sectionOneWeek = true;
     }
-    this.chartType = type;
+    return this.chartType = type;
+
   }
 
   // update fns
@@ -355,17 +361,19 @@ export class IncidentMetricsComponent implements OnInit {
     return this.section = section ? section : fallbackSection;
   }
 
-  updateYear(year: number): void {
+  updateYear(year: number): number {
     const fallbackYear = dayjs().year();
     this.year = year ? year : fallbackYear;
     this.setDateIndicesObject();
+    return this.year;
   }
 
   // update week to display
-  updateMonth(month: string): void {
+  updateMonth(month: string): string {
     const fallbackMonth = dayjs().format('MMM');
     this.month = month ? month : fallbackMonth;
     this.setDateIndicesObject();
+    return this.month;
   }
 
   updateWeek(week: string): string {
@@ -386,21 +394,23 @@ export class IncidentMetricsComponent implements OnInit {
     }
   }
 
-  updateWeeks(weeks: string[]): void {
+  updateWeeks(weeks: string[]): string[] {
     this.weeks = weeks;
     this.conditionallyUpdateWeek();
+    return this.weeks;
   }
 
   // For one section multiple months
-  updateUseCustomRange(event: MatSlideToggleChange): boolean {
-    const emptyIndices: IntDateIndices = { monthIndex: 0, yearIndex: dayjs().year() };
-    const resetDateRangeLimits: IntDateRangeLimits = {
-      firstDate: emptyIndices,
-      lastDate: emptyIndices,
-      limitsUpdated: false
-    };
-
-    return this.useCustomRange = event.checked ? true : false;
+  updateUseCustomRange(event: MatSlideToggleChange): any {
+    return event.checked ? (
+      this.useCustomRange = true
+    ) 
+      :
+      (
+      this.useCustomRange = false,
+      this.totalMonthsPeriod = 4,
+      this.setDateIndicesObject()
+    );
 
   }
 
@@ -493,6 +503,7 @@ export class IncidentMetricsComponent implements OnInit {
 
   // switch chart
   switchChart(newChartData: IntSwitchChart): void {
+    // this.loading = true;
     const type = newChartData['type'];
     const section = newChartData['section'];
     const month = newChartData['month'];

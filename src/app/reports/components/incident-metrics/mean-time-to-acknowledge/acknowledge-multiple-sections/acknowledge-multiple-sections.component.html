@@ -1,1 +1,11 @@
-<p>acknowledge-multiple-sections works!</p>
+<canvas
+  baseChart
+  id="acknowledgeMultipleSections"
+  [hidden]="loading || loadingFailed"
+>
+  {{ chart }}
+</canvas>
+
+<div *ngIf="!loading && loadingFailed">
+  {{ loadingDefaultError ? loadingDefaultError : loadingFallbackError }}
+</div>

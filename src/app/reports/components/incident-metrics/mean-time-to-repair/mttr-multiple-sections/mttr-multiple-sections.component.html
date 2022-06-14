@@ -1,1 +1,11 @@
-<p>mttr-multiple-sections works!</p>
+<canvas
+  baseChart
+  id="MTTRMultipleSections"
+  [hidden]="loading || loadingFailed"
+>
+  {{ chart }}
+</canvas>
+
+<div *ngIf="!loading && loadingFailed">
+  {{ loadingDefaultError ? loadingDefaultError : loadingFallbackError }}
+</div>

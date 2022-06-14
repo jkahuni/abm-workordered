@@ -10,7 +10,6 @@ import { MatCardModule } from '@angular/material/card';
 // spinner
 import { NgxSpinnerModule } from 'ngx-spinner';
 import { HomeComponent } from './components/home/home.component';
-import { ReportsModule } from '@reports/reports.module';
 
 
 @NgModule({
@@ -23,7 +22,6 @@ import { ReportsModule } from '@reports/reports.module';
     MatButtonModule,
     MatCardModule,
     NgxSpinnerModule,
-    ReportsModule
   ]
 })
 export class HomeModule { }

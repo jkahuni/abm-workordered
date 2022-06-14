@@ -86,24 +86,55 @@
         <ng-container *ngIf="multipleSections">
           <app-acknowledge-multiple-sections
             class="chart-container"
+            [workorders]="workorders"
+            [sections]="sections"
+            [dateIndicesObject]="dateIndicesObject"
+            [viableWorkorders]="viableWorkorders"
+            (chartPlotted)="updateChartPlottedStatus($event)"
+            (switchChart)="switchChart($event)"
           ></app-acknowledge-multiple-sections>
         </ng-container>
 
         <ng-container *ngIf="sectionMultipleMonths">
           <app-acknowledge-section-multiple-months
             class="chart-container"
+            [workorders]="workorders"
+            [section]="section"
+            [viableWorkorders]="viableWorkorders"
+            [dateIndicesObject]="dateIndicesObject"
+            [totalMonthsPeriod]="totalMonthsPeriod"
+            [useCustomRange]="useCustomRange"
+            [dateRangeLimits]="dateRangeLimits"
+            [defaultYearIndex]="defaultYearIndex"
+            [defaultMonthIndex]="defaultMonthIndex"
+            (chartPlotted)="updateChartPlottedStatus($event)"
+            (switchChart)="switchChart($event)"
+            (updateDateRangeLimits)="updateDateRangeLimitsFromChild($event)"
           ></app-acknowledge-section-multiple-months>
         </ng-container>
 
         <ng-container *ngIf="sectionOneMonth">
           <app-acknowledge-section-one-month
             class="chart-container"
+            [workorders]="workorders"
+            [section]="section"
+            [dateIndicesObject]="dateIndicesObject"
+            [viableWorkorders]="viableWorkorders"
+            (chartPlotted)="updateChartPlottedStatus($event)"
+            (switchChart)="switchChart($event)"
           ></app-acknowledge-section-one-month>
         </ng-container>
 
         <ng-container *ngIf="sectionOneWeek">
           <app-acknowledge-section-one-week
             class="chart-container"
+            [workorders]="workorders"
+            [section]="section"
+            [dateIndicesObject]="dateIndicesObject"
+            [week]="week"
+            [viableWorkorders]="viableWorkorders"
+            (chartPlotted)="updateChartPlottedStatus($event)"
+            (updateWeeks)="updateWeeks($event)"
           ></app-acknowledge-section-one-week>
         </ng-container>
       </ng-container>
@@ -113,24 +144,55 @@
         <ng-container *ngIf="multipleSections">
           <app-mttr-multiple-sections
             class="chart-container"
+            [workorders]="workorders"
+            [sections]="sections"
+            [dateIndicesObject]="dateIndicesObject"
+            [viableWorkorders]="viableWorkorders"
+            (chartPlotted)="updateChartPlottedStatus($event)"
+            (switchChart)="switchChart($event)"
           ></app-mttr-multiple-sections>
         </ng-container>
 
         <ng-container *ngIf="sectionMultipleMonths">
           <app-mttr-section-multiple-months
             class="chart-container"
+            [workorders]="workorders"
+            [section]="section"
+            [viableWorkorders]="viableWorkorders"
+            [dateIndicesObject]="dateIndicesObject"
+            [totalMonthsPeriod]="totalMonthsPeriod"
+            [useCustomRange]="useCustomRange"
+            [dateRangeLimits]="dateRangeLimits"
+            [defaultYearIndex]="defaultYearIndex"
+            [defaultMonthIndex]="defaultMonthIndex"
+            (chartPlotted)="updateChartPlottedStatus($event)"
+            (switchChart)="switchChart($event)"
+            (updateDateRangeLimits)="updateDateRangeLimitsFromChild($event)"
           ></app-mttr-section-multiple-months>
         </ng-container>
 
         <ng-container *ngIf="sectionOneMonth">
           <app-mttr-section-one-month
             class="chart-container"
+            [workorders]="workorders"
+            [section]="section"
+            [dateIndicesObject]="dateIndicesObject"
+            [viableWorkorders]="viableWorkorders"
+            (chartPlotted)="updateChartPlottedStatus($event)"
+            (switchChart)="switchChart($event)"
           ></app-mttr-section-one-month>
         </ng-container>
 
         <ng-container *ngIf="sectionOneWeek">
           <app-mttr-section-one-week
             class="chart-container"
+            [workorders]="workorders"
+            [section]="section"
+            [dateIndicesObject]="dateIndicesObject"
+            [week]="week"
+            [viableWorkorders]="viableWorkorders"
+            (chartPlotted)="updateChartPlottedStatus($event)"
+            (updateWeeks)="updateWeeks($event)"
           ></app-mttr-section-one-week>
         </ng-container>
       </ng-container>
@@ -189,7 +251,9 @@
                 >
                 <mat-option value="mean-time-to-repair"> MTTR</mat-option>
 
-                <mat-option value="mean-time-before-failure"> MTBF</mat-option>
+                <mat-option value="mean-time-before-failure" disabled="true">
+                  MTBF</mat-option
+                >
               </mat-select>
             </mat-form-field>
           </div>
@@ -232,7 +296,7 @@
         <div class="filter-chart-parameters">
           <div class="filter-charts-label">Change Chart Values</div>
 
-          <!-- change multiple sections one month -->
+          <!-- multiple sections -->
           <ng-container *ngIf="multipleSections">
             <div class="filter-chart-field">
               <mat-form-field
@@ -268,7 +332,7 @@
             </div>
           </ng-container>
 
-          <!-- change one section -->
+          <!-- one section -->
           <ng-container
             *ngIf="sectionMultipleMonths || sectionOneMonth || sectionOneWeek"
           >
@@ -293,8 +357,7 @@
             </div>
           </ng-container>
 
-          <!-- change total months -->
-          <!-- change individual date range parts -->
+          <!-- total months/date range limits -->
           <ng-container *ngIf="sectionMultipleMonths">
             <!-- change total months period -->
             <ng-container *ngIf="!useCustomRange">
@@ -417,10 +480,30 @@
             </ng-container>
           </ng-container>
 
-          <!-- change years and months -->
+          <!-- change years/months/weeks -->
           <ng-container
             *ngIf="multipleSections || sectionOneMonth || sectionOneWeek"
           >
+            <!-- filter weeks -->
+            <ng-container *ngIf="sectionOneWeek">
+              <div class="filter-chart-field">
+                <mat-form-field
+                  class="filter-chart-form-field"
+                  appearance="outline"
+                >
+                  <mat-label>Change Week</mat-label>
+                  <mat-select
+                    [(ngModel)]="week"
+                    (selectionChange)="updateWeek($event.value)"
+                  >
+                    <mat-option *ngFor="let week of weeks" [value]="week">{{
+                      week
+                    }}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+            </ng-container>
+
             <!-- filter years -->
             <div class="filter-chart-field">
               <mat-form-field
@@ -458,26 +541,6 @@
                 </mat-select>
               </mat-form-field>
             </div>
-
-            <!-- filter weeks -->
-            <ng-container *ngIf="sectionOneWeek">
-              <div class="filter-chart-field">
-                <mat-form-field
-                  class="filter-chart-form-field"
-                  appearance="outline"
-                >
-                  <mat-label>Change Week</mat-label>
-                  <mat-select
-                    [(ngModel)]="week"
-                    (selectionChange)="updateWeek($event.value)"
-                  >
-                    <mat-option *ngFor="let week of weeks" [value]="week">{{
-                      week
-                    }}</mat-option>
-                  </mat-select>
-                </mat-form-field>
-              </div>
-            </ng-container>
           </ng-container>
         </div>
       </div>

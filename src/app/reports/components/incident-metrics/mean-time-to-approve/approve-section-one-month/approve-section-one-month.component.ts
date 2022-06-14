@@ -169,35 +169,33 @@ export class ApproveSectionOneMonthComponent implements OnInit, OnChanges, OnDes
     const monthIndex = this.dateIndicesObject['monthIndex'];
     const dates: string[] = this.setDatesInWeeks()[weekLabel];
 
-    const filteredWorkorders = this.workorders
-      .filter((workorder: IntWorkorder) => {
-        const section = workorder.section.name;
-        const approved = workorder.approved.status;
-        const raised = dayjs(workorder.raised.dateTime);
-        const workorderType = workorder.workorder.type;
-        const typeIsViable = this.viableWorkorders.includes(workorderType);
-        const dateIsViable = dates.includes(raised.format('MMM DD, YYYY'));
+    let timeArray: number[] = [];
 
-        return typeIsViable &&
-          dateIsViable &&
-          approved &&
-          section === this.section &&
-          raised.year() === yearIndex &&
-          raised.month() === monthIndex
-          ;
+    for (let workorder of this.workorders) {
+      const section = workorder.section.name;
+      const approved = workorder.approved.status;
+      const raised = dayjs(workorder.raised.dateTime);
+      const workorderType = workorder.workorder.type;
+      const typeIsViable = this.viableWorkorders.includes(workorderType);
+      const dateIsViable = dates.includes(raised.format('MMM DD, YYYY'));
 
-      })
-      .map((workorder: IntWorkorder) => {
-        const raised = dayjs(workorder.raised.dateTime);
-        const approved = dayjs(workorder.approved.dateTime);
+      if (
+        typeIsViable &&
+        dateIsViable &&
+        approved &&
+        section === this.section &&
+        raised.year() === yearIndex &&
+        raised.month() === monthIndex
+      ) {
+        const approvedTime = dayjs(workorder.approved.dateTime);
 
-        const timeDifference = approved.diff(raised, 'minutes')
+        const timeDifference = approvedTime.diff(raised, 'minutes');
 
-        return timeDifference;
+        timeArray.push(timeDifference);
+      }
+    }
 
-      });
-
-    return filteredWorkorders;
+    return timeArray;
   }
 
   private constructLabelsArray(): string[] {
@@ -399,11 +397,11 @@ export class ApproveSectionOneMonthComponent implements OnInit, OnChanges, OnDes
 
       weekLabels.forEach(
         (weekLabel: string) => {
-          const workorders = this.filterWorkorders(weekLabel);
+          const workordersTimeArray: number[] = this.filterWorkorders(weekLabel);
 
-          const totalWorkorders = workorders.length;
+          const totalWorkorders = workordersTimeArray.length;
 
-          const totalTime = workorders.reduce(
+          const totalTime = workordersTimeArray.reduce(
             (finalTime: number, initialTime: number) => finalTime + initialTime, 0);
 
           const approvalRate = this.calculateApprovalRate({ totalTime, totalWorkorders });
@@ -439,7 +437,7 @@ export class ApproveSectionOneMonthComponent implements OnInit, OnChanges, OnDes
 
   private switchToApproveOneSectionOneWeek(week: string): void {
     const chartData: IntSwitchChart = {
-      type: 'approve-one-section-one-week',
+      type: 'section-one-week',
       section: this.section,
       week,
       weeks: this.constructLabelsArray()
@@ -447,6 +445,4 @@ export class ApproveSectionOneMonthComponent implements OnInit, OnChanges, OnDes
 
     this.switchChart.emit(chartData);
   }
-
-
 }

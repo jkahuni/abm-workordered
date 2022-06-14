@@ -3,19 +3,17 @@ import { Component, OnDestroy, OnInit, Input, OnChanges, Output, SimpleChanges, 
 // rxjs
 import { takeUntil, Subject } from 'rxjs';
 
-// interfaces
-import { IntWorkorder } from '@workorders/models/workorders.models';
-import { IntSwitchChart, IntDateIndices, IntDateRangeLimits } from '@reports/models/reports.models';
-
-
 // for chart
 import { ChartConfiguration, ChartType, Chart } from 'chart.js';
 import DataLabelsPlugin from 'chartjs-plugin-datalabels';
 import annotationPlugin from 'chartjs-plugin-annotation';
 
-
 // dayjs
 import * as dayjs from 'dayjs';
+
+// interfaces
+import { IntWorkorder } from '@workorders/models/workorders.models';
+import { IntSwitchChart, IntDateIndices, IntDateRangeLimits } from '@reports/models/reports.models';
 
 
 @Component({
@@ -225,40 +223,79 @@ export class ApproveSectionOneWeekComponent implements OnInit, OnChanges, OnDest
     return labelsArray;
   }
 
-  private filterWorkorders(date: number): number[] {
+  // utilised by chart and tooltip
+  private filterWorkorders(date: number): IntWorkorder[] {
     const yearIndex = this.dateIndicesObject['yearIndex'];
     const monthIndex = this.dateIndicesObject['monthIndex'];
 
-    const totalTimeTaken: number[] = this.workorders
-      .filter(
-        (workorder: IntWorkorder) => {
-          const raised = dayjs(workorder.raised.dateTime);
-          const section = workorder.section.name;
-          const approved = workorder.approved.status;
-          const workorderType = workorder.workorder.type;
-          const typeIsViable = this.viableWorkorders.includes(workorderType);
-          const dateIsViable = raised.date() === date ? true : false;
+    let filteredWorkorders: IntWorkorder[] = [];
 
-          return typeIsViable &&
-            dateIsViable &&
-            approved &&
-            section === this.section &&
-            raised.year() === yearIndex &&
-            raised.month() === monthIndex;
-        })
-      .map(
-        (workorder: IntWorkorder) => {
-          const raised = dayjs(workorder.raised.dateTime);
-          const approved = dayjs(workorder.approved.dateTime);
+    for (let workorder of this.workorders) {
+      const raised = dayjs(workorder.raised.dateTime);
+      const section = workorder.section.name;
+      const approved = workorder.approved.status;
+      const workorderType = workorder.workorder.type;
+      const typeIsViable = this.viableWorkorders.includes(workorderType);
+      const dateIsViable = raised.date() === date ? true : false;
 
-          const timeDifference = approved.diff(raised, 'minutes');
+      if (
+        typeIsViable &&
+        dateIsViable &&
+        approved &&
+        section === this.section &&
+        raised.year() === yearIndex &&
+        raised.month() === monthIndex
+      ) {
+        filteredWorkorders.push(workorder);
+      }
+    }
 
-          return timeDifference
-        }
-      );
+    return filteredWorkorders;
+  }
 
-    return totalTimeTaken;
+  // for chart data
+  private generateTotalTimeToApprove(date: number): number[] {
+    const workorders = this.filterWorkorders(date);
 
+    const totalApprovalTime: number[] = workorders.map(
+      (workorder: IntWorkorder) => {
+        const raised = dayjs(workorder.raised.dateTime);
+        const approved = dayjs(workorder.approved.dateTime);
+
+        const timeDifference = approved.diff(raised, 'minutes');
+
+        return timeDifference
+      }
+    );
+
+    return totalApprovalTime;
+  }
+
+  private generateTooltipLabelsData(date: number): string[] {
+    const workorders: IntWorkorder[] = this.filterWorkorders(date);
+
+    let dataArray: string[] = [];
+
+    const timeDifferenceArray: { workorderNumber: string, timeDifference: number }[] = workorders.map(
+      (workorder: IntWorkorder) => {
+        const workorderNumber = workorder.workorder.number;
+        const raised = dayjs(workorder.raised.dateTime);
+        const approved = dayjs(workorder.approved.dateTime);
+
+        const timeDifference = approved.diff(raised, 'minutes');
+        return { workorderNumber, timeDifference };
+      }
+    );
+
+    timeDifferenceArray.forEach(
+      (workorderData: { workorderNumber: string, timeDifference: number }, index: number) => {
+        const workorderApprovalTime = `${index + 1}. ${workorderData.workorderNumber}: ${workorderData.timeDifference} min`;
+
+        dataArray.push(workorderApprovalTime);
+      }
+    );
+
+    return dataArray;
   }
 
   // create the chart
@@ -480,11 +517,11 @@ export class ApproveSectionOneWeekComponent implements OnInit, OnChanges, OnDest
         (dateLabel: string) => {
           const date = Number(dateLabel.substring(2).trim());
 
-          const workorders = this.filterWorkorders(date);
+          const workordersTimeArray: number[] = this.generateTotalTimeToApprove(date);
 
-          const totalWorkorders = workorders.length;
+          const totalWorkorders: number = workordersTimeArray.length;
 
-          const totalTime = workorders.reduce(
+          const totalTime: number = workordersTimeArray.reduce(
             (final: number, initial: number) => final + initial, 0
           );
 
@@ -538,53 +575,11 @@ export class ApproveSectionOneWeekComponent implements OnInit, OnChanges, OnDest
 
   private extractTooltipLabels(tooltipItem: any): string[] {
     if (tooltipItem && tooltipItem.label) {
-      const date = tooltipItem.label;
+      const label = tooltipItem.label;
 
-      const datePart = Number(date.substring(2).trim());
+      const date = Number(label.substring(2).trim());
 
-      const yearIndex = this.dateIndicesObject['yearIndex'];
-
-      const monthIndex = this.dateIndicesObject['monthIndex'];
-
-      let mTTAObject: string[] = [];
-
-      // filters all workorders for
-      // workorders in current month, year, and section
-      const filteredWorkorders = this.workorders
-        .filter(
-          (workorder: IntWorkorder) => {
-            const section: string = workorder.section.name;
-            const raised = dayjs(workorder.raised.dateTime);
-            const approved = workorder.approved.status;
-            const workorderType = workorder.workorder.type;
-            const typeIsViable = this.viableWorkorders.includes(workorderType);
-            const dateIsViable = raised.date() === datePart ? true : false;
-
-            return typeIsViable &&
-              approved &&
-              dateIsViable &&
-              section === this.section &&
-              raised.year() === yearIndex &&
-              raised.month() === monthIndex;
-          }
-        )
-        .map((workorder: IntWorkorder) => {
-          const workorderNumber = workorder.workorder.number;
-          const raised = dayjs(workorder.raised.dateTime);
-          const approved = dayjs(workorder.approved.dateTime);
-
-          const timeDifference = approved.diff(raised, 'minutes');
-          return { workorderNumber, timeDifference };
-        })
-        .forEach(
-          (workorderData: { workorderNumber: string, timeDifference: number }, index: number) => {
-            const returnObject = `${index + 1}. ${workorderData.workorderNumber}: ${workorderData.timeDifference} min`;
-
-            mTTAObject.push(returnObject);
-          }
-        );
-
-      return mTTAObject;
+      return this.generateTooltipLabelsData(date);
     }
     return [''];
   }
@@ -605,10 +600,9 @@ export class ApproveSectionOneWeekComponent implements OnInit, OnChanges, OnDest
         }
       );
 
-      return `Average: ${formattedAverage}`;
+      return `Average: ${formattedAverage} min`;
     }
 
     return '';
   }
-
 }

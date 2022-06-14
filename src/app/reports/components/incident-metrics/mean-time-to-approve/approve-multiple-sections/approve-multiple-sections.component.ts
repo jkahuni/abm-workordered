@@ -61,7 +61,7 @@ export class ApproveMultipleSectionsComponent implements OnInit, OnChanges, OnDe
           this.loadingFailed = true;
         }
       }));
-   }
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     const workorders = changes['allWorkorders']?.currentValue;
@@ -100,37 +100,32 @@ export class ApproveMultipleSectionsComponent implements OnInit, OnChanges, OnDe
     const year = this.dateIndicesObject['yearIndex'];
     const month = this.dateIndicesObject['monthIndex'];
 
-    const workorders = this.workorders.filter(
-      (workorder: IntWorkorder) => {
-        const workorderSection = workorder.section.name;
+    let timeArray: number[] = [];
 
-        const raised = dayjs(workorder.raised.dateTime);
+    for (let workorder of this.workorders) {
+      const workorderSection = workorder.section.name;
 
-        const approved = workorder.approved.status;
+      const raised = dayjs(workorder.raised.dateTime);
 
-        const workorderType = workorder.workorder.type;
+      const approved = workorder.approved.status;
 
-        const workorderIsViable = this.viableWorkorders.includes(workorderType);
+      const workorderType = workorder.workorder.type;
 
-        return workorderIsViable &&
-          approved &&
-          workorderSection === section &&
-          raised.year() === year &&
-          raised.month() === month;
+      const workorderIsViable = this.viableWorkorders.includes(workorderType);
+
+      if (workorderIsViable &&
+        approved &&
+        workorderSection === section &&
+        raised.year() === year &&
+        raised.month() === month) {
+        const approvedTime = dayjs(workorder.approved.dateTime);
+
+        const timeDifference = approvedTime.diff(raised, 'minutes');
+
+        timeArray.push(timeDifference);
       }
-    ).map(
-      (workorder: IntWorkorder) => {
-        const raised = dayjs(workorder.raised.dateTime);
-        const approved = dayjs(workorder.approved.dateTime);
-
-        const timeDifference = approved.diff(raised, 'minutes');
-
-
-
-        return timeDifference
-      }
-    );
-    return workorders;
+    }
+    return timeArray;
 
 
   }
@@ -278,7 +273,7 @@ export class ApproveMultipleSectionsComponent implements OnInit, OnChanges, OnDe
             const point = points[0];
             if (point) {
               const section = chart.data.labels?.[point.index] as string;
-              this.switchToOneSectionMultipleMonthsChart(section);
+              this.switchToSectionMultipleMonths(section);
             }
           }
 
@@ -302,10 +297,10 @@ export class ApproveMultipleSectionsComponent implements OnInit, OnChanges, OnDe
           const sectionName = section['name'];
           const sectionFormattedName = section['formattedName'];
 
-          const workorders: number[] = this.filterWorkorders(sectionName);
+          const workordersTimeArray: number[] = this.filterWorkorders(sectionName);
 
-          const totalWorkorders: number = workorders.length;
-          const totalTime: number = workorders.reduce(
+          const totalWorkorders: number = workordersTimeArray.length;
+          const totalTime: number = workordersTimeArray.reduce(
             (finalTime: number, initialTime) => finalTime + initialTime, 0
           );
 
@@ -341,7 +336,7 @@ export class ApproveMultipleSectionsComponent implements OnInit, OnChanges, OnDe
     return rate;
   }
 
-  private switchToOneSectionMultipleMonthsChart(formattedSectionName: string): void {
+  private switchToSectionMultipleMonths(formattedSectionName: string): void {
 
     const section = this.sections.filter((section: IntNameAndFormattedName) =>
       section.formattedName === formattedSectionName
@@ -350,7 +345,7 @@ export class ApproveMultipleSectionsComponent implements OnInit, OnChanges, OnDe
       .reduce((final, initial) => initial);
 
     const switchChartData = {
-      type: 'approve-one-section-multiple-months',
+      type: 'section-multiple-months',
       section
     };
 

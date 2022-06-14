@@ -25,9 +25,9 @@ import { IncidentMetricsComponent } from '@reports/components/incident-metrics/i
 @NgModule({
   declarations: [
     ReportsComponent,
-    maintenanceCostsComponents,
     MaintenanceCostComponent,
     IncidentMetricsComponent,
+    maintenanceCostsComponents,
     acknowlegeMetricsComponents,
     approveMetricsComponents,
     mttrMetricsComponents,

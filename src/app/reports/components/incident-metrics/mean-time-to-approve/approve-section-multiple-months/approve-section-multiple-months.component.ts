@@ -23,9 +23,9 @@ import * as dayjs from 'dayjs';
   templateUrl: './approve-section-multiple-months.component.html',
   styleUrls: ['./approve-section-multiple-months.component.scss']
 })
-export class ApproveSectionMultipleMonthsComponent implements OnInit , OnChanges, OnDestroy {
+export class ApproveSectionMultipleMonthsComponent implements OnInit, OnChanges, OnDestroy {
 
-   @Input('workorders') allWorkorders!: IntWorkorder[];
+  @Input('workorders') allWorkorders!: IntWorkorder[];
   @Input('section') currentSection!: string;
   @Input('dateIndicesObject') selectedDateIndices!: IntDateIndices;
   @Input('totalMonthsPeriod') monthsToPlotOver!: number;
@@ -76,7 +76,7 @@ export class ApproveSectionMultipleMonthsComponent implements OnInit , OnChanges
   loadingDefaultError!: string;
   loadingFallbackError = `Plotting chart failed with error code U-IM-MMP-01. Please try reloading the page or report the error code if the issue persists.`;
 
- constructor() {
+  constructor() {
     this.updateChartPlotted
       .pipe(takeUntil(this.onDestroy))
       .subscribe((status: boolean) => setTimeout(() => {
@@ -88,9 +88,9 @@ export class ApproveSectionMultipleMonthsComponent implements OnInit , OnChanges
           this.loadingFailed = true;
         }
       }));
- }
-  
-   ngOnChanges(changes: SimpleChanges): void {
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
     const workorders = changes['allWorkorders']?.currentValue;
     const section = changes['currentSection']?.currentValue;
     const dateIndicesObject = changes['selectedDateIndices']?.currentValue;
@@ -128,8 +128,8 @@ export class ApproveSectionMultipleMonthsComponent implements OnInit , OnChanges
       }
       this.generateChartData();
     }
-   }
-  
+  }
+
   ngOnInit(): void {
   }
 
@@ -233,35 +233,34 @@ export class ApproveSectionMultipleMonthsComponent implements OnInit , OnChanges
 
   // returns maintenance cost as int
   private filterWorkorders(yearIndex: number, monthIndex: number): number[] {
-    const workorders = this.workorders.filter(
-      (workorder: IntWorkorder) => {
-        const workorderSection: string = workorder.section.name;
+    let timeArray: number[] = [];
 
-        const raised = dayjs(workorder.raised.dateTime);
+    for (let workorder of this.workorders) {
+      const workorderSection: string = workorder.section.name;
 
-        const approved = workorder.approved.status;
+      const raised = dayjs(workorder.raised.dateTime);
 
-        const workorderType = workorder.workorder.type;
+      const approved = workorder.approved.status;
 
-        const workorderIsViable = this.viableWorkorders.includes(workorderType);
+      const workorderType = workorder.workorder.type;
 
-        return workorderIsViable &&
-          approved &&
-          workorderSection === this.section &&
-          raised.year() === yearIndex &&
-          raised.month() === monthIndex;
+      const workorderIsViable = this.viableWorkorders.includes(workorderType);
+
+      if (workorderIsViable &&
+        approved &&
+        workorderSection === this.section &&
+        raised.year() === yearIndex &&
+        raised.month() === monthIndex) {
+        const approvedTime = dayjs(workorder.approved.dateTime);
+
+        const timeDifference = approvedTime.diff(raised, 'minutes');
+
+        timeArray.push(timeDifference);
+
+
       }
-    ).map(
-      (workorder: IntWorkorder) => {
-        const raised = dayjs(workorder.raised.dateTime);
-        const approved = dayjs(workorder.approved.dateTime);
-
-        const timeDifference = approved.diff(raised, 'minutes');
-        return timeDifference;
-      }
-    );
-
-    return workorders;
+    }
+    return timeArray;
   }
 
   // create the chart
@@ -461,11 +460,11 @@ export class ApproveSectionMultipleMonthsComponent implements OnInit , OnChanges
 
           const monthAndTwoYearDigitLabel = dayjs().year(yearIndex).month(monthIndex).format('MMM YY');
 
-          const workorders: number[] = this.filterWorkorders(yearIndex, monthIndex);
+          const workordersTimeArray: number[] = this.filterWorkorders(yearIndex, monthIndex);
 
-          const totalWorkorders = workorders.length;
+          const totalWorkorders = workordersTimeArray.length;
 
-          const totalTime = workorders.reduce(
+          const totalTime = workordersTimeArray.reduce(
             (finalTime: number, initialTime: number) => finalTime + initialTime, 0
           );
 
@@ -507,7 +506,7 @@ export class ApproveSectionMultipleMonthsComponent implements OnInit , OnChanges
 
   private switchToOneSectionOneMonthChart(month: string): void {
     const switchChartData: IntSwitchChart = {
-      type: 'approve-one-section-one-month',
+      type: 'section-one-month',
       section: this.section,
       month
     };

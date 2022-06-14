@@ -1,1 +1,11 @@
-<p>mttr-section-one-week works!</p>
+<canvas
+  baseChart
+  id="MTTRSectionOneWeek"
+  [hidden]="loading || loadingFailed"
+>
+  {{ chart }}
+</canvas>
+
+<div *ngIf="!loading && loadingFailed">
+  {{ loadingDefaultError ? loadingDefaultError : loadingFallbackError }}
+</div>

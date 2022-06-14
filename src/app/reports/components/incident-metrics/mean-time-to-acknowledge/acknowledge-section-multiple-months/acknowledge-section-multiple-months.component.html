@@ -1,1 +1,11 @@
-<p>acknowledge-section-multiple-months works!</p>
+<canvas
+  baseChart
+  id="acknowledgeSectionMultipleMonths"
+  [hidden]="loading || loadingFailed"
+>
+  {{ chart }}
+</canvas>
+
+<div *ngIf="!loading && loadingFailed">
+  {{ loadingDefaultError ? loadingDefaultError : loadingFallbackError }}
+</div>
