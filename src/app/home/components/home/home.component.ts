@@ -1,5 +1,6 @@
 // angular core imports
 import { Component, OnInit } from '@angular/core';
+import { MessagingService } from '@messaging/services/messaging.service';
 
 // router
 import { Router } from '@angular/router';
@@ -67,6 +68,7 @@ export class HomeComponent implements OnInit {
     private auth: Auth,
     private toast: HotToastService,
     private router: Router,
+    private messagingService: MessagingService
   ) { }
 
   ngOnInit(): void {
@@ -323,6 +325,12 @@ export class HomeComponent implements OnInit {
 
     this.hideSpinnerOnSuccess();
 
+  }
+
+  // TODO: remove after testing
+  testMessage(): any {
+    console.log('METHOD CALLED IN HOME');
+    this.messagingService.sendSMSMessage();
   }
 
   resendVerificationCode(): any {

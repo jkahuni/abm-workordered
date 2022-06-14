@@ -9,6 +9,11 @@ export const environment = {
     authDomain: 'abm-workordered.firebaseapp.com',
     messagingSenderId: '78703146241',
     measurementId: 'G-C7WK73ZL6Y',
+  }
+  ,
+  africasTalkingCredentials: {
+    apiKey: 'fa8315549a493e578d6b1b4e611c3db3b7e2dfd1afcde5025f4ffd864b4b4a8e',
+    username: 'sandbox'
   },
   production: true
 };

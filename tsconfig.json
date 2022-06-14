@@ -1,4 +1,8 @@
 /* To learn more about this file see: https://angular.io/config/tsconfig. */
+/* allowJS: added */
+/* declaration: false => true */
+/* "emitDeclarationOnly": true, */
+/* declarationMap added */
 {
   "compileOnSave": false,
   "compilerOptions": {
@@ -11,7 +15,9 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "sourceMap": true,
-    "declaration": false,
+    "allowJs": true,
+    "declaration": true,
+    "declarationMap": true,
     "downlevelIteration": true,
     "experimentalDecorators": true,
     "moduleResolution": "node",
@@ -22,6 +28,7 @@
       "es2020",
       "dom"
     ],
+    
     "paths": {
       "@environments/*": [
         "src/environments/*"
@@ -46,6 +53,9 @@
       ],
       "@reports/*": [
         "src/app/reports/*"
+      ],
+      "@messaging/*": [
+        "src/app/messaging/*"
       ]
     }
   },
