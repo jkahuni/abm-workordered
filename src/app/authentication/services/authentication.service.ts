@@ -8,7 +8,8 @@ import {
   signInWithEmailAndPassword,
   sendPasswordResetEmail,
   User,
-  UserCredential
+  UserCredential,
+  ActionCodeSettings
 } from '@angular/fire/auth';
 import {
   Firestore,
@@ -58,6 +59,10 @@ export class AuthenticationService {
     user: User,
     lastName: string,
     userData: IntFirestoreUser): Promise<[void, void, void]> {
+    // for returning user back to app
+    const actionCodeSettings: ActionCodeSettings = {
+      url: `https://abm-workordered.web.app/?email=${user.email}`
+    };
 
     // for persisting the user to firestore
     const userDocRef = doc(this.firestore, `users/${userData.uid}`);
@@ -71,7 +76,11 @@ export class AuthenticationService {
     const persistUserToFirestore = setDoc(userDocRef, userData);
 
     // verify email
-    const sendVerificationEmail = sendEmailVerification(user);
+    // with action code
+    const sendVerificationEmail = sendEmailVerification(user, actionCodeSettings);
+
+    // without action code
+    // const sendVerificationEmail = sendEmailVerification(user);
 
     return await Promise.all([
       updateDisplayName,
@@ -81,15 +90,23 @@ export class AuthenticationService {
   }
 
   async resetPassword(email: string): Promise<void> {
-    return await sendPasswordResetEmail(this.auth, email);
+    const actionCodeSettings: ActionCodeSettings = {
+      url: `https://abm-workordered.web.app/?email=${email}`
+    };
+    // with action code
+    return await sendPasswordResetEmail(this.auth, email, actionCodeSettings);
+
+    // without acion code
+    // return await sendPasswordResetEmail(this.auth, email);
+
+
   }
 
   // for resending verification code from the home page
   async sendVerificationEmail(user: User): Promise<void> {
-    return await sendEmailVerification(user);
+    const actionCodeSettings: ActionCodeSettings = {
+      url: `https://abm-workordered.web.app/?email=${user.email}`
+    };
+    return await sendEmailVerification(user, actionCodeSettings);
   }
-
-
-
-
 }

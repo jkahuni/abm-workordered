@@ -348,15 +348,16 @@ export class MaintenanceCostComponent implements OnInit, OnDestroy {
   }
 
   // EXCLUSIVELY FOR ONE SECTION OVER MULTIPLE MONTHS CHART
-  updateUseCustomRange(event: MatSlideToggleChange): boolean {
-    const emptyIndices: IntDateIndices = { monthIndex: 0, yearIndex: dayjs().year() };
-    const resetDateRangeLimits: IntDateRangeLimits = {
-      firstDate: emptyIndices,
-      lastDate: emptyIndices,
-      limitsUpdated: false
-    };
-
-    return this.useCustomRange = event.checked ? true : false;
+  updateUseCustomRange(event: MatSlideToggleChange): any {
+    return event.checked ? (
+      this.useCustomRange = true
+    )
+      :
+      (
+        this.useCustomRange = false,
+        this.updateTotalMonthsPeriod(4),
+        this.setDateIndicesObject()
+      );
   }
 
   // updates total sections to plot over
@@ -404,7 +405,7 @@ export class MaintenanceCostComponent implements OnInit, OnDestroy {
   }
 
   // update date RangeLimits to Child
-  updateChildsDateRangeLimits({ firstDate, lastDate }: { firstDate: IntDateIndices, lastDate: IntDateIndices }): any {
+  updateChildsDateRangeLimits({ firstDate, lastDate }: { firstDate: IntDateIndices, lastDate: IntDateIndices }): IntDateRangeLimits {
     const dateRangeLimits: IntDateRangeLimits = {
       firstDate,
       lastDate,
@@ -450,15 +451,16 @@ export class MaintenanceCostComponent implements OnInit, OnDestroy {
   }
 
   // updates displayed week
-  updateWeek(week: string): void {
+  updateWeek(week: string): string {
     const fallbackWeek = 'Week 1';
-    this.week = week ? week : fallbackWeek;
+    return this.week = week ? week : fallbackWeek;
   }
 
   // emitted from one section one week component
-  updateWeeks(weeks: string[]): any {
+  updateWeeks(weeks: string[]): string[] {
     this.weeks = weeks;
     this.conditionallyUpdateWeek();
+    return this.weeks;
   }
 
   // emitted from different components

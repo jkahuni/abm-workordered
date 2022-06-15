@@ -636,19 +636,9 @@ export class McOneSectionOneWeekPeriodComponent implements OnInit, OnChanges, On
 
         }
       );
-      return `Total: ${formattedTotal}`;
+      return `Total: ${formattedTotal} Mil Ksh`;
     }
 
     return '';
   }
-
-  // custom tooltip position
-  // private customTooltipPositioner(elements: any, eventPosition: any): any {
-  //   const { x, y: currentY } = eventPosition;
-
-
-  //   const y = currentY + 10;
-
-  //   return { x, y };
-  // }
 }
