@@ -85,9 +85,9 @@ export interface IntWorkorder {
     rejected: IntStatusAndTime;
     section: IntSection;
     sparesUsed: IntSparesUsed;
-    storesTechnician: IntUser;
-    supervisor: IntUser;
-    technician: IntUser;
+    storesTechnician?: IntUser;
+    supervisor?: IntUser;
+    technician?: IntUser;
     timeTaken: IntTimeTakenByWorkorder;
     toolChange: IntToolChange;
     workorder: IntWorkorderSummary;

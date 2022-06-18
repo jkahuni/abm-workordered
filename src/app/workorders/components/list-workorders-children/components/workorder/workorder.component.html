@@ -67,7 +67,7 @@
   </ng-container>
 
   <!-- supervisor -->
-  <ng-container class="supevisor" *ngIf="workorder.supervisor.fullName">
+  <ng-container class="supevisor" *ngIf="workorder.supervisor?.fullName">
     <mat-form-field>
       <mat-label>Supervisor</mat-label>
 
@@ -82,7 +82,7 @@
   </ng-container>
 
   <!-- technician -->
-  <ng-container class="technician" *ngIf="workorder.technician.fullName">
+  <ng-container class="technician" *ngIf="workorder.technician?.fullName">
     <mat-form-field>
       <mat-label>Eng. Technician</mat-label>
       <input
@@ -98,7 +98,7 @@
   <!-- stores technician -->
   <ng-container
     class="storesTechnician"
-    *ngIf="workorder.storesTechnician.fullName"
+    *ngIf="workorder.storesTechnician?.fullName"
   >
     <mat-form-field>
       <mat-label>Store Technician</mat-label>

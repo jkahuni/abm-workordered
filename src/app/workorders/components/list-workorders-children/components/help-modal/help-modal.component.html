@@ -26,32 +26,33 @@
       <div class="modal-body">
         <!-- SUPERVISORS ACTIONS -->
         <div *ngIf="userType === 'supervisor'">
-          <p class="">
-            <strong>Approve:- </strong> The workorder looks okay and you want to
-            notify the one who raised and the technician named that they can
-            proceed to resolve the issue.
-          </p>
-
-          <p class="mt-2">
-            <strong>Reject:- </strong> The workorder is either unnecessary or
-            was not raised properly. You will be required to provide a reason
-            for rejecting it. The raiser will then be notified of this reason.
-          </p>
+          <ng-container *ngIf="!workorder?.escalated?.status">
+            <p class="">
+              <strong>Reject:- </strong> The workorder is either unnecessary or
+              was not raised properly. You will be required to provide a reason
+              for rejecting it. The raiser will then be notified of this reason.
+            </p>
+            <p class="mt-2">
+              <strong>Assign Technicians:- </strong> You want to assign
+              engineering and stores technicians to handle the issue
+              raised. This will approve the workorder.
+              The raiser and technicians will then be notified.
+            </p>
+          </ng-container>
 
           <p class="mt-2">
             <strong>Delegate:- </strong> You are unavailable to oversee the
             resolution of the issue raised or there is another supervisor better
             suited to follow up on the workorder. The raiser and the new
-            supervisor will be notified. The new supervisor will then be
-            responsible for approving or rejecting the workorder.
+            supervisor will be notified.
           </p>
 
           <p class="mt-2">
             <strong>Change Technicians:- </strong> You want to change either one
             or both the engineering and stores technicians named in the
             workorder. You can select the same technician if you do not want to
-            change him. This will automatically treat the workorder as approved.
-            The raiser and the new technicians will then be notified.
+            change him. The raiser and the new technicians will then be
+            notified.
           </p>
 
           <ng-container *ngIf="workorder?.escalated?.status">
@@ -60,15 +61,6 @@
               workorder to the technicians named. This will treat the workorder
               as if it has been approved at that time. Only the technicians will
               be notified.
-            </p>
-          </ng-container>
-
-          <ng-container *ngIf="workorder?.abnormalityCard?.status">
-            <p class="mt-2">
-              <strong>Assign Technicians:- </strong> You want to assign
-              engineering and stores technicians to handle the abnormality
-              raised. This will automatically treat the workorder as approved.
-              The raiser and technicians will then be notified.
             </p>
           </ng-container>
         </div>
@@ -86,9 +78,7 @@
             <strong>Mark Done:- </strong> You have attended to the issue raised,
             the m/c has been tested and is working okay. Time taken on the
             workorder stops counting when you mark workorder done. You can then
-            close the workorder within 12 hours from the time it was approved.
-            You can only mark w/o as done after it has been acknowledged. The
-            supervisor and the one who raised the workoder will be updated.
+            close the workorder as soon as possible.
           </p>
           <p class="mt-2">
             <strong>Close:- </strong> You are ready to close the workorder off,
@@ -98,8 +88,8 @@
           <p class="mt-2">
             <strong>Handover:- </strong> Delegate the workorder to another
             technician who is either on duty and/or can attend to the issue
-            raised. This should be done before acknowledging the workorder or
-            marking it as done. The supervisor who approved and the one who
+            raised. This should be done before acknowledging or
+            marking the workorder done. The supervisor who approved and the one who
             raised the workorder will be notified of the handover.
           </p>
         </div>

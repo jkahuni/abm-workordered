@@ -33,27 +33,15 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
           const hasActions = object['workorderHasActions'];
 
           this.largeScreen = largeScreen;
+          this.workorderHasActions = hasActions;
 
-          if (hasActions && this.largeScreen !== undefined && this.largeScreen === true) {
-            this.showLeftSidenav = true;
-            this.showRightSidenav = true;
-          }
-
-          else {
-            this.showRightSidenav = false;
-            this.showLeftSidenav = true;
-          }
-
-        }
-
-
-      );
+        });
 
     this.setActionsAndUsers
       .pipe(takeUntil(this.onDestroy))
       .subscribe((workorderHasActions: boolean) => {
         this.workorderHasActions = workorderHasActions;
-        if (workorderHasActions) {
+        if (workorderHasActions || this.workorderHasActions) {
           this.getUsers();
         }
       });
@@ -80,10 +68,11 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
 
   // for handover templates
   supervisors!: IntUser[];
+  supervisor!: IntUser;
   technicians!: IntUser[];
 
   // when to show right-sidenav
-  workorderHasActions!: boolean;
+  workorderHasActions = false;
 
   // toggle sidenavs
   showLeftSidenav = true;
@@ -108,7 +97,7 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
   showReviewWorkordersModal = false;
   showRaiseConcernsModal = false;
 
-  largeScreen!: boolean;
+  largeScreen = false;
 
   ngOnDestroy(): void {
     this.onDestroy.next();
@@ -126,18 +115,46 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
 
     this.matcher = this.mediaMatcher.matchMedia('(min-width: 670px)');
     this.matcher.addEventListener('change', this.mediaSizeListener);
-    // this.getScreenSizeOnLoad((window.innerWidth) > 670);
+    this.getScreenSizeOnLoad((window.innerWidth) > 670);
   }
 
-  // private getScreenSizeOnLoad(largeScreen: boolean): void {
-  //   this.updateScreenProperties.next(this.checkWorkorderStatus(largeScreen));
-  // }
+  private getScreenSizeOnLoad(largeScreen: boolean): void {
+    if (largeScreen) {
+      this.largeScreen = true;
+      if (this.workorderHasActions) {
+        this.showLeftSidenav = true;
+        this.showRightSidenav = true;
+      } else {
+        this.showLeftSidenav = true;
+        this.showRightSidenav = false;
+      }
+    }
+  }
 
   private mediaSizeListener = (event: { matches: any }) => {
-    this.updateScreenProperties.next(this.checkWorkorderStatus(event.matches))
+    if (event.matches) {
+      this.largeScreen = true;
+      if (this.workorderHasActions) {
+        this.showLeftSidenav = true;
+        this.showRightSidenav = true;
+      } else {
+        this.showLeftSidenav = true;
+        this.showRightSidenav = false;
+      }
+    }
+    else {
+      this.largeScreen = false;
+      if (this.workorderHasActions) {
+        this.showLeftSidenav = false;
+        this.showRightSidenav = true;
+      } else {
+        this.showLeftSidenav = true;
+        this.showRightSidenav = false;
+      }
+    }
   }
 
-  // create query
+  // filter workorders based on user
   private filterUsersWorkorders(workorders: IntWorkorder[]): IntWorkorder[] | undefined {
     if (
       this.userType &&
@@ -184,12 +201,11 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
             (workorder: IntWorkorder) => {
               const approved = workorder.approved.status;
               const rejected = workorder.rejected.status;
-              const supervisor = workorder.supervisor.uid;
 
               if (
                 !approved &&
-                !rejected &&
-                supervisor === this.userUid) {
+                !rejected
+              ) {
                 return true;
               }
               return false;
@@ -206,7 +222,7 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
             (workorder: IntWorkorder) => {
               const approved = workorder.approved.status;
               const rejected = workorder.rejected.status;
-              const supervisor = workorder.supervisor.uid;
+              const supervisor = workorder.supervisor?.uid;
 
               if (
                 approved &&
@@ -219,8 +235,7 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
 
             }
           );
-          this.setActionsAndUsers.next(false);
-
+          this.setActionsAndUsers.next(true);
           return approvedWorkorders;
 
         }
@@ -231,7 +246,7 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
             (workorder: IntWorkorder) => {
               const approved = workorder.approved.status;
               const rejected = workorder.rejected.status;
-              const supervisor = workorder.supervisor.uid;
+              const supervisor = workorder.supervisor?.uid;
 
               if (
                 !approved &&
@@ -292,7 +307,7 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
               const approved = workorder.approved.status;
               const rejected = workorder.rejected.status;
               const closed = workorder.closed.status;
-              const technician = workorder.technician.uid;
+              const technician = workorder.technician?.uid;
 
               if (
                 approved &&
@@ -317,7 +332,7 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
               const approved = workorder.approved.status;
               const rejected = workorder.rejected.status;
               const closed = workorder.closed.status;
-              const technician = workorder.technician.uid;
+              const technician = workorder.technician?.uid;
 
               if (
                 approved &&
@@ -344,7 +359,7 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
               const approved = workorder.approved.status;
               const rejected = workorder.rejected.status;
               const closed = workorder.closed.status;
-              const technician = workorder.storesTechnician.uid;
+              const technician = workorder.storesTechnician?.uid;
 
               if (
                 approved &&
@@ -369,7 +384,7 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
               const approved = workorder.approved.status;
               const rejected = workorder.rejected.status;
               const closed = workorder.closed.status;
-              const technician = workorder.storesTechnician.uid;
+              const technician = workorder.storesTechnician?.uid;
 
               if (
                 approved &&
@@ -500,6 +515,12 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
         this.supervisors = users.filter((user: IntUser) => user.group === 'Supervisor'
         );
 
+        const supervisor = users.find((user: IntUser) => {
+          return user.group === 'Supervisor' && user.uid === this.userUid;
+        });
+
+        if (supervisor) { this.supervisor = supervisor; }
+
         this.technicians = users.filter(
           (user: IntUser) =>
             user.group === 'Technician'
@@ -562,18 +583,10 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
 
   displayCurrentWorkorder(workorder: IntWorkorder): any {
     this.workorder = workorder;
-
-    this.updateScreenProperties.next(this.checkWorkorderStatus(this.largeScreen));
-  }
-
-  private checkWorkorderStatus(largeScreen: boolean): SidenavsDeterminer {
-    const workorderHasActions = this.workorderHasActions ? this.workorderHasActions : false;
-
-    return {
-      largeScreen,
-      workorderHasActions
-    };
-
+    if (this.workorderHasActions && this.largeScreen) {
+      this.showLeftSidenav = true;
+      this.showRightSidenav = true;
+    }
   }
 
   // from actions component

@@ -195,6 +195,7 @@
 <div *ngIf="showRejectWorkorderModal && workorder">
   <app-reject-workorder-modal
     [workorder]="workorder"
+    [supervisor]="supervisor"
     (close)="toggleModal($event)"
     (updateWorkorder)="updateWorkorder($event)"
   ></app-reject-workorder-modal>
@@ -224,6 +225,7 @@
 <div *ngIf="showAssignTechniciansModal && workorder && technicians">
   <app-assign-technicians-modal
     [workorder]="workorder"
+    [supervisor]="supervisor"
     [technicians]="technicians"
     (close)="toggleModal($event)"
     (updateWorkorder)="updateWorkorder($event)"

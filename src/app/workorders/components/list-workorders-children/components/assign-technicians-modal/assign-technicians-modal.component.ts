@@ -29,6 +29,7 @@ export class AssignTechniciansModalComponent implements OnInit, OnChanges {
   selectedWorkorder!: IntWorkorder;
   @Input('technicians')
   allTechnicians!: IntUser[];
+  @Input('supervisor') currentSupervisor!: IntUser;
 
   @Output()
   close: EventEmitter<string> = new EventEmitter<string>();
@@ -44,6 +45,7 @@ export class AssignTechniciansModalComponent implements OnInit, OnChanges {
 
   workorder!: IntWorkorder;
   technicians!: IntUser[];
+  supervisor!: IntUser;
 
   electricalTechnicians!: IntUser[];
   mechanicalTechnicians!: IntUser[];
@@ -55,11 +57,13 @@ export class AssignTechniciansModalComponent implements OnInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    const workorder = changes['selectedWorkorder']?.currentValue;
-    const technicians = changes['allTechnicians']?.currentValue;
+    const workorder = changes['selectedWorkorder']?.currentValue as IntWorkorder;
+    const technicians = changes['allTechnicians']?.currentValue as IntUser[];
+    const supervisor = changes['currentSupervisor']?.currentValue as IntUser;
 
-    this.workorder = workorder;
-    this.technicians = technicians;
+    this.workorder = workorder ? workorder : this.workorder;
+    this.technicians = technicians ? technicians : this.technicians;
+    this.supervisor = supervisor ? supervisor : this.supervisor;
 
     this.createForm();
     this.filterTechnicians();
@@ -139,7 +143,8 @@ export class AssignTechniciansModalComponent implements OnInit, OnChanges {
           approved: { status: true, dateTime: now },
           rejected: { status: false, dateTime: now },
           technician: engTechnician,
-          storesTechnician: storeTechnician
+          storesTechnician: storeTechnician,
+          supervisor: this.supervisor
         };
 
         this.workordersService.updateWorkorder(workorderUid, workorderUpdateData)

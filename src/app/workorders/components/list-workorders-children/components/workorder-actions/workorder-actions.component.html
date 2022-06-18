@@ -25,9 +25,13 @@
   </div>
 </div>
 
-<!-- supervisor w/o status -->
+<!-- supervisor && manager w/o status -->
 <div
-  *ngIf="workorder && userType === 'supervisor' && workorder.escalated?.status"
+  *ngIf="
+    workorder &&
+    workorder.escalated?.status &&
+    (userType === 'supervisor' || userType === 'manager')
+  "
   class="workorder-status-wrapper escalated"
 >
   <div class="workorder-status escalated">status: Escalated</div>
@@ -49,7 +53,7 @@
         <!-- workorder not escalated -->
         <div *ngIf="!workorder.escalated?.status">
           <!-- approve workorder -->
-          <mat-list-item role="listitem">
+          <!-- <mat-list-item role="listitem">
             <div *ngIf="approvingWorkorder">
               <button
                 class="action-button btn btn-sm btn-success shadow-none"
@@ -78,46 +82,22 @@
             </div>
 
             <mat-divider></mat-divider>
-          </mat-list-item>
+          </mat-list-item> -->
 
-          <!-- reject -->
-          <mat-list-item role="listitem">
-            <button
-              class="action-button btn btn-link shadow-none"
-              type="button"
-              (click)="openModal('reject')"
-            >
-              Reject
-            </button>
-            <mat-divider></mat-divider>
-          </mat-list-item>
+          <ng-container *ngIf="workorder && !workorder.approved.status">
+            <!-- reject -->
+            <mat-list-item role="listitem">
+              <button
+                class="action-button btn btn-link shadow-none"
+                type="button"
+                (click)="openModal('reject')"
+              >
+                Reject
+              </button>
+              <mat-divider></mat-divider>
+            </mat-list-item>
 
-          <!-- supervisor handover -->
-          <mat-list-item role="listitem">
-            <button
-              class="action-button btn btn-link shadow-none"
-              type="button"
-              (click)="openModal('supervisorHandover')"
-            >
-              Delegate
-            </button>
-            <mat-divider></mat-divider>
-          </mat-list-item>
-
-          <!-- change technicians -->
-          <mat-list-item role="listitem" class="long-button-text">
-            <button
-              class="action-button btn btn-link shadow-none"
-              type="button"
-              (click)="openModal('changeTechnicians')"
-            >
-              Change Technicians
-            </button>
-            <mat-divider></mat-divider>
-          </mat-list-item>
-
-          <!-- assign technicians -->
-          <div *ngIf="workorder.abnormalityCard.status">
+            <!-- assign technicians -->
             <mat-list-item role="listitem" class="long-button-text">
               <button
                 #assignTechniciansButton
@@ -129,37 +109,37 @@
               </button>
               <mat-divider></mat-divider>
             </mat-list-item>
-          </div>
+          </ng-container>
+
+          <ng-container *ngIf="workorder && workorder.approved.status">
+            <!-- supervisor handover -->
+            <mat-list-item role="listitem">
+              <button
+                class="action-button btn btn-link shadow-none"
+                type="button"
+                (click)="openModal('supervisorHandover')"
+              >
+                Delegate
+              </button>
+              <mat-divider></mat-divider>
+            </mat-list-item>
+
+            <!-- change technicians -->
+            <mat-list-item role="listitem" class="long-button-text">
+              <button
+                class="action-button btn btn-link shadow-none"
+                type="button"
+                (click)="openModal('changeTechnicians')"
+              >
+                Change Technicians
+              </button>
+              <mat-divider></mat-divider>
+            </mat-list-item>
+          </ng-container>
         </div>
 
         <!-- workorder escalated -->
         <div *ngIf="workorder.escalated?.status">
-          <!-- approve workorder -->
-          <mat-list-item role="listitem">
-            <div *ngIf="workorder.approved.status">
-              <button
-                class="action-button btn btn-link shadow-none"
-                type="button"
-                disabled
-              >
-                Approved
-              </button>
-            </div>
-            <mat-divider></mat-divider>
-          </mat-list-item>
-
-          <!-- reject -->
-          <mat-list-item role="listitem">
-            <button
-              class="action-button btn btn-link shadow-none"
-              type="button"
-              disabled
-            >
-              Reject
-            </button>
-            <mat-divider></mat-divider>
-          </mat-list-item>
-
           <!-- supervisor handover -->
           <mat-list-item role="listitem">
             <button
@@ -215,20 +195,6 @@
 
             <mat-divider></mat-divider>
           </mat-list-item>
-
-          <!-- assign technicians -->
-          <div [hidden]="!workorder.abnormalityCard.status">
-            <mat-list-item role="listitem" class="long-button-text">
-              <button
-                class="action-button btn btn-link shadow-none"
-                type="button"
-                disabled
-              >
-                Assign Technicians
-              </button>
-              <mat-divider></mat-divider>
-            </mat-list-item>
-          </div>
         </div>
       </div>
 

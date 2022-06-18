@@ -133,9 +133,9 @@ export class CloseMoldServiceComponent implements OnInit {
       workorderDescription: [workorder.workorder.description ? workorder.workorder.description :
         'no description provided.'],
       raiser: [workorder.raiser.fullName],
-      supervisor: [workorder.supervisor.fullName],
-      technician: [workorder.technician.fullName],
-      storesTechnician: [workorder.storesTechnician.fullName],
+      supervisor: [workorder.supervisor?.fullName],
+      technician: [workorder.technician?.fullName],
+      storesTechnician: [workorder.storesTechnician?.fullName],
       dateRaised: [this.formatDate(workorder.raised.dateTime)],
       timeRaised: [this.formatTime(workorder.raised.dateTime)],
       dateApproved: [this.formatDate(workorder.approved.dateTime)],

@@ -37,7 +37,10 @@ export class IncidentMetricsComponent implements OnInit {
     { name: 'Tank Formation', formattedName: 'Tank' }
   ];
 
-  sections: IntNameAndFormattedName[] = [];
+  sections: IntNameAndFormattedName[] = [
+    { name: 'Grid Casting', formattedName: 'Casting' },
+    { name: 'Pasting', formattedName: 'Pasting' }
+  ];
 
   section!: string;
 
@@ -136,7 +139,7 @@ export class IncidentMetricsComponent implements OnInit {
     this.setYearsArray();
     this.setCurrentYear();
     this.setCurrentMonth();
-    this.setFirstFiveSections();
+    // this.setFirstFiveSections();
     this.setInitialRandomSection();
     this.setDateIndicesObject();
     this.setInitialWeekAndWeeks();
@@ -228,7 +231,7 @@ export class IncidentMetricsComponent implements OnInit {
   // in case no particular section was selected
   // in the sections over one month chart
   private setInitialRandomSection(): string {
-    const section: IntNameAndFormattedName = this.factorySections[Math.floor(Math.random() * this.factorySections.length)];
+    const section: IntNameAndFormattedName = this.sections[Math.floor(Math.random() * this.sections.length)];
 
     return this.section = section.name;
   }

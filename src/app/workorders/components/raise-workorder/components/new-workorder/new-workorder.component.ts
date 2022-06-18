@@ -1,7 +1,4 @@
-import { Component, OnInit } from '@angular/core';
-
-// for firebase User object
-import { Auth, onAuthStateChanged, User } from '@angular/fire/auth';
+import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 
 
 @Component({
@@ -11,21 +8,15 @@ import { Auth, onAuthStateChanged, User } from '@angular/fire/auth';
 })
 export class NewWorkorderComponent implements OnInit {
 
-  constructor(
-    private auth: Auth,
-  ) { }
 
-  public userUid!: string;
+  @Output() workorderTypeSelected: EventEmitter<string> = new EventEmitter<string>();
 
+  constructor() { }
 
   ngOnInit(): void {
-    onAuthStateChanged(this.auth,
-      (user: User | null) => {
-        if (user) {
-          this.userUid = user.uid;
-        }
-      });
-
   }
 
+  updateWorkorderType(type: string): void {
+    this.workorderTypeSelected.emit(type);
+  }
 }

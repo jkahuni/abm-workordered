@@ -1,280 +1,167 @@
-<div *ngIf="!loading">
-  <div *ngIf="!loadingFailed">
-    <div class="form-container mat-elevation-z5">
-      <div class="form-header">
-        <h2 class="text-center">Breakdown Workorder</h2>
-      </div>
+<ng-container *ngIf="!loading">
+  <div class="form-container mat-elevation-z5">
+    <div class="form-header">
+      <h2 class="text-center">Breakdown Workorder</h2>
+    </div>
 
-      <form [formGroup]="form" (ngSubmit)="raiseWorkorder()" autocomplete="off">
-        <ng-container class="workorder-number">
-          <mat-form-field>
-            <mat-label>Workorder Number</mat-label>
-            <input
-              readonly
-              matInput
-              type="text"
-              formControlName="workorderNumber"
-            />
+    <form [formGroup]="form" (ngSubmit)="raiseWorkorder()" autocomplete="off">
+      <ng-container class="workorder-number">
+        <mat-form-field>
+          <mat-label>Workorder Number</mat-label>
+          <input
+            readonly
+            matInput
+            type="text"
+            formControlName="workorderNumber"
+          />
+        </mat-form-field>
+      </ng-container>
+
+      <ng-container class="raiser-fullName">
+        <mat-form-field>
+          <mat-label>Raised By</mat-label>
+          <input
+            readonly
+            matInput
+            type="text"
+            class="text-capitalize"
+            formControlName="raiserFullName"
+          />
+        </mat-form-field>
+      </ng-container>
+
+      <ng-container class="date-time-raised">
+        <div>
+          <mat-form-field class="date shareWidth">
+            <mat-label>Date Raised</mat-label>
+            <input readonly matInput type="text" formControlName="dateRaised" />
           </mat-form-field>
-        </ng-container>
-
-        <ng-container class="raiser-fullName">
-          <mat-form-field>
-            <mat-label>Raised By</mat-label>
-            <input
-              readonly
-              matInput
-              type="text"
-              class="text-capitalize"
-              formControlName="raiserFullName"
-            />
-          </mat-form-field>
-        </ng-container>
-
-        <ng-container class="date-time-raised">
-          <div>
-            <mat-form-field class="date shareWidth">
-              <mat-label>Date Raised</mat-label>
-              <input
-                readonly
-                matInput
-                type="text"
-                formControlName="dateRaised"
-              />
-            </mat-form-field>
-            <mat-form-field class="time shareWidth">
-              <mat-label
-                [ngClass]="{'invalid-machine-stopped-time': form.controls['timeMachineStopped']?.errors?.['invalidTime']}"
-                >Time Raised</mat-label
-              >
-              <input
-                readonly
-                matInput
-                type="text"
-                formControlName="timeRaised"
-              />
-            </mat-form-field>
-          </div>
-        </ng-container>
-
-        <ng-container class="date-machine-stopped">
-          <mat-form-field>
-            <mat-label>Date M/C Stopped</mat-label>
-            <input
-              matInput
-              formControlName="dateMachineStopped"
-              [matDatepickerFilter]="filterDates"
-              [matDatepicker]="breakdownDatePicker"
-            />
-            <mat-datepicker-toggle
-              matSuffix
-              [for]="breakdownDatePicker"
-            ></mat-datepicker-toggle>
-            <mat-datepicker #breakdownDatePicker></mat-datepicker>
-            <mat-error
-              *ngIf="form.controls['dateMachineStopped']?.errors?.['required']"
-              >Breakdown date is required.</mat-error
+          <mat-form-field class="time shareWidth">
+            <mat-label
+              [ngClass]="{'invalid-machine-stopped-time': form.controls['timeMachineStopped']?.errors?.['invalidTime']}"
+              >Time Raised</mat-label
             >
+            <input readonly matInput type="text" formControlName="timeRaised" />
           </mat-form-field>
-        </ng-container>
+        </div>
+      </ng-container>
 
-        <ng-container class="time-machine-stopped">
-          <mat-form-field>
-            <mat-label>Time M/C Stopped</mat-label>
-            <input matInput type="time" formControlName="timeMachineStopped" />
-            <mat-error
-              *ngIf="form.controls['timeMachineStopped']?.errors?.['required']"
-              >Breakdown time is required.</mat-error
+      <ng-container class="date-machine-stopped">
+        <mat-form-field>
+          <mat-label>Date M/C Stopped</mat-label>
+          <input
+            matInput
+            formControlName="dateMachineStopped"
+            [matDatepickerFilter]="filterDates"
+            [matDatepicker]="breakdownDatePicker"
+          />
+          <mat-datepicker-toggle
+            matSuffix
+            [for]="breakdownDatePicker"
+          ></mat-datepicker-toggle>
+          <mat-datepicker #breakdownDatePicker></mat-datepicker>
+          <mat-error
+            *ngIf="form.controls['dateMachineStopped']?.errors?.['required']"
+            >Breakdown date is required.</mat-error
+          >
+        </mat-form-field>
+      </ng-container>
+
+      <ng-container class="time-machine-stopped">
+        <mat-form-field>
+          <mat-label>Time M/C Stopped</mat-label>
+          <input matInput type="time" formControlName="timeMachineStopped" />
+          <mat-error
+            *ngIf="form.controls['timeMachineStopped']?.errors?.['required']"
+            >Breakdown time is required.</mat-error
+          >
+
+          <mat-error
+            *ngIf="form.controls['timeMachineStopped']?.errors?.['invalidTime']"
+          >
+            M/C stop time cannot be after w/o raised time.
+          </mat-error>
+        </mat-form-field>
+      </ng-container>
+
+      <ng-container class="section-select">
+        <mat-form-field>
+          <mat-label>Section</mat-label>
+          <mat-select formControlName="section">
+            <mat-option value="" selected> --select section-- </mat-option>
+            <mat-option
+              *ngFor="let section of sections | sectionsFilter: 'Breakdown'"
+              [value]="section"
+              >{{ section.name }}</mat-option
             >
+          </mat-select>
+          <mat-error *ngIf="form.controls['section']?.errors?.['required']">
+            Section is required.</mat-error
+          >
+        </mat-form-field>
+      </ng-container>
 
-            <mat-error
-              *ngIf="form.controls['timeMachineStopped']?.errors?.['invalidTime']"
-            >
-              M/C stop time cannot be after w/o raised time.
-            </mat-error>
-          </mat-form-field>
-        </ng-container>
-
-        <ng-container class="section-select">
-          <mat-form-field>
-            <mat-label>Section</mat-label>
-            <mat-select formControlName="section">
-              <mat-option value="" selected> --select section-- </mat-option>
+      <ng-container class="machine-select">
+        <mat-form-field>
+          <mat-label>Machine</mat-label>
+          <mat-select formControlName="machine">
+            <ng-container *ngIf="section; else noSection">
+              <mat-option value="" selected>--select machine--</mat-option>
               <mat-option
-                *ngFor="let section of sections | sectionsFilter: 'Breakdown'"
-                [value]="section"
-                >{{ section.name }}</mat-option
+                *ngFor="let machine of machines | machinesFilter: section"
+                [value]="machine"
               >
-            </mat-select>
-            <mat-error *ngIf="form.controls['section']?.errors?.['required']">
-              Section is required.</mat-error
-            >
-          </mat-form-field>
-        </ng-container>
+                {{ machine.name }}</mat-option
+              >
+            </ng-container>
+            <ng-template #noSection>
+              <mat-option value="" selected>
+                -- select a section first --</mat-option
+              >
+            </ng-template>
+          </mat-select>
+          <mat-error *ngIf="form.controls['machine']?.errors?.['required']"
+            >Machine is required.</mat-error
+          >
+        </mat-form-field>
+      </ng-container>
 
-        <ng-container class="machine-select">
-          <mat-form-field>
-            <mat-label>Machine</mat-label>
-            <mat-select formControlName="machine">
-              <ng-container *ngIf="section; else noSection">
-                <mat-option value="" selected>--select machine--</mat-option>
-                <mat-option
-                  *ngFor="let machine of machines | machinesFilter: section"
-                  [value]="machine"
-                >
-                  {{ machine.name }}</mat-option
-                >
-              </ng-container>
-              <ng-template #noSection>
-                <mat-option value="" selected>
-                  -- select a section first --</mat-option
-                >
-              </ng-template>
-            </mat-select>
-            <mat-error *ngIf="form.controls['machine']?.errors?.['required']"
-              >Machine is required.</mat-error
-            >
-          </mat-form-field>
-        </ng-container>
+      <ng-container class="workorder-description">
+        <mat-form-field>
+          <mat-label>Problem Description</mat-label>
+          <textarea
+            formControlName="workorderDescription"
+            class="text-capitalize"
+            appValidateSentenceFormat
+            type="text"
+            matInput
+            placeholder="Briefly describe the breakdown."
+            maxlength="500"
+            cdkTextareaAutosize
+            cdkAutosizeMinRows="2"
+            cdkAutosizeMaxRows="7"
+          >
+          </textarea>
 
-        <ng-container class="workorder-description">
-          <mat-form-field>
-            <mat-label>Problem Description</mat-label>
-            <textarea
-              formControlName="workorderDescription"
-              class="text-capitalize"
-              appValidateSentenceFormat
-              type="text"
-              matInput
-              placeholder="Briefly describe the breakdown."
-              maxlength="500"
-              cdkTextareaAutosize
-              cdkAutosizeMinRows="2"
-              cdkAutosizeMaxRows="7"
-            >
-            </textarea>
-
-            <mat-error
-              *ngIf="form.controls['workorderDescription']?.errors?.['required']"
-              >Problem description is required.</mat-error
-            >
-            <mat-error
-              *ngIf="form.controls['workorderDescription']?.errors?.['invalidSentenceFormat']"
-            >
-              {{
+          <mat-error
+            *ngIf="form.controls['workorderDescription']?.errors?.['required']"
+            >Problem description is required.</mat-error
+          >
+          <mat-error
+            *ngIf="form.controls['workorderDescription']?.errors?.['invalidSentenceFormat']"
+          >
+            {{
                 form.controls['workorderDescription']?.errors?.['invalidSentenceFormat'].value
-              }}</mat-error
-            >
-          </mat-form-field>
-        </ng-container>
+            }}</mat-error
+          >
+        </mat-form-field>
+      </ng-container>
 
-        <ng-container class="supervisor-select">
-          <mat-form-field>
-            <mat-label>Supervisor</mat-label>
-            <mat-select formControlName="supervisor" class="text-capitalize">
-              <mat-option value="" selected>-- select supervisor --</mat-option>
-              <mat-optgroup label="Production Supervisors">
-                <mat-option
-                  class="text-capitalize"
-                  *ngFor="let supervisor of productionSupervisors"
-                  [value]="supervisor"
-                  >{{ supervisor.fullName }}</mat-option
-                >
-              </mat-optgroup>
-              <mat-optgroup label="Engineering Supervisors">
-                <mat-option
-                  class="text-capitalize"
-                  *ngFor="let supervisor of engineeringSupervisors"
-                  [value]="supervisor"
-                  >{{ supervisor.fullName }}</mat-option
-                >
-              </mat-optgroup>
-            </mat-select>
-            <mat-error
-              *ngIf="form.controls['supervisor']?.errors?.['required']"
-            >
-              Supervisor is required.
-            </mat-error>
-          </mat-form-field>
-        </ng-container>
-
-        <ng-container class="technician-select">
-          <mat-form-field>
-            <mat-label>Eng. Technician</mat-label>
-            <mat-select formControlName="technician" class="text-capitalize">
-              <mat-option value="" selected
-                >-- select eng. technician --</mat-option
-              >
-              <mat-optgroup label="Electrical Technicians">
-                <mat-option
-                  *ngFor="let technician of electricalTechnicians"
-                  [value]="technician"
-                  class="text-capitalize"
-                  >{{ technician.fullName }}</mat-option
-                >
-              </mat-optgroup>
-              <mat-optgroup label="Mechanical Technicians">
-                <mat-option
-                  *ngFor="let technician of mechanicalTechnicians"
-                  [value]="technician"
-                  class="text-capitalize"
-                  >{{ technician.fullName }}</mat-option
-                >
-              </mat-optgroup>
-            </mat-select>
-            <mat-error *ngIf="form.controls['technician']?.errors?.['required']"
-              >Enginering Technician is required.</mat-error
-            >
-          </mat-form-field>
-        </ng-container>
-
-        <ng-container class="stores-technician-select">
-          <mat-form-field>
-            <mat-label>Stores Technician</mat-label>
-            <mat-select
-              formControlName="storesTechnician"
-              class="text-capitalize"
-            >
-              <mat-option value="" selected
-                >-- select stores technician --</mat-option
-              >
-              <mat-option
-                *ngFor="let technician of storesTechnicians"
-                [value]="technician"
-                class="text-capitalize"
-                >{{ technician.fullName }}</mat-option
-              >
-            </mat-select>
-            <mat-error
-              *ngIf="form.controls['storesTechnician']?.errors?.['required']"
-              >Stores technician is required.</mat-error
-            >
-          </mat-form-field>
-        </ng-container>
-
-        <ng-container class="submit-button">
-          <button type="submit" class="shadow-none btn btn-success my-3">
-            Raise Workorder
-          </button>
-        </ng-container>
-      </form>
-    </div>
+      <ng-container class="submit-button">
+        <button type="submit" class="shadow-none btn btn-success my-3">
+          Raise Workorder
+        </button>
+      </ng-container>
+    </form>
   </div>
-
-  <!-- error -->
-  <div *ngIf="loadingFailed">
-    <div class="form-container mat-elevation-z5">
-      {{
-        getUserError
-          ? getUserError
-          : getUsersError
-          ? getUsersError
-          : getSectionsError
-          ? getSectionsError
-          : getMachinesError
-          ? getMachinesError
-          : defaultErrorMessage
-      }}
-    </div>
-  </div>
-</div>
+</ng-container>

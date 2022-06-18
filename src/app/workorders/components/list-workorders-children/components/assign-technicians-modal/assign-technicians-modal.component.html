@@ -31,153 +31,116 @@
 
       <div class="modal-body">
         <div class="form-header-container">
-          <h2>Assign Technicians</h2>
+          <h2>Assign Technicians & Approve</h2>
         </div>
 
-        <!-- w/o not abnormality card -->
-        <div *ngIf="workorder?.workorder?.type !== 'Abnormality Card'">
-          <div class="d-flex justify-content-center align-items-center">
-            <span class="text-center fst-italic">
-              <p>This workorder is not an abnormality card.</p>
-              <p>Technicians have already been assigned to this workorder.</p>
-              <p>
-                You cannot assign technicians when they have already been
-                assigned.
-              </p>
-              <p>
-                Please refer to the Help? section in the workorder actions pane
-                (right hand side) to better understand what each of the
-                available actions does.
-              </p>
-            </span>
-          </div>
-        </div>
-
-        <!-- workorder is an abnormality -->
-        <div [hidden]="workorder?.workorder?.type !== 'Abnormality Card'">
-          <div class="form-container mat-elevation-z5">
-            <form
-              [formGroup]="form"
-              (ngSubmit)="assignTechnicians()"
-              id="assignTechnicians"
-              #formReference
-              autocomplete="off"
-            >
-              <ng-container class="eng-technician">
-                <mat-form-field>
-                  <mat-label>Eng. Technician</mat-label>
-                  <mat-select
-                    class="text-capitalize"
-                    formControlName="engTechnician"
+        <div class="form-container mat-elevation-z5">
+          <form
+            [formGroup]="form"
+            (ngSubmit)="assignTechnicians()"
+            id="assignTechnicians"
+            #formReference
+            autocomplete="off"
+          >
+            <ng-container class="eng-technician">
+              <mat-form-field>
+                <mat-label>Eng. Technician</mat-label>
+                <mat-select
+                  class="text-capitalize"
+                  formControlName="engTechnician"
+                >
+                  <mat-option selected value=""
+                    >--select eng. technician</mat-option
                   >
-                    <mat-option selected value=""
-                      >--select eng. technician</mat-option
+                  <mat-optgroup label="Electrical Technicians">
+                    <mat-option
+                      class="text-capitalize"
+                      *ngFor="let technician of electricalTechnicians"
+                      [value]="technician"
+                      >{{ technician.fullName }}</mat-option
                     >
-                    <mat-optgroup label="Electrical Technicians">
-                      <mat-option
-                        class="text-capitalize"
-                        *ngFor="let technician of electricalTechnicians"
-                        [value]="technician"
-                        >{{ technician.fullName }}</mat-option
-                      >
-                    </mat-optgroup>
-                    <mat-optgroup label="Mechanical Technicians">
-                      <mat-option
-                        class="text-capitalize"
-                        *ngFor="let technician of mechanicalTechnicians"
-                        [value]="technician"
-                        >{{ technician.fullName }}</mat-option
-                      >
-                    </mat-optgroup>
-                  </mat-select>
-                  <mat-error
-                    *ngIf="
+                  </mat-optgroup>
+                  <mat-optgroup label="Mechanical Technicians">
+                    <mat-option
+                      class="text-capitalize"
+                      *ngFor="let technician of mechanicalTechnicians"
+                      [value]="technician"
+                      >{{ technician.fullName }}</mat-option
+                    >
+                  </mat-optgroup>
+                </mat-select>
+                <mat-error
+                  *ngIf="
                       form.controls['engTechnician']?.errors
                         ?.['required']
                     "
-                    >Eng. technician is required</mat-error
-                  >
-                </mat-form-field>
-              </ng-container>
+                  >Eng. technician is required</mat-error
+                >
+              </mat-form-field>
+            </ng-container>
 
-              <ng-container class="select-store-technician">
-                <mat-form-field>
-                  <mat-label>Store Technician</mat-label>
-                  <mat-select
-                    class="text-capitalize"
-                    formControlName="storeTechnician"
+            <ng-container class="select-store-technician">
+              <mat-form-field>
+                <mat-label>Store Technician</mat-label>
+                <mat-select
+                  class="text-capitalize"
+                  formControlName="storeTechnician"
+                >
+                  <mat-option selected value=""
+                    >--select store technician</mat-option
                   >
-                    <mat-option selected value=""
-                      >--select store technician</mat-option
-                    >
-                    <mat-option
-                      class="text-capitalize"
-                      *ngFor="let technician of storeTechnicians"
-                      [value]="technician"
-                    >
-                      {{ technician.fullName }}
-                    </mat-option>
-                  </mat-select>
-                  <mat-error
-                    *ngIf="
+                  <mat-option
+                    class="text-capitalize"
+                    *ngFor="let technician of storeTechnicians"
+                    [value]="technician"
+                  >
+                    {{ technician.fullName }}
+                  </mat-option>
+                </mat-select>
+                <mat-error
+                  *ngIf="
                       form.controls['storeTechnician']?.errors
                         ?.['required']
                     "
-                    >Stores technician is required</mat-error
-                  >
-                </mat-form-field>
-              </ng-container>
-            </form>
-          </div>
+                  >Stores technician is required</mat-error
+                >
+              </mat-form-field>
+            </ng-container>
+          </form>
         </div>
       </div>
-      
+
       <div class="modal-footer">
-        <!-- w/o not abnormality -->
-        <div *ngIf="workorder?.workorder?.type !== 'Abnormality Card'">
+        <div *ngIf="!assigningTechnicians">
           <button
             type="button"
-            class="btn btn-success"
+            class="btn btn-secondary me-3"
             data-bs-dismiss="modal"
             (click)="closeModal()"
           >
-            Understood
+            Cancel
+          </button>
+          <button
+            type="submit"
+            class="btn btn-primary"
+            form="assignTechnicians"
+            (click)="formReference?.['ngSubmit']?.emit()"
+          >
+            Assign Technicians
           </button>
         </div>
 
-        <!-- w/o is an abnormality card -->
-        <div [hidden]="workorder?.workorder?.type !== 'Abnormality Card'">
-          <div *ngIf="!assigningTechnicians">
-            <button
-              type="button"
-              class="btn btn-secondary me-3"
-              data-bs-dismiss="modal"
-              (click)="closeModal()"
+        <div *ngIf="assigningTechnicians">
+          <button type="button" class="btn btn-success" disabled>
+            <span
+              #buttonSpinner
+              class="spinner-border spinner-border-sm"
+              role="status"
+              aria-hidden="true"
             >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              class="btn btn-primary"
-              form="assignTechnicians"
-              (click)="formReference?.['ngSubmit']?.emit()"
-            >
-              Assign Technicians
-            </button>
-          </div>
-
-          <div *ngIf="assigningTechnicians">
-            <button type="button" class="btn btn-success" disabled>
-              <span
-                #buttonSpinner
-                class="spinner-border spinner-border-sm"
-                role="status"
-                aria-hidden="true"
-              >
-              </span>
-              Assigning Technicians...
-            </button>
-          </div>
+            </span>
+            Assigning Technicians...
+          </button>
         </div>
       </div>
     </div>

@@ -35,42 +35,8 @@
             <h2>Change Technicians</h2>
           </div>
 
-          <!-- no technicians set -->
-          <!-- workorder is an abnormality card -->
           <div
             class="no-technicians-set"
-            *ngIf="
-              workorder?.workorder?.type === 'Abnormality Card' &&
-              !workorder?.technician?.fullName &&
-              !workorder?.storesTechnician?.fullName
-            "
-          >
-            <div class="d-flex justify-content-center align-items-center">
-              <span class="text-center fst-italic">
-                <p>This is an abnormality card.</p>
-                <p>
-                  No technicians have been assigned to this abnormality yet.
-                </p>
-                <p>You cannot change technicians if none have been assigned.</p>
-                <p>
-                  Please refer to the Help? section in the workorder actions
-                  pane (right hand side) to better understand what each of the
-                  available actions does.
-                </p>
-              </span>
-            </div>
-          </div>
-
-          <!-- workorder is not an abnormality card
-           -->
-          <!-- technicians set -->
-          <div
-            class="no-technicians-set"
-            [hidden]="
-              workorder?.workorder?.type === 'Abnormality Card' &&
-              !workorder?.technician?.fullName &&
-              !workorder?.storesTechnician?.fullName
-            "
           >
             <form
               [formGroup]="form"
@@ -176,65 +142,36 @@
       </div>
 
       <div class="modal-footer">
-        <!-- no technicians set -->
-        <!-- workorder is an abnormality card -->
-        <div
-          *ngIf="
-            workorder?.workorder?.type === 'Abnormality Card' &&
-            !workorder?.technician?.fullName &&
-            !workorder?.storesTechnician?.fullName
-          "
-        >
+        <div *ngIf="!changingTechnicians">
           <button
             type="button"
-            class="btn btn-success"
+            class="btn btn-secondary me-3"
             data-bs-dismiss="modal"
             (click)="closeModal()"
           >
-            Understood
+            Cancel
+          </button>
+          <button
+            type="submit"
+            class="btn btn-primary"
+            form="changeTechnicians"
+            (click)="formReference?.['ngSubmit']?.emit()"
+          >
+            Change Technicians
           </button>
         </div>
 
-        <!-- technicians set -->
-        <!-- w/o not abnormality card -->
-        <div
-          [hidden]="
-            workorder?.workorder?.type === 'Abnormality Card' &&
-            !workorder?.technician?.fullName &&
-            !workorder?.storesTechnician?.fullName
-          "
-        >
-          <div *ngIf="!changingTechnicians">
-            <button
-              type="button"
-              class="btn btn-secondary me-3"
-              data-bs-dismiss="modal"
-              (click)="closeModal()"
+        <div *ngIf="changingTechnicians">
+          <button type="button" class="btn btn-success" disabled>
+            <span
+              #buttonSpinner
+              class="spinner-border spinner-border-sm"
+              role="status"
+              aria-hidden="true"
             >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              class="btn btn-primary"
-              form="changeTechnicians"
-              (click)="formReference?.['ngSubmit']?.emit()"
-            >
-              Change Technicians
-            </button>
-          </div>
-
-          <div *ngIf="changingTechnicians">
-            <button type="button" class="btn btn-success" disabled>
-              <span
-                #buttonSpinner
-                class="spinner-border spinner-border-sm"
-                role="status"
-                aria-hidden="true"
-              >
-              </span>
-              Changing Technicians...
-            </button>
-          </div>
+            </span>
+            Changing Technicians...
+          </button>
         </div>
       </div>
     </div>

@@ -62,7 +62,10 @@ export class MaintenanceCostComponent implements OnInit, OnDestroy {
   ];
 
   // ng model on sections one month chart
-  sections: IntNameAndFormattedName[] = [];
+  sections: IntNameAndFormattedName[] = [
+    { name: 'Grid Casting', formattedName: 'Casting' },
+    { name: 'Pasting', formattedName: 'Pasting' }
+  ];
 
   // ng model for chart types
   chartType!: string;
@@ -133,7 +136,7 @@ export class MaintenanceCostComponent implements OnInit, OnDestroy {
     this.setCurrentYear();
     this.setCurrentMonth();
 
-    this.setFirstFiveSections();
+    // this.setFirstFiveSections();
     this.setInitialRandomSection();
     this.updateChartType();
     this.getWorkorders();
@@ -251,7 +254,7 @@ export class MaintenanceCostComponent implements OnInit, OnDestroy {
   // in case no particular section was selected
   // in the sections over one month chart
   private setInitialRandomSection(): string {
-    const section: IntNameAndFormattedName = this.factorySections[Math.floor(Math.random() * this.factorySections.length)];
+    const section: IntNameAndFormattedName = this.sections[Math.floor(Math.random() * this.sections.length)];
 
     return this.section = section.name;
   }

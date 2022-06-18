@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input, Output, SimpleChanges, OnChanges, EventEmitter } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 
@@ -19,7 +19,11 @@ import * as dayjs from 'dayjs';
   templateUrl: './raise-abnormality-card.component.html',
   styleUrls: ['./raise-abnormality-card.component.scss']
 })
-export class RaiseAbnormalityCardComponent implements OnInit {
+export class RaiseAbnormalityCardComponent implements OnInit, OnChanges {
+
+  @Input('sections') allSections!: IntSection[];
+  @Input('machines') allMachines!: IntMachine[];
+  @Input('raiser') currentUser!: IntUser;
 
   constructor(
     private spinner: NgxSpinnerService,
@@ -32,36 +36,38 @@ export class RaiseAbnormalityCardComponent implements OnInit {
 
   form!: FormGroup;
   raiser!: IntUser;
-  productionSupervisors!: IntUser[];
-  engineeringSupervisors!: IntUser[];
   sections!: IntSection[];
   machines!: IntMachine[];
   now!: string;
-  userUid!: string | null;
 
-  loading = false;
+  loading = true;
   loadingFailed = false;
-  getUserError!: string;
-  getUsersError!: string;
-  getSectionsError!: string;
-  getMachinesError!: string;
-  defaultErrorMessage = `Error UAC-01 occured while configuring your workorder. 
-  Please reload the page or report the error code to support for assistance.`
 
   workorderUid!: string;
   workorderNumber!: string;
 
+  ngOnChanges(changes: SimpleChanges): void {
+    this.spinner.show('app-raise-new-workorder-spinner');
+
+    const raiser = changes['currentUser']?.currentValue as IntUser;
+    const sections = changes['allSections']?.currentValue as IntSection[];
+    const machines = changes['allMachines']?.currentValue as IntMachine[];
+
+    this.raiser = raiser ? raiser : this.raiser;
+    this.sections = sections ? sections : this.sections;
+    this.machines = machines ? machines : this.machines;
+
+    if (this.raiser !== undefined && this.sections !== undefined && this.machines !== undefined) {
+      this.now = dayjs().format();
+
+      this.workorderNumber = this.generateWorkorderNumber();
+      this.workorderUid = this.generateWorkorderUid();
+
+      this.createForm();
+    }
+  }
+
   ngOnInit(): void {
-    this.showSpinner();
-
-    this.userUid = this.route.snapshot.paramMap.get('userUid');
-
-    this.now = dayjs().format();
-
-    this.workorderNumber = this.generateWorkorderNumber();
-    this.workorderUid = this.generateWorkorderUid();
-
-    this.newWorkorderSetup();
   }
 
   private showSpinner(): void {
@@ -72,107 +78,6 @@ export class RaiseAbnormalityCardComponent implements OnInit {
   private hideSpinner(): void {
     this.loading = false;
     this.spinner.hide('app-raise-new-workorder-spinner');
-  }
-
-  private hideSpinnerOnSuccess(): void {
-    if (
-      this.raiser &&
-      this.productionSupervisors &&
-      this.engineeringSupervisors && 
-      this.machines &&
-      this.sections
-    ) {
-      this.createForm();
-      this.hideSpinner();
-
-    }
-
-  }
-
-  private hideSpinnerOnError(): void {
-    this.loadingFailed = true;
-    this.hideSpinner();
-
-
-  }
-
-  private newWorkorderSetup(): void {
-    if (this.userUid) {
-      this.getUser(this.userUid);
-      this.getUsers();
-      this.getSections();
-      this.getMachines();
-    }
-  }
-
-  private getUser(userUid: string): void {
-    this.workordersService.getUser(userUid)
-      .then((user: IntUser) => {
-        this.raiser = user;
-        this.hideSpinnerOnSuccess();
-      })
-      .catch((err: any) => {
-        this.hideSpinnerOnError();
-        if (err.code === 'failed-precondition') {
-          this.getUserError = `Configuring your new workorder failed with error code IND-AC-01. Please report this error code to support to have it resolved.`;
-        } else {
-          this.getUserError = `Configuring your new workorder failed with error code AC-01. Please report this error code to support to have it resolved.`;
-        }
-      });
-  }
-
-  private getUsers(): void {
-    this.workordersService.getUsers()
-      .then(
-        (firestoreUsers: IntUser[]) => {
-          this.productionSupervisors = firestoreUsers.filter((firestoreUser: IntUser) => firestoreUser.group === 'Supervisor' && firestoreUser.supervisorGroup === 'Production');
-          this.engineeringSupervisors = firestoreUsers.filter((firestoreUser: IntUser) => firestoreUser.group === 'Supervisor' && firestoreUser.supervisorGroup === 'Engineering');
-          this.hideSpinnerOnSuccess();
-
-        })
-      .catch((err: any) => {
-        this.hideSpinnerOnError();
-        if (err.code === 'failed-precondition') {
-          this.getUsersError = `Configuring your new workorder failed with error code IND-AC-02. Please report this error code to support to have it resolved.`;
-        } else {
-          this.getUsersError = `Configuring your new workorder failed with error code AC-02. Please report this error code to support to have it resolved.`;
-        }
-      });
-  }
-
-  private getSections(): void {
-    this.workordersService.getSections()
-      .then((sections: IntSection[]) => {
-        this.sections = sections;
-        this.hideSpinnerOnSuccess();
-      })
-      .catch((err: any) => {
-        this.hideSpinnerOnError();
-        if (err.code === 'failed-precondition') {
-          this.getSectionsError = `Configuring your new workorder failed with error code IND-AC-03. Please report this error code to support to have it resolved.`;
-
-        } else {
-          this.getSectionsError = `Configuring your new workorder failed with error code AC-03. Please report this error code to support to have it resolved.`;
-
-        }
-      });
-  }
-
-  private getMachines(): void {
-    this.workordersService.getMachines()
-      .then((machines: IntMachine[]) => {
-        this.machines = machines;
-        this.hideSpinnerOnSuccess();
-      })
-      .catch((err: any) => {
-        this.hideSpinnerOnError();
-        if (err.code === 'failed-precondition') {
-          this.getMachinesError = `Configuring your new workorder failed with error code IND-AC-04. Please report this error code to support to have it resolved.`;
-
-        } else {
-          this.getMachinesError = `Configuring your new workorder failed with error code AC-04. Please report this error code to support to have it resolved.`;
-        }
-      });
   }
 
   private createForm(): FormGroup {
@@ -191,10 +96,10 @@ export class RaiseAbnormalityCardComponent implements OnInit {
       section: ['', Validators.required],
       machine: ['', Validators.required],
       workorderDescription: ['', Validators.required],
-      supervisor: ['', Validators.required],
       amStep: ['']
     });
 
+    this.hideSpinner();
     return this.form = form;
 
   }
@@ -226,10 +131,6 @@ export class RaiseAbnormalityCardComponent implements OnInit {
     const numberSuffix = [...Array(6)].map(() => Math.random() * 10 | 0).join(``);
 
     return numberPrefix + numberSuffix;
-
-    // const date = dayjs(this.now).format('DD:MM:YY');
-    // const time = this.formatTime();
-    // return date + '-' + time;
   }
 
   // form getters
@@ -247,7 +148,6 @@ export class RaiseAbnormalityCardComponent implements OnInit {
       section,
       machine,
       workorderDescription,
-      supervisor,
       amStep
     } = this.form.value;
 
@@ -269,7 +169,7 @@ export class RaiseAbnormalityCardComponent implements OnInit {
           status: false,
           dateTime: ''
 
-          },
+        },
         review: {
           status: '',
           concern: {},
@@ -322,21 +222,6 @@ export class RaiseAbnormalityCardComponent implements OnInit {
         },
         section,
         machine,
-        technician: {
-          fullName: '',
-          uid: '',
-          group: '',
-          technicianGroup: '',
-          supervisorGroup: ''
-        },
-        storesTechnician: {
-          fullName: '',
-          uid: '',
-          group: '',
-          technicianGroup: '',
-          supervisorGroup: ''
-        },
-        supervisor,
         toolChange: {
           from: '',
           to: ''
@@ -362,25 +247,12 @@ export class RaiseAbnormalityCardComponent implements OnInit {
         })
         .catch((err: any) => {
           this.hideSpinner();
-          console.log('ERR IN WORKORDER', err);
-
-
           this.toast.error(`Failed. Raising abnormality card ${workorderNumber}
           failed with error code AB-02.
           Please try again or forward the error code to support for assistance.`, {
             duration: 8000, id: 'raise-abnormality-card-error-2'
           });
-
-
         });
-
-
-
     }
-
-
-
-
   }
 }
-

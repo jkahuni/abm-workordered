@@ -2,72 +2,44 @@
   <h2 class="text-center fw-bold title-element">Choose Workorder Type</h2>
   <div class="raise-workorders-links">
     <div class="corrective-maintenance">
-      <a
-        type="button"
-        class="btn btn-link"
-        [routerLink]="['/raise-workorder/corrective-maintenance', userUid]"
-      >
+      <a type="button" class="btn btn-link" (click)="updateWorkorderType('cm')">
         Corrective Maintenance
       </a>
       <!-- router-link mt-2 mb-1 text-start btn -->
     </div>
 
     <div class="breakdown">
-      <a
-        type="button"
-        class="btn btn-link"
-        [routerLink]="['/raise-workorder/breakdown/', userUid]"
-      >
+      <a type="button" class="btn btn-link" (click)="updateWorkorderType('bd')">
         Breakdown
       </a>
     </div>
 
     <div class="tool-change">
-      <a
-        type="button"
-        class="btn btn-link"
-        [routerLink]="['/raise-workorder/tool-change/', userUid]"
-      >
+      <a type="button" class="btn btn-link" (click)="updateWorkorderType('tc')">
         Tool Change
       </a>
     </div>
 
     <div class="am">
-      <a
-        type="button"
-        class="btn btn-link"
-        [routerLink]="['/raise-workorder/am/', userUid]"
-      >
+      <a type="button" class="btn btn-link" (click)="updateWorkorderType('am')">
         AM
       </a>
     </div>
 
     <div class="pm">
-      <a
-        type="button"
-        class="btn btn-link"
-        [routerLink]="['/raise-workorder/pm/', userUid]"
-      >
+      <a type="button" class="btn btn-link" (click)="updateWorkorderType('pm')">
         PM
       </a>
     </div>
 
     <div class="mold-service">
-      <a
-        type="button"
-        class="btn btn-link"
-        [routerLink]="['/raise-workorder/mold-service/', userUid]"
-      >
+      <a type="button" class="btn btn-link" (click)="updateWorkorderType('ms')">
         Mold Service
       </a>
     </div>
 
     <div class="abnormality-card">
-      <a
-        type="button"
-        class="btn btn-link"
-        [routerLink]="['/raise-workorder/abnormality-card/', userUid]"
-      >
+      <a type="button" class="btn btn-link" (click)="updateWorkorderType('ac')">
         Abnormality Card
       </a>
     </div>
@@ -76,7 +48,7 @@
       <a
         type="button"
         class="btn btn-link disabled"
-        [routerLink]="['/raise-workorder/kaizen-card/', userUid]"
+        (click)="updateWorkorderType('kc')"
         aria-disabled="true"
       >
         Kaizen Card
@@ -87,7 +59,7 @@
       <a
         type="button"
         class="btn btn-link disabled"
-        [routerLink]="['/raise-workorder/service/', userUid]"
+        (click)="updateWorkorderType('ser')"
         aria-disabled="true"
       >
         Service
@@ -98,7 +70,7 @@
       <a
         type="button"
         class="btn btn-link disabled"
-        [routerLink]="['/raise-workorder/project/', userUid]"
+        (click)="updateWorkorderType('pr')"
         aria-disabled="true"
       >
         Project

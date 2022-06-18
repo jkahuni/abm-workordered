@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnChanges, SimpleChanges, Input, Output, EventEmitter } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 
@@ -18,52 +18,56 @@ import * as dayjs from 'dayjs';
   templateUrl: './raise-breakdown.component.html',
   styleUrls: ['./raise-breakdown.component.scss']
 })
-export class RaiseBreakdownComponent implements OnInit {
+export class RaiseBreakdownComponent implements OnInit, OnChanges {
+
+  @Input('sections') allSections!: IntSection[];
+  @Input('machines') allMachines!: IntMachine[];
+  @Input('raiser') currentUser!: IntUser;
+
+  form!: FormGroup;
+  raiser!: IntUser;
+  sections!: IntSection[];
+  machines!: IntMachine[];
+  now!: string;
+
+  loading = true;
+  loadingFailed = false;
+
+  workorderNumber!: string;
+  workorderUid!: string;
 
   constructor(
     private spinner: NgxSpinnerService,
     private fb: FormBuilder,
     private toast: HotToastService,
     private workordersService: WorkordersService,
-    private router: Router,
-    private route: ActivatedRoute
+    private router: Router
   ) { }
 
-  form!: FormGroup;
-  raiser!: IntUser;
-  productionSupervisors!: IntUser[];
-  engineeringSupervisors!: IntUser[];
-  electricalTechnicians!: IntUser[];
-  mechanicalTechnicians!: IntUser[];
-  storesTechnicians!: IntUser[];
-  sections!: IntSection[];
-  machines!: IntMachine[];
-  now!: string;
-  userUid!: string | null;
 
-  loading = false;
-  loadingFailed = false;
-  getUserError!: string;
-  getUsersError!: string;
-  getSectionsError!: string;
-  getMachinesError!: string;
-  defaultErrorMessage = `Error UBD-01 occured while configuring your workorder. 
-  Please reload the page or report the error code to support for assistance.`;
+  ngOnChanges(changes: SimpleChanges): void {
+    this.spinner.show('app-raise-new-workorder-spinner');
 
-  workorderNumber!: string;
-  workorderUid!: string;
+    const raiser = changes['currentUser']?.currentValue as IntUser;
+    const sections = changes['allSections']?.currentValue as IntSection[];
+    const machines = changes['allMachines']?.currentValue as IntMachine[];
+
+    this.raiser = raiser ? raiser : this.raiser;
+    this.sections = sections ? sections : this.sections;
+    this.machines = machines ? machines : this.machines;
+
+    if (this.raiser !== undefined && this.sections !== undefined && this.machines !== undefined) {
+      this.now = dayjs().format();
+
+      this.workorderNumber = this.generateWorkorderNumber();
+      this.workorderUid = this.generateWorkorderUid();
+
+      this.createForm();
+    }
+  }
 
   ngOnInit(): void {
-    this.showSpinner();
 
-    this.userUid = this.route.snapshot.paramMap.get('userUid');
-
-    this.now = dayjs().format();
-
-    this.workorderNumber = this.generateWorkorderNumber();
-    this.workorderUid = this.generateWorkorderUid();
-
-    this.newWorkorderSetup();
   }
 
   private showSpinner(): void {
@@ -74,23 +78,6 @@ export class RaiseBreakdownComponent implements OnInit {
   private hideSpinner(): void {
     this.loading = false;
     this.spinner.hide('app-raise-new-workorder-spinner');
-  }
-
-  private hideSpinnerOnSuccess(): void {
-    if (
-      this.raiser &&
-      this.storesTechnicians &&
-      this.engineeringSupervisors &&
-      this.machines
-    ) {
-      this.createForm();
-      this.hideSpinner();
-    }
-  }
-
-  private hideSpinnerOnError(): void {
-    this.loadingFailed = true;
-    this.hideSpinner();
   }
 
   private formatDate(): string {
@@ -126,104 +113,15 @@ export class RaiseBreakdownComponent implements OnInit {
     return workorderUid;
   }
 
-  private newWorkorderSetup(): void {
-    if (this.userUid) {
-      this.getUser(this.userUid);
-      this.getUsers();
-      this.getSections();
-      this.getMachines();
-    }
-  }
-
-  private getUser(userUid: string): void {
-    this.workordersService.getUser(userUid)
-      .then((user: IntUser) => {
-        this.raiser = user;
-        this.hideSpinnerOnSuccess();
-      })
-      .catch((err: any) => {
-        this.hideSpinnerOnError();
-        if (err.code === 'failed-precondition') {
-          this.getUserError = `Configuring your new workorder failed with error code IND-BD-01. Please report this error code to support to have it resolved.`;
-        } else {
-          this.getUserError = `Configuring your new workorder failed with error code BD-01. Please report this error code to support to have it resolved.`;
-        }
-      });
-  }
-
-  private getUsers(): void {
-    this.workordersService.getUsers()
-      .then(
-        (firestoreUsers: IntUser[]) => {
-          this.electricalTechnicians = firestoreUsers.filter(
-            (firestoreUser: IntUser) =>
-              firestoreUser.group === 'Technician' && firestoreUser.technicianGroup === 'Electrical');
-          this.mechanicalTechnicians = firestoreUsers.filter(
-            (firestoreUser: IntUser) =>
-              firestoreUser.group === 'Technician' && firestoreUser.technicianGroup === 'Mechanical');
-          this.storesTechnicians = firestoreUsers.filter(
-            (firestoreUser: IntUser) => firestoreUser.group === 'Technician' && firestoreUser.technicianGroup === 'Eng. Store'
-              || firestoreUser.technicianGroup === 'PM Planning'
-          );
-          this.productionSupervisors = firestoreUsers.filter((firestoreUser: IntUser) => firestoreUser.group === 'Supervisor' && firestoreUser.supervisorGroup === 'Production');
-          this.engineeringSupervisors = firestoreUsers.filter((firestoreUser: IntUser) => firestoreUser.group === 'Supervisor' && firestoreUser.supervisorGroup === 'Engineering');
-          this.hideSpinnerOnSuccess();
-
-        })
-      .catch((err: any) => {
-        this.hideSpinnerOnError();
-        if (err.code === 'failed-precondition') {
-          this.getUsersError = `Configuring your new workorder failed with error code IND-BD-02. Please report this error code to support to have it resolved.`;
-        } else {
-          this.getUsersError = `Configuring your new workorder failed with error code BD-02. Please report this error code to support to have it resolved.`;
-        }
-      });
-  }
-
-  private getSections(): void {
-    this.workordersService.getSections()
-      .then((sections: IntSection[]) => {
-        this.sections = sections;
-        this.hideSpinnerOnSuccess();
-      })
-      .catch((err: any) => {
-        this.hideSpinnerOnError();
-        if (err.code === 'failed-precondition') {
-          this.getSectionsError = `Configuring your new workorder failed with error code IND-BD-03. Please report this error code to support to have it resolved.`;
-
-        } else {
-          this.getSectionsError = `Configuring your new workorder failed with error code BD-03. Please report this error code to support to have it resolved.`;
-
-        }
-      });
-  }
-
-  private getMachines(): void {
-    this.workordersService.getMachines()
-      .then((machines: IntMachine[]) => {
-        this.machines = machines;
-        this.hideSpinnerOnSuccess();
-      })
-      .catch((err: any) => {
-        this.hideSpinnerOnError();
-        if (err.code === 'failed-precondition') {
-          this.getMachinesError = `Configuring your new workorder failed with error code IND-BD-04. Please report this error code to support to have it resolved.`;
-        } else {
-          this.getMachinesError = `Configuring your new workorder failed with error code BD-04. Please report this error code to support to have it resolved.`;
-        }
-      });
-  }
-
-
   private createForm(): FormGroup {
     const form = this.fb.group({
       // hidden fields
       workorderUid: [this.workorderUid],
       raiser: [this.raiser],
       dateTimeRaised: [this.now],
-      workorderType: ['Breakdown'],
 
       // visible fields
+      workorderType: ['Breakdown'],
       workorderNumber: [this.workorderNumber],
       raiserFullName: [this.raiser.fullName],
       dateRaised: [this.formatDate()],
@@ -232,12 +130,10 @@ export class RaiseBreakdownComponent implements OnInit {
       timeMachineStopped: [this.formatTime(), Validators.required],
       section: ['', Validators.required],
       machine: ['', Validators.required],
-      workorderDescription: ['', Validators.required],
-      supervisor: ['', Validators.required],
-      technician: ['', Validators.required],
-      storesTechnician: ['', Validators.required]
+      workorderDescription: ['', Validators.required]
     });
 
+    this.hideSpinner();
     return this.form = form;
   }
 
@@ -287,9 +183,6 @@ export class RaiseBreakdownComponent implements OnInit {
       section,
       machine,
       workorderDescription,
-      supervisor,
-      technician,
-      storesTechnician,
       dateMachineStopped,
       timeMachineStopped,
     } = this.form.value;
@@ -370,9 +263,6 @@ export class RaiseBreakdownComponent implements OnInit {
         },
         section,
         machine,
-        technician,
-        storesTechnician,
-        supervisor,
         toolChange: {
           from: '',
           to: ''
@@ -405,15 +295,6 @@ export class RaiseBreakdownComponent implements OnInit {
           }
           );
         });
-
-
     }
-
-
-
-
-
-
-
   }
 }

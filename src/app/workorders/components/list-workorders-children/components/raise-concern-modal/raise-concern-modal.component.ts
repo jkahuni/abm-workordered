@@ -62,9 +62,9 @@ export class RaiseConcernModalComponent implements OnInit, OnChanges {
     if (this.workorder) {
       this.users.push(
         this.workorder.raiser,
-        this.workorder.supervisor,
-        this.workorder.technician,
-        this.workorder.storesTechnician
+        this.workorder.supervisor!,
+        this.workorder.technician!,
+        this.workorder.storesTechnician!
       );
     }
   }

@@ -65,54 +65,8 @@ const routes: Routes = [
   },
   // raise
   {
-    path: 'new-workorder', component: NewWorkorderComponent,
-    ...canActivate(redirectToLogin)
-  },
-  {
-    path: 'raise-workorder',
+    path: 'raise-workorder/:userUid',
     component: RaiseWorkorderComponent,
-    children: [
-      {
-        path: 'abnormality-card/:userUid', component: RaiseAbnormalityCardComponent,
-        ...canActivate(redirectToLogin)
-      },
-      {
-        path: 'am/:userUid', component: RaiseAmComponent,
-        ...canActivate(redirectToLogin)
-      },
-      {
-        path: 'breakdown/:userUid', component: RaiseBreakdownComponent,
-        ...canActivate(redirectToLogin)
-      },
-      {
-        path: 'corrective-maintenance/:userUid', component: RaiseCorrectiveMaintenanceComponent,
-        ...canActivate(redirectToLogin)
-      },
-      {
-        path: 'kaizen-card/:userUid', component: RaiseKaizenCardComponent,
-        ...canActivate(redirectToLogin)
-      },
-      {
-        path: 'mold-service/:userUid', component: RaiseMoldServiceComponent,
-        ...canActivate(redirectToLogin)
-      },
-      {
-        path: 'pm/:userUid', component: RaisePmComponent,
-        ...canActivate(redirectToLogin)
-      },
-      {
-        path: 'project/:userUid', component: RaiseProjectComponent,
-        ...canActivate(redirectToLogin)
-      },
-      {
-        path: 'service/:userUid', component: RaiseServiceComponent,
-        ...canActivate(redirectToLogin)
-      },
-      {
-        path: 'tool-change/:userUid', component: RaiseToolChangeComponent,
-        ...canActivate(redirectToLogin)
-      },
-    ],
     ...canActivate(redirectToLogin)
   },
   // close

@@ -148,7 +148,8 @@ export class WorkordersService {
   async getAllWorkorders(): Promise<void> {
     const colRef = collection(this.firestore, 'workorders');
     const workordersQuery = query(colRef,
-      orderBy('workorder.number'));
+      orderBy('workorder.number'),
+    limit(2000));
 
     const workordersQuerySnapshot = await getDocs(workordersQuery);
 

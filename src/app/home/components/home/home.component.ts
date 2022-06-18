@@ -231,9 +231,9 @@ export class HomeComponent implements OnInit {
 
     for (let workorder of this.workorders) {
       const raiser = workorder.raiser.uid;
-      const supervisor = workorder.supervisor.uid;
-      const technician = workorder.technician.uid;
-      const storesTechnician = workorder.storesTechnician.uid;
+      const supervisor = workorder.supervisor?.uid;
+      const technician = workorder.technician?.uid;
+      const storesTechnician = workorder.storesTechnician?.uid;
       const approved = workorder.approved.status;
       const rejected = workorder.rejected.status;
       const escalated = workorder.escalated?.status;
@@ -255,17 +255,17 @@ export class HomeComponent implements OnInit {
         }
       }
 
-      // raised, unverified, escalated, approved, rejected
+      // raised, unverified, approved, rejected, escalated
       else if (this.isSupervisor) {
         if (raiser === this.userUid) {
           raisedWorkorders.push(workorder);
         }
 
-        if (supervisor === this.userUid) {
-          if (!approved && !rejected) {
-            unverifiedWorkorders.push(workorder);
-          }
+        if (!approved && !rejected) {
+          unverifiedWorkorders.push(workorder);
+        }
 
+        if (supervisor === this.userUid) {
           if (approved && !rejected) {
             approvedWorkorders.push(workorder);
           }
@@ -298,8 +298,12 @@ export class HomeComponent implements OnInit {
         }
       }
 
-      // reviewed, unreviewed
+      // reviewed, unreviewed, escalated
       else if (this.isEngineeringManager) {
+        if ((escalated !== undefined || escalated !== null) && escalated) {
+          escalatedWorkorders.push(workorder);
+        }
+
         if (reviewed) {
           reviewedWorkorders.push(workorder);
         }
@@ -325,12 +329,6 @@ export class HomeComponent implements OnInit {
 
     this.hideSpinnerOnSuccess();
 
-  }
-
-  // TODO: remove after testing
-  testMessage(): any {
-    console.log('METHOD CALLED IN HOME');
-    this.messagingService.sendSMSMessage();
   }
 
   resendVerificationCode(): any {

@@ -133,9 +133,9 @@ export class CloseBreakdownComponent implements OnInit {
       workorderDescription: [workorder.workorder.description ? workorder.workorder.description :
         'no description provided.'],
       raiser: [workorder.raiser.fullName],
-      supervisor: [workorder.supervisor.fullName],
-      technician: [workorder.technician.fullName],
-      storesTechnician: [workorder.storesTechnician.fullName],
+      supervisor: [workorder.supervisor?.fullName],
+      technician: [workorder.technician?.fullName],
+      storesTechnician: [workorder.storesTechnician?.fullName],
       breakdownDate: [this.formatDate(workorder.breakdown.dateTime)],
       breakdownTime: [this.formatTime(workorder.breakdown.dateTime)],
       dateRaised: [this.formatDate(workorder.raised.dateTime)],

@@ -116,9 +116,9 @@ export class IssueSparesComponent implements OnInit {
       problemDescription: [workorder.workorder.description ? workorder.workorder.description : 'No description provided'],
       section: [workorder.section.name],
       machine: [workorder.machine.name],
-      supervisor: [workorder.supervisor.fullName],
-      technician: [workorder.technician.fullName],
-      storeTechnician: [workorder.storesTechnician.fullName],
+      supervisor: [workorder.supervisor?.fullName],
+      technician: [workorder.technician?.fullName],
+      storeTechnician: [workorder.storesTechnician?.fullName],
       sparesUsedStatus: [workorder.sparesUsed.status ? 'true' : ''],
       sparesUsedArray: this.fb.array(workorder.sparesUsed.status ? [...this.getIssuedSpares(workorder.sparesUsed.spares)] : []),
       searchSparesInput: [''],
@@ -140,7 +140,7 @@ export class IssueSparesComponent implements OnInit {
   }
 
   private getIssuedSpares(spares: IntSpareWithQuantities[]): FormGroup[] {
-    const sparesArray: FormGroup[] = [];
+    let sparesArray: FormGroup[] = [];
     spares.map(
       (spare: IntSpareWithQuantities) => {
 

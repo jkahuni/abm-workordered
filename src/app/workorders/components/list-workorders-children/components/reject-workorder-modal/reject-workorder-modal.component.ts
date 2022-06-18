@@ -2,7 +2,7 @@ import { Component, OnInit, Input, Output, EventEmitter, ViewChild, ElementRef, 
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HotToastService } from '@ngneat/hot-toast';
 import { ResourcesService } from '@resources/services/resources.service';
-import { IntWorkorder } from '@workorders/models/workorders.models';
+import { IntUser, IntWorkorder } from '@workorders/models/workorders.models';
 import { WorkordersService } from '@workorders/services/workorders.service';
 import * as dayjs from 'dayjs';
 
@@ -27,6 +27,7 @@ export class RejectWorkorderModalComponent implements OnInit, OnChanges {
 
   @Input('workorder')
   selectedWorkorder!: IntWorkorder;
+  @Input('supervisor') currentSupervisor!: IntUser;
 
   @Output()
   close: EventEmitter<string> = new EventEmitter<string>();
@@ -37,6 +38,7 @@ export class RejectWorkorderModalComponent implements OnInit, OnChanges {
   @ViewChild('buttonSpinner') buttonSpinner!: ElementRef;
 
   workorder!: IntWorkorder;
+  supervisor!: IntUser;
   form!: FormGroup;
   rejectingWorkorder = false;
 
@@ -45,8 +47,10 @@ export class RejectWorkorderModalComponent implements OnInit, OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     const workorder = changes['selectedWorkorder']?.currentValue as IntWorkorder;
+    const supervisor = changes['currentSupervisor']?.currentValue as IntUser;
 
-    this.workorder = workorder;
+    this.workorder = workorder ? workorder : this.workorder;
+    this.supervisor = supervisor ? supervisor : this.supervisor;
 
     this.createForm();
   }
@@ -115,7 +119,8 @@ export class RejectWorkorderModalComponent implements OnInit, OnChanges {
             status: true,
             dateTime: now,
             reason
-          }
+          },
+          supervisor: this.supervisor
 
         };
 

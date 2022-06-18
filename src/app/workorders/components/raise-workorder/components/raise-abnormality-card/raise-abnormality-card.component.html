@@ -1,224 +1,163 @@
 <!-- !loading -->
-<div *ngIf="!loading">
+<ng-container *ngIf="!loading">
   <!-- form -->
-  <div *ngIf="!loadingFailed">
-    <div class="form-container mat-elevation-z5">
-      <div class="form-header">
-        <h2 class="text-center" style="margin: 0px auto">Abnormality Card</h2>
-        <h3 class="text-center fst-italic">
-          (Corrective action by Maintenance)
-        </h3>
-      </div>
+  <div class="form-container mat-elevation-z5">
+    <div class="form-header">
+      <h2 class="text-center" style="margin: 0px auto">Abnormality Card</h2>
+      <h3 class="text-center fst-italic">(Corrective action by Maintenance)</h3>
+    </div>
 
-      <form [formGroup]="form" (ngSubmit)="raiseWorkorder()" autocomplete="off">
-        <ng-container class="tag-number">
-          <mat-form-field>
-            <mat-label>Tag Number</mat-label>
-            <input
-              readonly
-              matInput
-              type="text"
-              formControlName="workorderNumber"
-            />
+    <form [formGroup]="form" (ngSubmit)="raiseWorkorder()" autocomplete="off">
+      <ng-container class="tag-number">
+        <mat-form-field>
+          <mat-label>Tag Number</mat-label>
+          <input
+            readonly
+            matInput
+            type="text"
+            formControlName="workorderNumber"
+          />
+        </mat-form-field>
+      </ng-container>
+
+      <ng-container class="am-step">
+        <div>
+          <mat-label
+            [ngClass]="{invalidAmStep: form.controls['amStep']?.errors?.['required']}"
+            >AM Step</mat-label
+          >
+          <mat-radio-group
+            class="am-step-button-group"
+            aria-labelledby="toggle am step"
+            formControlName="amStep"
+          >
+            <mat-radio-button class="am-step-button" type="button" value="1">
+              1
+            </mat-radio-button>
+            <mat-radio-button class="am-step-button" type="button" value="2"
+              >2
+            </mat-radio-button>
+            <mat-radio-button class="am-step-button" type="button" value="3"
+              >3
+            </mat-radio-button>
+            <mat-radio-button class="am-step-button" type="button" value="4"
+              >4
+            </mat-radio-button>
+            <mat-radio-button class="am-step-button" type="button" value="5"
+              >5
+            </mat-radio-button>
+          </mat-radio-group>
+          <mat-error *ngIf="form.controls['amStep']?.errors?.['required']">
+            Am step is required.
+          </mat-error>
+        </div>
+      </ng-container>
+
+      <ng-container class="detected-by">
+        <mat-form-field>
+          <mat-label>Detected By</mat-label>
+          <input
+            readonly
+            matInput
+            type="text"
+            class="text-capitalize"
+            formControlName="raiserFullName"
+          />
+        </mat-form-field>
+      </ng-container>
+
+      <ng-container class="detected-on">
+        <div class="shareWidth">
+          <mat-form-field class="date shareWidth">
+            <mat-label>Date Detected</mat-label>
+            <input readonly matInput type="text" formControlName="dateRaised" />
           </mat-form-field>
-        </ng-container>
-
-        <ng-container class="am-step">
-          <div>
-            <mat-label
-              [ngClass]="{invalidAmStep: form.controls['amStep']?.errors?.['required']}"
-              >AM Step</mat-label
-            >
-            <mat-radio-group
-              class="am-step-button-group"
-              aria-labelledby="toggle am step"
-              formControlName="amStep"
-            >
-              <mat-radio-button class="am-step-button" type="button" value="1">
-                1
-              </mat-radio-button>
-              <mat-radio-button class="am-step-button" type="button" value="2"
-                >2
-              </mat-radio-button>
-              <mat-radio-button class="am-step-button" type="button" value="3"
-                >3
-              </mat-radio-button>
-              <mat-radio-button class="am-step-button" type="button" value="4"
-                >4
-              </mat-radio-button>
-              <mat-radio-button class="am-step-button" type="button" value="5"
-                >5
-              </mat-radio-button>
-            </mat-radio-group>
-            <mat-error *ngIf="form.controls['amStep']?.errors?.['required']">
-              Am step is required.
-            </mat-error>
-          </div>
-        </ng-container>
-
-        <ng-container class="detected-by">
-          <mat-form-field>
-            <mat-label>Detected By</mat-label>
-            <input
-              readonly
-              matInput
-              type="text"
-              class="text-capitalize"
-              formControlName="raiserFullName"
-            />
+          <mat-form-field class="time shareWidth">
+            <mat-label>Time Detected</mat-label>
+            <input readonly matInput type="text" formControlName="timeRaised" />
           </mat-form-field>
-        </ng-container>
+        </div>
+      </ng-container>
 
-        <ng-container class="detected-on">
-          <div class="shareWidth">
-            <mat-form-field class="date shareWidth">
-              <mat-label>Date Detected</mat-label>
-              <input
-                readonly
-                matInput
-                type="text"
-                formControlName="dateRaised"
-              />
-            </mat-form-field>
-            <mat-form-field class="time shareWidth">
-              <mat-label>Time Detected</mat-label>
-              <input
-                readonly
-                matInput
-                type="text"
-                formControlName="timeRaised"
-              />
-            </mat-form-field>
-          </div>
-        </ng-container>
+      <ng-container class="section-select">
+        <mat-form-field>
+          <mat-label>Section</mat-label>
+          <mat-select formControlName="section">
+            <mat-option value="" selected> --select section-- </mat-option>
+            <mat-option *ngFor="let section of sections" [value]="section">{{
+              section.name
+            }}</mat-option>
+          </mat-select>
+          <mat-error *ngIf="form.controls['section']?.errors?.['required']">
+            Section is required.</mat-error
+          >
+        </mat-form-field>
+      </ng-container>
 
-        <ng-container class="section-select">
-          <mat-form-field>
-            <mat-label>Section</mat-label>
-            <mat-select formControlName="section">
-              <mat-option value="" selected> --select section-- </mat-option>
-              <mat-option *ngFor="let section of sections" [value]="section">{{
-                section.name
-              }}</mat-option>
-            </mat-select>
-            <mat-error *ngIf="form.controls['section']?.errors?.['required']">
-              Section is required.</mat-error
-            >
-          </mat-form-field>
-        </ng-container>
+      <ng-container class="machine-select">
+        <mat-form-field>
+          <mat-label>Equipment/Resource</mat-label>
+          <mat-select formControlName="machine">
+            <ng-container *ngIf="section; else noSection">
+              <mat-option value="" selected
+                >--select equipment/resource--</mat-option
+              >
+              <mat-option
+                *ngFor="let machine of machines | machinesFilter: section"
+                [value]="machine"
+              >
+                {{ machine.name }}</mat-option
+              >
+            </ng-container>
+            <ng-template #noSection>
+              <mat-option value="" selected>
+                -- select a section first --</mat-option
+              >
+            </ng-template>
+          </mat-select>
+          <mat-error *ngIf="form.controls['machine']?.errors?.['required']"
+            >Machine is required.</mat-error
+          >
+        </mat-form-field>
+      </ng-container>
 
-        <ng-container class="machine-select">
-          <mat-form-field>
-            <mat-label>Equipment/Resource</mat-label>
-            <mat-select formControlName="machine">
-              <ng-container *ngIf="section; else noSection">
-                <mat-option value="" selected
-                  >--select equipment/resource--</mat-option
-                >
-                <mat-option
-                  *ngFor="let machine of machines | machinesFilter: section"
-                  [value]="machine"
-                >
-                  {{ machine.name }}</mat-option
-                >
-              </ng-container>
-              <ng-template #noSection>
-                <mat-option value="" selected>
-                  -- select a section first --</mat-option
-                >
-              </ng-template>
-            </mat-select>
-            <mat-error *ngIf="form.controls['machine']?.errors?.['required']"
-              >Machine is required.</mat-error
-            >
-          </mat-form-field>
-        </ng-container>
+      <ng-container class="abnormality-in-brief">
+        <mat-form-field>
+          <mat-label>Abnormality In Brief</mat-label>
+          <textarea
+            formControlName="workorderDescription"
+            class="text-capitalize"
+            appValidateSentenceFormat
+            type="text"
+            matInput
+            placeholder="Briefly describe the abnormality."
+            maxlength="500"
+            cdkTextareaAutosize
+            cdkAutosizeMinRows="2"
+            cdkAutosizeMaxRows="7"
+          >
+          </textarea>
+          <mat-error
+            *ngIf="form.controls['workorderDescription']?.errors?.['required']"
+          >
+            Abnormality description is required.
+          </mat-error>
 
-        <ng-container class="abnormality-in-brief">
-          <mat-form-field>
-            <mat-label>Abnormality In Brief</mat-label>
-            <textarea
-              formControlName="workorderDescription"
-              class="text-capitalize"
-              appValidateSentenceFormat
-              type="text"
-              matInput
-              placeholder="Briefly describe the abnormality."
-              maxlength="500"
-              cdkTextareaAutosize
-              cdkAutosizeMinRows="2"
-              cdkAutosizeMaxRows="7"
-            >
-            </textarea>
-            <mat-error
-              *ngIf="form.controls['workorderDescription']?.errors?.['required']"
-            >
-              Abnormality description is required.
-            </mat-error>
-
-            <mat-error
-              *ngIf="form.controls['workorderDescription']?.errors?.['invalidSentenceFormat']"
-            >
-              {{
+          <mat-error
+            *ngIf="form.controls['workorderDescription']?.errors?.['invalidSentenceFormat']"
+          >
+            {{
                form.controls['workorderDescription']?.errors?.['invalidSentenceFormat'].value
-              }}</mat-error
-            >
-          </mat-form-field>
-        </ng-container>
+            }}</mat-error
+          >
+        </mat-form-field>
+      </ng-container>
 
-        <ng-container class="supervisor-select">
-          <mat-form-field>
-            <mat-label>Supervisor</mat-label>
-            <mat-select formControlName="supervisor" class="text-capitalize">
-              <mat-option value="" selected>-- select supervisor --</mat-option>
-              <mat-optgroup label="Production Supervisors">
-                <mat-option
-                  class="text-capitalize"
-                  *ngFor="let supervisor of productionSupervisors"
-                  [value]="supervisor"
-                  >{{ supervisor.fullName }}</mat-option
-                >
-              </mat-optgroup>
-              <mat-optgroup label="Engineering Supervisors">
-                <mat-option
-                  class="text-capitalize"
-                  *ngFor="let supervisor of engineeringSupervisors"
-                  [value]="supervisor"
-                  >{{ supervisor.fullName }}</mat-option
-                >
-              </mat-optgroup>
-            </mat-select>
-            <mat-error
-              *ngIf="form.controls['supervisor']?.errors?.['required']"
-            >
-              Supervisor is required.
-            </mat-error>
-          </mat-form-field>
-        </ng-container>
-
-        <ng-container class="submit-button">
-          <button class="btn btn-success my-3 shadow-none" type="submit">
-            Raise Workorder
-          </button>
-        </ng-container>
-      </form>
-    </div>
+      <ng-container class="submit-button">
+        <button class="btn btn-success my-3 shadow-none" type="submit">
+          Raise Workorder
+        </button>
+      </ng-container>
+    </form>
   </div>
-
-  <!-- error -->
-  <div *ngIf="loadingFailed">
-    <div class="form-container mat-elevation-z5">
-      {{
-        getUserError
-          ? getUserError
-          : getUsersError
-          ? getUsersError
-          : getSectionsError
-          ? getSectionsError
-          : getMachinesError
-          ? getMachinesError
-          : defaultErrorMessage
-      }}
-    </div>
-  </div>
-</div>
+</ng-container>

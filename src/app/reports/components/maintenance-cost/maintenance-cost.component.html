@@ -131,7 +131,7 @@
             </mat-select-trigger>
 
             <mat-option
-              *ngFor="let section of factorySections"
+              *ngFor="let section of sections"
               [value]="section"
               >{{ section.name }}</mat-option
             >
@@ -155,7 +155,7 @@
               (selectionChange)="updateSection($event.value)"
             >
               <mat-option
-                *ngFor="let section of factorySections"
+                *ngFor="let section of sections"
                 value="{{ section.name }}"
                 >{{ section.name }}</mat-option
               >

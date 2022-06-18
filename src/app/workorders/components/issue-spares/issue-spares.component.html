@@ -241,7 +241,8 @@
         <ng-container *ngIf="sparesUsedStatus" formArrayName="sparesUsedArray">
           <!-- label -->
           <div *ngIf="sparesUsedArray?.length !== 0">
-            <mat-label class="fw-bold"
+            <mat-label
+              class="fw-bold"
               [ngClass]="{
                 'invalid-spares-label': form.controls['sparesUsedArray']?.errors?.['invalidSpares']
               }"
@@ -377,7 +378,7 @@
             <mat-label>Spares</mat-label>
             <mat-select formControlName="selectSparesUsed" multiple>
               <mat-select-trigger
-                >--search and select spares--
+                >--search/select more spares--
               </mat-select-trigger>
               <mat-option
                 *ngFor="let spare of spares"

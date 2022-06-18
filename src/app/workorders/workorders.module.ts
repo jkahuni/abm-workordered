@@ -40,6 +40,8 @@ import { ValidateMixedFormatDirective } from '@workorders/directives/validate-mi
   ],
   providers: [CurrencyPipe],
   exports: [
-    exportableComponents]
+    exportableComponents,
+    raiseWorkorderComponents
+  ]
 })
 export class WorkordersModule { }

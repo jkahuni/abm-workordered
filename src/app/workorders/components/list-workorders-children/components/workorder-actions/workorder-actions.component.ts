@@ -122,11 +122,11 @@ export class WorkorderActionsComponent implements OnInit, OnChanges {
   // workorder actions
   approve(): void {
     if (this.workorder) {
-      const technician = this.workorder.technician.uid;
-      const storesTechnician = this.workorder.storesTechnician.uid;
+      const technician = this.workorder.technician?.uid;
+      const storesTechnician = this.workorder.storesTechnician?.uid;
       const workorderType = this.workorder.workorder.type;
 
-      if (workorderType === 'Abnormality Card' && !technician || !storesTechnician) {
+      if (!technician || !storesTechnician) {
         if (this.assignTechniciansButton) {
           this.assignTechniciansButton.nativeElement.click();
         }

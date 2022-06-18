@@ -43,7 +43,7 @@
                 <a
                   type="button"
                   class="btn btn-link home-nav-button shadow-none"
-                  routerLink="/new-workorder"
+                  [routerLink]="['/raise-workorder', userUid]"
                 >
                   Raise New Workorder
                 </a>
@@ -91,7 +91,7 @@
                 <a
                   type="button"
                   class="btn btn-link home-nav-button shadow-none"
-                  routerLink="/new-workorder"
+                  [routerLink]="['/raise-workorder', userUid]"
                 >
                   Raise New Workorder
                 </a>
@@ -146,15 +146,17 @@
               </div>
 
               <!-- rejected workorders -->
-              <div>
-                <a
-                  type="button"
-                  class="btn btn-outline-warning home-nav-button shadow-none"
-                  [routerLink]="['/workorders/supervisor/rejected', userUid]"
-                  >Rejected Workorders - (
-                  {{ rejectedWorkorders ? rejectedWorkorders.length : 0 }} )
-                </a>
-              </div>
+              <ng-container *ngIf="rejectedWorkorders.length">
+                <div>
+                  <a
+                    type="button"
+                    class="btn btn-outline-warning home-nav-button shadow-none"
+                    [routerLink]="['/workorders/supervisor/rejected', userUid]"
+                    >Rejected Workorders - (
+                    {{ rejectedWorkorders ? rejectedWorkorders.length : 0 }} )
+                  </a>
+                </div>
+              </ng-container>
             </div>
 
             <!-- eng technicians -->
@@ -257,6 +259,19 @@
 
             <!-- eng manager -->
             <div *ngIf="isEngineeringManager" class="navigation-links">
+              <!-- escalated workorders -->
+              <ng-container *ngIf="escalatedWorkorders.length">
+                <div>
+                  <a
+                    type="button"
+                    class="btn btn-outline-danger home-nav-button shadow-none"
+                    [routerLink]="['/workorders/supervisor/escalated', userUid]"
+                    >Escalated Workorders - (
+                    {{ escalatedWorkorders ? escalatedWorkorders.length : 0 }} )
+                  </a>
+                </div>
+              </ng-container>
+
               <!-- all un-reviewed workorders -->
               <div>
                 <a
@@ -293,10 +308,7 @@
             <span class="emailAddress">{{ user.email }}</span>
           </p>
 
-          <p>
-            Complete the verification to access all features and services.
-            
-          </p>
+          <p>Complete the verification to access all features and services.</p>
 
           <p>
             Remember to check your spam and junk mail folders, where automated

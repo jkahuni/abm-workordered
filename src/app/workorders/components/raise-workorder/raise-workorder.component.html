@@ -1,1 +1,102 @@
-<router-outlet></router-outlet>
+<!-- no child selected -->
+<ng-container *ngIf="!newWorkorderTypeSelected">
+  <app-new-workorder
+    (workorderTypeSelected)="workorderTypeSelected($event)"
+  ></app-new-workorder>
+</ng-container>
+
+<!-- child selected -->
+<ng-container *ngIf="!loading && !loadingFailed && newWorkorderTypeSelected">
+  <!-- abnormality card -->
+  <ng-container *ngIf="raiseAbrnomalityCard">
+    <app-raise-abnormality-card
+      [sections]="sections"
+      [machines]="machines"
+      [raiser]="raiser"
+    ></app-raise-abnormality-card>
+  </ng-container>
+
+  <!-- am -->
+  <ng-container *ngIf="raiseAm">
+    <app-raise-am
+      [sections]="sections"
+      [machines]="machines"
+      [raiser]="raiser"
+    ></app-raise-am>
+  </ng-container>
+
+  <!-- breakdown -->
+  <ng-container *ngIf="raiseBreakdown">
+    <app-raise-breakdown
+      [sections]="sections"
+      [machines]="machines"
+      [raiser]="raiser"
+    ></app-raise-breakdown
+  ></ng-container>
+
+  <!-- corrective maintenance -->
+  <ng-container *ngIf="raiseCorrectiveMaintenance">
+    <app-raise-corrective-maintenance
+      [sections]="sections"
+      [machines]="machines"
+      [raiser]="raiser"
+    ></app-raise-corrective-maintenance>
+  </ng-container>
+
+  <!-- kaizen card -->
+  <ng-container *ngIf="raiseKaizenCard">
+    <app-raise-kaizen-card></app-raise-kaizen-card>
+  </ng-container>
+
+  <!-- mold service -->
+  <ng-container *ngIf="raiseMoldService">
+    <app-raise-mold-service
+      [sections]="sections"
+      [machines]="machines"
+      [raiser]="raiser"
+    ></app-raise-mold-service>
+  </ng-container>
+
+  <!-- pm -->
+  <ng-container *ngIf="raisePM">
+    <app-raise-pm
+      [sections]="sections"
+      [machines]="machines"
+      [raiser]="raiser"
+    ></app-raise-pm>
+  </ng-container>
+
+  <!-- project -->
+  <ng-container *ngIf="raiseProject">
+    <app-raise-project></app-raise-project>
+  </ng-container>
+
+  <!-- service -->
+  <ng-container *ngIf="raiseService">
+    <app-raise-service></app-raise-service>
+  </ng-container>
+
+  <!-- tool change -->
+  <ng-container *ngIf="raiseToolChange">
+    <app-raise-tool-change
+      [sections]="sections"
+      [machines]="machines"
+      [raiser]="raiser"
+    ></app-raise-tool-change>
+  </ng-container>
+</ng-container>
+
+<!-- display errors -->
+<ng-container *ngIf="!loading && loadingFailed">
+  <div class="form-container mat-elevation-z5">
+    {{
+      getUserError
+        ? getUserError
+        : getSectionsError
+        ? getSectionsError
+        : getMachinesError
+        ? getMachinesError
+        : defaultErrorMessage
+    }}
+  </div>
+</ng-container>
