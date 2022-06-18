@@ -34,12 +34,14 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
 
           this.largeScreen = largeScreen;
 
-          if (hasActions) {
+          if (hasActions && this.largeScreen !== undefined && this.largeScreen === true) {
             this.showLeftSidenav = true;
             this.showRightSidenav = true;
-          } else {
-            this.showLeftSidenav = true;
+          }
+
+          else {
             this.showRightSidenav = false;
+            this.showLeftSidenav = true;
           }
 
         }
@@ -53,7 +55,7 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
         this.workorderHasActions = workorderHasActions;
         if (workorderHasActions) {
           this.getUsers();
-        } 
+        }
       });
   }
 
@@ -84,8 +86,8 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
   workorderHasActions!: boolean;
 
   // toggle sidenavs
-  showLeftSidenav!: boolean;
-  showRightSidenav!: boolean;
+  showLeftSidenav = true;
+  showRightSidenav = false;
 
   // loading spinner
   loadingWorkorders = true;
@@ -124,12 +126,12 @@ export class ListWorkordersComponent implements OnInit, OnDestroy {
 
     this.matcher = this.mediaMatcher.matchMedia('(min-width: 670px)');
     this.matcher.addEventListener('change', this.mediaSizeListener);
-    this.getScreenSizeOnLoad((window.innerWidth) > 670);
+    // this.getScreenSizeOnLoad((window.innerWidth) > 670);
   }
 
-  private getScreenSizeOnLoad(largeScreen: boolean): void {
-    this.updateScreenProperties.next(this.checkWorkorderStatus(largeScreen));
-  }
+  // private getScreenSizeOnLoad(largeScreen: boolean): void {
+  //   this.updateScreenProperties.next(this.checkWorkorderStatus(largeScreen));
+  // }
 
   private mediaSizeListener = (event: { matches: any }) => {
     this.updateScreenProperties.next(this.checkWorkorderStatus(event.matches))
