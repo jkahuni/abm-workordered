@@ -30,15 +30,15 @@ export interface IntSpare {
     name: string;
     unitCost: string;
     id: string | number;
+    searchParams: string[];
 }
 
 export interface IntExpandedSpare {
-    code: string;
     id: string | number;
+    code: string;
     codeLowercase: string;
-    machine: string;
-    machineLowercase: string;
     name: string;
     nameLowercase: string;
     searchParams: string[];
+    unitCost: string;
 }
