@@ -1,24 +1,24 @@
-<div *ngIf="loading">
+<ng-container *ngIf="loading">
   <div class="form-container mat-elevation-z8">
     <div class="bootstrap-spinner-container">
       <div class="bootstrap-spinner">
         <div
           class="spinner-border"
-          style="width: 2rem; height: 2rem"
+          style="width: 1rem; height: 1rem"
           role="status"
         ></div>
-        <span class="loading-tag"><strong>Loading spares...</strong></span>
+        <span class="loading-tag"><strong>Loading spare...</strong></span>
       </div>
     </div>
   </div>
-</div>
+</ng-container>
 
-<div *ngIf="!loadingFailed">
+<ng-container *ngIf="!loadingFailed">
   <div class="form-container mat-elevation-z5">
     <div class="form-header fw-bold mb-3">Edit Spare</div>
-    <form [formGroup]="form" (ngSubmit)="editSpare()">
-        <!-- search -->
-       <mat-form-field appearance="outline" appearance="outline">
+    <form [formGroup]="form" (ngSubmit)="editSpare()" autocomplete="off">
+      <!-- search -->
+      <mat-form-field appearance="outline" appearance="outline">
         <mat-label>Search Spare Code/Name</mat-label>
         <input
           type="text"
@@ -29,7 +29,7 @@
         />
       </mat-form-field>
 
-       <mat-form-field appearance="outline">
+      <mat-form-field appearance="outline">
         <mat-label>Spares</mat-label>
         <mat-select
           #selectSpares
@@ -43,7 +43,7 @@
             [value]="spare"
             class="text-capitalize"
           >
-            {{ spare.name }}
+            {{ spare.code }}: {{ spare.name }}
           </mat-option>
         </mat-select>
 
@@ -52,8 +52,9 @@
         </mat-error>
       </mat-form-field>
 
-      <div *ngIf="spareSelected">
-         <mat-form-field appearance="outline">
+      <ng-container *ngIf="spareSelected">
+        <!-- spare code -->
+        <mat-form-field appearance="outline">
           <mat-label>Spare Code</mat-label>
           <textarea
             matInput
@@ -66,16 +67,18 @@
             cdkAutosizeMaxRows="3"
           >
           </textarea>
-          <mat-error *ngIf="form.controls['code']?.errors?.['required']">Spare code is required.</mat-error>
+          <mat-error *ngIf="form.controls['code']?.errors?.['required']"
+            >Spare code is required.</mat-error
+          >
         </mat-form-field>
 
-         <mat-form-field appearance="outline">
+        <!-- spare name -->
+        <mat-form-field appearance="outline">
           <mat-label>Spare Name</mat-label>
           <textarea
             matInput
             formControlName="name"
             class="text-capitalize"
-            appValidateSentenceFormat
             type="text"
             maxlength="500"
             cdkTextareaAutosize
@@ -87,15 +90,16 @@
           <mat-error *ngIf="form.controls['name']?.errors?.['required']"
             >Spare name is required.</mat-error
           >
-          <mat-error
+          <!-- <mat-error
             *ngIf="form.controls['name']?.errors?.['invalidSentenceFormat']"
           >
             {{
                 form.controls['name']?.errors?.['invalidSentenceFormat'].value
             }}
-          </mat-error>
+          </mat-error> -->
         </mat-form-field>
 
+        <!-- spare unit cost -->
         <mat-form-field appearance="outline">
           <mat-label>Spare Unit Cost</mat-label>
           <textarea
@@ -122,7 +126,7 @@
             }}
           </mat-error>
         </mat-form-field>
-      </div>
+      </ng-container>
 
       <button *ngIf="!editingSpare" type="submit" class="btn btn-primary my-3">
         Edit Spare
@@ -144,8 +148,8 @@
       </button>
     </form>
   </div>
-</div>
+</ng-container>
 
-<div *ngIf="!loading && loadingFailed">
+<ng-container *ngIf="!loading && loadingFailed">
   <div class="form-container mat-elevation-z5"></div>
-</div>
+</ng-container>

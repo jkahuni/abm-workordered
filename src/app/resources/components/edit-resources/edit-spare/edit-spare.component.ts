@@ -81,9 +81,9 @@ export class EditSpareComponent implements OnInit {
       });
   }
 
-  private createForm(): FormGroup {
+  private createForm(spareCode?: string): FormGroup {
     const form = this.fb.group({
-      searchSpareTerm: [''],
+      searchSpareTerm: [spareCode ? spareCode : ''],
       spare: [this.spare ? this.spare : ''],
       code: [this.spare ? this.spare.code : '', Validators.required],
       name: [this.spare ? this.spare.name : '', Validators.required],
@@ -113,6 +113,71 @@ export class EditSpareComponent implements OnInit {
       });
   }
 
+  private formatTitleCase(term: string): string {
+    return term.toLocaleLowerCase()
+      .split(' ')
+      .map((word: string) => {
+        return (word.charAt(0).toUpperCase() + word.slice(1));
+      })
+      .join(' ');
+
+  }
+
+  private generateSearchParams(code: string, name: string): string[] {
+    const lowercaseName: string = name.toLocaleLowerCase();
+    const lowercaseCode = code.toLocaleLowerCase();
+
+    const splitNames: string[] = lowercaseName.split(/[,#x:\/\\\s\*\+\.\-\(\)\'\"]+/);
+    const splitCode: string[] = lowercaseCode.split(/[,#x:\/\\\s\*\+\.\-\(\)\'\"]+/);
+
+    const codeAndNamesArray: string[] = [... new Set(splitNames.concat(splitCode))];
+    let searchParamsArray: string[] = [];
+
+
+    codeAndNamesArray.forEach(
+      (word: string) => {
+        if (word.length >= 4) {
+          // account for codes such as ea01
+          const firstBatch = word.substring(0, 2);
+          const secondBatch = word.substring(2, 4);
+          const thirdBatch = word.substring(4);
+
+
+          // account for codes such as les001
+          const fourthBatch = word.substring(0, 3);
+          const fifthBatch = word.substring(3, 6);
+          const sixthBatch = word.substring(6);
+
+          searchParamsArray.push(
+            firstBatch,
+            secondBatch,
+            thirdBatch,
+            fourthBatch,
+            fifthBatch,
+            sixthBatch
+          );
+        }
+      }
+    );
+
+    // remove empty strings
+    const searchParams = (codeAndNamesArray.concat(searchParamsArray)).filter(
+      (param: string) => param);
+
+    return searchParams;
+  }
+
+  private coreParamsChanged(code: string, name: string, spare: IntSpare): boolean {
+    const codeLowercase = code.toLocaleLowerCase();
+    const nameLowercase = name.toLocaleLowerCase();
+
+    const spareCodeLowercase = spare.code.toLocaleLowerCase();
+    const spareNameLowercase = spare.name.toLocaleLowerCase();
+
+    return codeLowercase !== spareCodeLowercase || nameLowercase !== spareNameLowercase ? true : false;
+
+  }
+
   // fn called from search input field keyup event
   searchSpares(event: Event): void {
     const searchTerm = (event.target as HTMLInputElement)
@@ -127,28 +192,59 @@ export class EditSpareComponent implements OnInit {
     });
 
     if (this.spare) {
-      this.createForm();
+      this.createForm(this.spare.code);
       this.spareSelected = true;
     }
 
     return this.spare;
   }
 
-  private formatTitleCase(term: string): string {
-    return term.toLocaleLowerCase()
-      .split(' ')
-      .map((word: string) => {
-        return (word.charAt(0).toUpperCase() + word.slice(1));
-      })
-      .join(' ');
-
-  }
-
   editSpare(): void {
     const { spare, code, name, unitCost } = this.form?.value;
 
-    console.log(spare, code, name, unitCost);
+    const { uid, id, searchParams } = spare;
+
+    if (!unitCost || unitCost === '0' || +unitCost === 0) {
+      setTimeout(() => {
+        this.form?.get('unitCost')?.setErrors({
+          invalidUnitCost: {
+            errorMessage: `Cost cannot be ${unitCost
+              }. Enter a valid cost.`
+          }
+        });
+      });
+    }
+
+    else if (this.form?.invalid) {
+      this.toast.error(`Please ensure all required fields are not blank or invalid.`, { autoClose: false, id: 'invalid-edit-spares-form' });
+    }
+
+    else {
+      this.editingSpare = true;
+
+      const ref: string = uid;
+      const col: string = 'spares';
+
+      const data: IntExpandedSpare = {
+        id,
+        code: code.toUpperCase(),
+        codeLowercase: code.toLocaleLowerCase(),
+        name: this.formatTitleCase(name),
+        nameLowercase: name.toLocaleLowerCase(),
+        unitCost,
+        searchParams: this.coreParamsChanged(code, name, spare) ? this.generateSearchParams(code, name) : searchParams
+      };
+
+      this.resourcesService.updateResource(col, ref, data)
+        .then(() => {
+          this.editingSpare = false;
+          this.router.navigate(['/']);
+          this.toast.success(`Success. Spare ${code} editted successfully.`, { duration: 12000, id: 'edit-spare-success' });
+        })
+        .catch(() => {
+          this.editingSpare = false;
+          this.toast.error(`Failed. Editing spare ${code} failed with error code <b>ESp-01</b>. Please try again or report this error code to support for assistance.`, { autoClose: false, id: 'edit-spare-failed' });
+        });
+    }
   }
-
-
 }
