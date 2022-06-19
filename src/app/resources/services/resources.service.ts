@@ -66,16 +66,16 @@ export class ResourcesService {
     const q = query(sparesColRef,
       orderBy('code'),
       where('searchParams', 'array-contains', searchValue),
-      limit(5)
+      limit(10)
     );
 
     const querySnapshot = await getDocs(q);
 
     const sparesArray = querySnapshot?.docs.map((spare: any) => {
       const uid = spare['id'];
-      const { code, name, unitCost, id } = spare.data();
+      const { code, name, unitCost, id, searchParams } = spare.data();
 
-      const data = { uid, code, name, unitCost, id } as IntSpare;
+      const data = { uid, code, name, unitCost, id, searchParams } as IntSpare;
 
       return data;
     }) as IntSpare[];
