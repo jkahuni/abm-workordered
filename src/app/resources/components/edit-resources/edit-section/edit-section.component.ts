@@ -106,7 +106,9 @@ export class EditSectionComponent implements OnInit {
       currentName,
       newName
     } = this.form?.value;
+
     const { id, uid } = section;
+
     if (section === '' && currentName === null) {
       this.form?.get('section')?.setErrors({ required: true });
     } else if (this.form?.invalid) {
@@ -114,9 +116,11 @@ export class EditSectionComponent implements OnInit {
 
     } else {
       this.editingSection = true;
+
       const ref: string = uid;
       const col: string = 'sections';
       const name = this.formatTitleCase(newName);
+      
       const data: IntExpandedSection = {
         id,
         name,
