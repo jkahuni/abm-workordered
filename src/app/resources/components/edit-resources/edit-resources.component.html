@@ -1,0 +1,52 @@
+<!-- default start page -->
+<ng-container *ngIf="noResourceSelected">
+  <div class="edit-resources-links-container mat-elevation-z5">
+    
+    <div class="edit-resources-header text-center fw-bold">Select Resource</div>
+
+    <div class="edit-resources-links">
+      <!-- sections -->
+      <div class="sections">
+        <a
+          type="button"
+          class="btn btn-link shadow-none edit-resource-button"
+          (click)="editResource('section')"
+          >Sections
+        </a>
+      </div>
+
+      <!-- machines -->
+      <div class="machines">
+        <a
+          type="button"
+          class="btn btn-link shadow-none edit-resource-button"
+          (click)="editResource('machine')"
+          >Machines</a
+        >
+      </div>
+
+      <!-- spares -->
+      <div class="spares">
+        <a
+          type="button"
+          class="btn btn-link shadow-none edit-resource-button"
+          (click)="editResource('spare')"
+          >Spares</a
+        >
+      </div>
+    </div>
+  </div>
+</ng-container>
+
+<!-- resource selected -->
+<ng-container *ngIf="!noResourceSelected">
+  <ng-container *ngIf="editSection">
+    <app-edit-section></app-edit-section>
+  </ng-container>
+  <ng-container *ngIf="editMachine">
+    <app-edit-machine></app-edit-machine>
+  </ng-container>
+  <ng-container *ngIf="editSpare">
+    <app-edit-spare></app-edit-spare>
+  </ng-container>
+</ng-container>
