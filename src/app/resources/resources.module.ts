@@ -8,6 +8,8 @@ import {
   editResourcesComponents
 } from '@resources/resources-routing.module';
 import { SharedModule } from '@shared/shared.module';
+import { AddResourcesComponent } from '@resources/components/add-resources/add-resources.component';
+import { EditResourcesComponent } from '@resources/components/edit-resources/edit-resources.component';
 
 
 
@@ -16,11 +18,17 @@ import { SharedModule } from '@shared/shared.module';
     rootResourcesComponent,
     addResourcesComponents,
     editResourcesComponents,
+    AddResourcesComponent,
+    EditResourcesComponent,
   ],
   imports: [
     CommonModule,
     ResourcesRoutingModule,
     SharedModule
+  ],
+  exports: [
+    addResourcesComponents,
+    editResourcesComponents
   ]
 })
 export class ResourcesModule { }
