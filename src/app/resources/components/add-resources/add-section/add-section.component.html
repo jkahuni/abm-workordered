@@ -1,1 +1,83 @@
-<p>add-section works!</p>
+<div class="form-container mat-elevation-z8">
+  <ng-container *ngIf="loading">
+    <div class="bootstrap-spinner-container">
+      <div class="bootstrap-spinner">
+        <div
+          class="spinner-border"
+          style="width: 2rem; height: 2rem"
+          role="status"
+        ></div>
+        <span class="loading-tag"><strong>Loading...</strong></span>
+      </div>
+    </div>
+  </ng-container>
+
+  <ng-container *ngIf="!loading">
+    <ng-container *ngIf="!loadingFailed">
+      <div class="form-header fw-bold mb-3">Add Section</div>
+      <form [formGroup]="form" (ngSubmit)="addSection()">
+        <mat-form-field appearance="outline">
+          <mat-label>Section Name</mat-label>
+          <textarea
+            matInput
+            formControlName="name"
+            class="text-capitalize"
+            appValidateSentenceFormat
+            type="text"
+            maxlength="500"
+            cdkTextareaAutosize
+            cdkAutosizeMinRows="2"
+            cdkAutosizeMaxRows="7"
+          >
+          </textarea>
+
+          <mat-error *ngIf="form.controls['name']?.errors?.['required']"
+            >Section name is required.</mat-error
+          >
+          <mat-error
+            *ngIf="form.controls['name']?.errors?.['invalidSentenceFormat']"
+          >
+            {{
+                form.controls['name']?.errors?.['invalidSentenceFormat'].value
+            }}
+          </mat-error>
+        </mat-form-field>
+
+        <button
+          *ngIf="!addingSection"
+          type="submit"
+          class="btn btn-primary my-3"
+        >
+          Add Section
+        </button>
+
+        <button
+          *ngIf="addingSection"
+          type="button"
+          disabled
+          class="btn btn-success my-3"
+        >
+          <span
+            class="spinner-border spinner-border-sm"
+            role="status"
+            aria-hidden="true"
+          >
+          </span>
+          Adding Section...
+        </button>
+      </form>
+    </ng-container>
+
+    <ng-container *ngIf="loadingFailed">
+      <div>
+        {{
+          loadingIndexingError
+            ? loadingIndexingError
+            : loadingOtherError
+            ? loadingOtherError
+            : loadingUnknownError
+        }}
+      </div>
+    </ng-container>
+  </ng-container>
+</div>

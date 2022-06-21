@@ -22,4 +22,13 @@ export interface IntFirestoreUser {
     isSuperUser: boolean;
 }
 
+export interface IntUser {
+    fullName: string;
+    uid: string;
+    group: string;
+    technicianGroup: string;
+    supervisorGroup: string;
+    managerGroup?: string;
+}
+
 

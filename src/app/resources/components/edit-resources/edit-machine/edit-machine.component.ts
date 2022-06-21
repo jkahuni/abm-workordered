@@ -58,7 +58,7 @@ export class EditMachineComponent implements OnInit {
         if (err.code === 'failed-precondition') {
           this.loadingMachinesIndexingError = `Loading machines to edit failed with error code IND-EM-01. Please report this error code to support to have it fixed.`;
         } else {
-          this.loadingMachinesOtherError = `Loading machines to edit failed with error code EM-01. Please report this error code to support to have it fixed.`;
+          this.loadingMachinesOtherError = `Loading machines to edit failed with error code EM-01. Please try reloading the parge or report this error code to support to have it fixed.`;
         }
       });
   }
@@ -81,18 +81,6 @@ export class EditMachineComponent implements OnInit {
       })
       .join(' ');
 
-  }
-
-  private generateMachineUid(): string {
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-
-    let uid = '';
-
-    for (let i = 0; i <= 20; i++) {
-      uid += characters.charAt(Math.floor(Math.random() * characters.length));
-    }
-
-    return uid;
   }
 
   displayMachine(machine: IntMachine): IntMachine | undefined {

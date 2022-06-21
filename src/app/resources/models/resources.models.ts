@@ -41,4 +41,13 @@ export interface IntExpandedSpare {
     nameLowercase: string;
     searchParams: string[];
     unitCost: string;
+    machine?: string;
+    machineLowercase?: string;
+}
+
+export interface IntResourceMetrics {
+    sections: number;
+    machines: number;
+    spares: number;
+    workorders?: number;
 }

@@ -1,1 +1,123 @@
-<p>add-spare works!</p>
+<div class="form-container mat-elevation-z8">
+  <ng-container *ngIf="loading">
+    <div class="bootstrap-spinner-container">
+      <div class="bootstrap-spinner">
+        <div
+          class="spinner-border"
+          style="width: 2rem; height: 2rem"
+          role="status"
+        ></div>
+        <span class="loading-tag"><strong>Loading...</strong></span>
+      </div>
+    </div>
+  </ng-container>
+
+  <ng-container *ngIf="!loading">
+    <ng-container *ngIf="!loadingFailed">
+      <div class="form-header fw-bold mb-3">Add Spare</div>
+      <form [formGroup]="form" (ngSubmit)="addSpare()">
+        <!-- spare code -->
+        <mat-form-field appearance="outline">
+          <mat-label>Code</mat-label>
+          <input matInput type="text"  formControlName="code" />
+          <mat-error *ngIf="form.controls['code']?.errors?.['required']">
+            Spare code is required.
+          </mat-error>
+        </mat-form-field>
+
+        <!-- spare name -->
+        <mat-form-field appearance="outline">
+          <mat-label>Name</mat-label>
+          <textarea
+            matInput
+            formControlName="name"
+            class="text-capitalize"
+            type="text"
+            maxlength="500"
+            cdkTextareaAutosize
+            cdkAutosizeMinRows="2"
+            cdkAutosizeMaxRows="7"
+          >
+          </textarea>
+
+          <mat-error *ngIf="form.controls['name']?.errors?.['required']"
+            >Spare name is required.</mat-error
+          >
+        </mat-form-field>
+
+        <!-- machine -->
+        <mat-form-field appearance="outline">
+          <mat-label>Machine</mat-label>
+          <textarea
+            matInput
+            formControlName="machine"
+            class="text-capitalize"
+            appValidateSentenceFormat
+            type="text"
+            maxlength="500"
+            cdkTextareaAutosize
+            cdkAutosizeMinRows="2"
+            cdkAutosizeMaxRows="7"
+            placeholder="Optional"
+          >
+          </textarea>
+
+          <mat-error
+            *ngIf="form.controls['machine']?.errors?.['invalidSentenceFormat']"
+          >
+            {{
+                form.controls['machine']?.errors?.['invalidSentenceFormat'].value
+            }}
+          </mat-error>
+        </mat-form-field>
+
+        <!-- unit cost -->
+        <mat-form-field appearance="outline">
+          <mat-label>Unit Cost</mat-label>
+          <input matInput type="text"  formControlName="unitCost" />
+
+          <mat-error *ngIf="form.controls['unitCost']?.errors?.['required']">
+            Unit cost is required.
+          </mat-error>
+
+           <mat-error
+            *ngIf="form.controls['unitCost']?.errors?.['invalidUnitCost']"
+          >
+            {{
+                form.controls['unitCost']?.errors?.['invalidUnitCost'].errorMessage
+            }}
+          </mat-error>
+        </mat-form-field>
+
+        <button
+          *ngIf="!addingSpare"
+          type="submit"
+          class="btn btn-primary my-3"
+        >
+          Add Spare
+        </button>
+
+        <button
+          *ngIf="addingSpare"
+          type="button"
+          disabled
+          class="btn btn-success my-3"
+        >
+          <span
+            class="spinner-border spinner-border-sm"
+            role="status"
+            aria-hidden="true"
+          >
+          </span>
+          Adding Spare...
+        </button>
+      </form>
+    </ng-container>
+
+    <ng-container *ngIf="loadingFailed">
+      <div>
+        {{ loadingOtherError ? loadingOtherError : loadingUnknownError }}
+      </div>
+    </ng-container>
+  </ng-container>
+</div>

@@ -1,1 +1,101 @@
-<p>add-machine works!</p>
+<div class="form-container mat-elevation-z8">
+  <ng-container *ngIf="loading">
+    <div class="bootstrap-spinner-container">
+      <div class="bootstrap-spinner">
+        <div
+          class="spinner-border"
+          style="width: 2rem; height: 2rem"
+          role="status"
+        ></div>
+        <span class="loading-tag"><strong>Loading...</strong></span>
+      </div>
+    </div>
+  </ng-container>
+
+  <ng-container *ngIf="!loading">
+    <ng-container *ngIf="!loadingFailed">
+      <div class="form-header fw-bold mb-3">Add Machine</div>
+      <form [formGroup]="form" (ngSubmit)="addMachine()">
+        <mat-form-field appearance="outline">
+          <mat-label>Section</mat-label>
+          <mat-select class="text-capitalize" formControlName="section">
+            <mat-option value="" selected>--select section--</mat-option>
+            <mat-option
+              *ngFor="let section of sections"
+              [value]="section"
+              class="text-capitalize"
+            >
+              {{ section.name }}
+            </mat-option>
+          </mat-select>
+
+          <mat-error *ngIf="form.controls['section']?.errors?.['required']">
+            Please select the section to add machine to.
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Machine Name</mat-label>
+          <textarea
+            matInput
+            formControlName="machineName"
+            class="text-capitalize"
+            appValidateSentenceFormat
+            type="text"
+            maxlength="500"
+            cdkTextareaAutosize
+            cdkAutosizeMinRows="2"
+            cdkAutosizeMaxRows="7"
+          >
+          </textarea>
+
+          <mat-error *ngIf="form.controls['machineName']?.errors?.['required']"
+            >Machine name is required.</mat-error
+          >
+          <mat-error
+            *ngIf="form.controls['machineName']?.errors?.['invalidSentenceFormat']"
+          >
+            {{
+                form.controls['machineName']?.errors?.['invalidSentenceFormat'].value
+            }}
+          </mat-error>
+        </mat-form-field>
+
+        <button
+          *ngIf="!addingMachine"
+          type="submit"
+          class="btn btn-primary my-3"
+        >
+          Add Machine
+        </button>
+
+        <button
+          *ngIf="addingMachine"
+          type="button"
+          disabled
+          class="btn btn-success my-3"
+        >
+          <span
+            class="spinner-border spinner-border-sm"
+            role="status"
+            aria-hidden="true"
+          >
+          </span>
+          Adding Machine...
+        </button>
+      </form>
+    </ng-container>
+
+    <ng-container *ngIf="loadingFailed">
+      <div>
+        {{
+          loadingIndexingError
+            ? loadingIndexingError
+            : loadingOtherError
+            ? loadingOtherError
+            : loadingUnknownError
+        }}
+      </div>
+    </ng-container>
+  </ng-container>
+</div>

@@ -1,1 +1,54 @@
-<p>add-resources works!</p>
+<!-- default start page -->
+<ng-container *ngIf="noResourceSelected">
+  <div class="add-resources-links-container mat-elevation-z5">
+    
+    <div class="add-resources-header text-center fw-bold">Select Resource To Add</div>
+
+    <div class="add-resources-links">
+      <!-- sections -->
+      <div class="sections">
+        <a
+          type="button"
+          class="btn btn-link shadow-none add-resource-button"
+          (click)="addResource('section')"
+          >Section
+        </a>
+      </div>
+
+      <!-- machines -->
+      <div class="machines">
+        <a
+          type="button"
+          class="btn btn-link shadow-none add-resource-button"
+          (click)="addResource('machine')"
+          >Machine
+          </a
+        >
+      </div>
+
+      <!-- spares -->
+      <div class="spares">
+        <a
+          type="button"
+          class="btn btn-link shadow-none add-resource-button"
+          (click)="addResource('spare')"
+          >Spare
+          </a
+        >
+      </div>
+    </div>
+  </div>
+</ng-container>
+
+<!-- resource selected -->
+<ng-container *ngIf="!noResourceSelected">
+  <ng-container *ngIf="addSection">
+    <app-add-section></app-add-section>
+  </ng-container>
+  <ng-container *ngIf="addMachine">
+    <app-add-machine></app-add-machine>
+  </ng-container>
+  <ng-container *ngIf="addSpare">
+    <app-add-spare></app-add-spare>
+  </ng-container>
+</ng-container>

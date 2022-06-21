@@ -17,6 +17,10 @@ import { User } from '@angular/fire/auth';
 })
 export class NavComponent implements OnInit {
 
+  user$!: Observable<User | null>;
+  isStoresTechnician!: boolean;
+
+
   constructor(
     private authenticationService: AuthenticationService,
     private spinner: NgxSpinnerService,
@@ -24,10 +28,31 @@ export class NavComponent implements OnInit {
     private toast: HotToastService,
   ) { }
 
-  user$!: Observable<User | null>;
-
   ngOnInit(): void {
-    this.user$ = this.authenticationService.currentUser$;
+    this.userSetup();
+    this.setUserGroup();
+  }
+
+  private userSetup(): any {
+    return this.user$ = this.authenticationService.currentUser$;
+  }
+
+  private setUserGroup(): any {
+    this.user$.subscribe(
+      (user: User | null) => {
+        if (user) {
+          const uid = user.uid;
+
+          this.authenticationService.getCurrentUserData(uid)
+            .then((userGroup: string) => {
+              return this.isStoresTechnician = userGroup && (userGroup === 'Eng. Store' || userGroup === 'PM Planning') ? true : false;
+            })
+            .catch(() => {
+              return;
+            });
+        }
+      }
+    );
   }
 
   logout(): void {
@@ -45,8 +70,4 @@ export class NavComponent implements OnInit {
       });
 
   }
-
-
-
-
 }

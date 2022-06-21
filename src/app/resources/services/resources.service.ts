@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import {
-  IntSection, IntMachine, IntSpare, IntExpandedSection, IntExpandedMachine, IntExpandedSpare
+  IntSection, IntMachine, IntSpare, IntExpandedSection, IntExpandedMachine, IntExpandedSpare, IntResourceMetrics
 } from '@resources/models/resources.models';
-import { DocumentData, query, getDocs, collection, Firestore, orderBy, where, limit, doc, setDoc, updateDoc } from '@angular/fire/firestore';
+import { DocumentData, query, getDocs, collection, Firestore, orderBy, where, limit, doc, setDoc, updateDoc, getDoc } from '@angular/fire/firestore';
 import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
@@ -106,5 +106,32 @@ export class ResourcesService {
     const updatedResource = await updateDoc(docRef, data as any);
 
     return updatedResource;
+  }
+
+  // get last ID for resource
+  async getResourceMetrics(): Promise<IntResourceMetrics> {
+    const resourcesPath = 'resources/resource-metrics';
+    const docRef = doc(this.firestore, `${resourcesPath}`);
+
+
+    const resourceMetrics = await getDoc(docRef);
+
+    const { sections, machines, spares } = resourceMetrics?.data() as IntResourceMetrics;
+
+
+    return { sections, machines, spares };
+
+
+  }
+
+  // update resource ID
+  async updateResourceMetrics(data: IntResourceMetrics): Promise<any> {
+    const resourcesPath = 'resources/resource-metrics';
+    const docRef = doc(this.firestore, `${resourcesPath}`);
+
+    const updatedMetrics = await updateDoc(docRef, data as any);
+
+
+    return updatedMetrics;
   }
 }

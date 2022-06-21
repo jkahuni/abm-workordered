@@ -20,11 +20,7 @@
     >
       <ng-container *ngIf="user$ | async as userObj; else loggedOut">
         <ng-container *ngIf="userObj.emailVerified; else loggedOut">
-          <button
-            mat-button
-            routerLink="/"
-            class="text-white"
-          >
+          <button mat-button routerLink="/" class="text-white">
             <mat-icon>home</mat-icon>
           </button>
           <mat-divider [vertical]="true" [inset]="true"></mat-divider>
@@ -73,18 +69,46 @@
     </button>
     <mat-divider class="menu-items-divider"></mat-divider>
 
-    <button mat-menu-item [matMenuTriggerFor]="reportsMenu" color="" class="home-button">
+    <button
+      mat-menu-item
+      [matMenuTriggerFor]="reportsMenu"
+      color=""
+      class="home-button"
+    >
       <mat-icon class="text-white">bar_chart</mat-icon>
       <span class="text-white">Reports</span>
     </button>
     <mat-divider class="menu-items-divider"></mat-divider>
-
 
     <button mat-menu-item routerLink="/" color="" class="home-button">
       <mat-icon class="text-white">table_chart</mat-icon>
       <span class="text-white">Data</span>
     </button>
     <mat-divider class="menu-items-divider"></mat-divider>
+
+    <ng-container *ngIf="isStoresTechnician">
+      <button
+        mat-menu-item
+        routerLink="/resources/edit-resources"
+        color=""
+        class="home-button"
+      >
+        <mat-icon class="text-white">edit</mat-icon>
+        <span class="text-white">Edit Resources</span>
+      </button>
+      <mat-divider class="menu-items-divider"></mat-divider>
+
+      <button
+        mat-menu-item
+        routerLink="/resources/add-resources"
+        color=""
+        class="home-button"
+      >
+        <mat-icon class="text-white">add_circle</mat-icon>
+        <span class="text-white">Add Resources</span>
+      </button>
+      <mat-divider class="menu-items-divider"></mat-divider>
+    </ng-container>
 
     <button mat-menu-item (click)="logout()">
       <mat-icon class="text-white">logout</mat-icon>
@@ -95,16 +119,25 @@
 
 <ng-container class="logged-in-drop-down-menu">
   <mat-menu #reportsMenu="matMenu" class="bg-success">
-    <button mat-menu-item routerLink="/reports/maintenance-costs" color="" class="home-button">
+    <button
+      mat-menu-item
+      routerLink="/reports/maintenance-costs"
+      color=""
+      class="home-button"
+    >
       <mat-icon class="text-white">attach_money</mat-icon>
       <span class="text-white">Costs</span>
     </button>
     <mat-divider class="menu-items-divider"></mat-divider>
 
-    <button mat-menu-item routerLink="/reports/incident-metrics" color="" class="home-button">
+    <button
+      mat-menu-item
+      routerLink="/reports/incident-metrics"
+      color=""
+      class="home-button"
+    >
       <mat-icon class="text-white">access_time</mat-icon>
       <span class="text-white">Time</span>
     </button>
-   
   </mat-menu>
 </ng-container>

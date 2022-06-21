@@ -14,12 +14,13 @@ import {
 import {
   Firestore,
   doc,
-  setDoc
+  setDoc,
+  getDoc
 } from '@angular/fire/firestore';
 import {
-  IntFirebaseAuthUser, IntFirestoreUser
+  IntFirebaseAuthUser, IntFirestoreUser, IntUser
 } from '@authentication/models/authentication.models';
-import { Observable } from 'rxjs';
+import { lastValueFrom, Observable, Subscription } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -109,4 +110,17 @@ export class AuthenticationService {
     };
     return await sendEmailVerification(user, actionCodeSettings);
   }
+
+  // gets currentuser
+  async getCurrentUserData(uid: string): Promise<string> {
+    const docRef = doc(this.firestore, 'users', uid);
+
+    const user = await getDoc(docRef);
+
+    const { technicianGroup } = user?.data() as IntUser;
+
+    return technicianGroup;
+  }
+
+
 }
