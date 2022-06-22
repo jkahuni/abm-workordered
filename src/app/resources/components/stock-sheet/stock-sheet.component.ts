@@ -1,8 +1,14 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+// core imports
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { MatTable } from '@angular/material/table';
+
+// 3rd party imports
+import * as dayjs from 'dayjs';
+import * as XLSX from 'xlsx';
+
+// local imports
 import { IntWorkorder, IntSparesUsed, IntSpareWithQuantities } from '@workorders/models/workorders.models';
 import { WorkordersService } from '@workorders/services/workorders.service';
-import * as dayjs from 'dayjs';
 
 @Component({
   selector: 'app-stock-sheet',
@@ -11,6 +17,7 @@ import * as dayjs from 'dayjs';
 })
 export class StockSheetComponent implements OnInit {
   @ViewChild(MatTable) stockSheetTable!: MatTable<any>;
+  @ViewChild('stockSheetTable') stockSheetTableElement!: ElementRef;
 
   sparesUsed!: IntSparesUsed[];
   allSpares!: any[];
@@ -127,4 +134,21 @@ export class StockSheetComponent implements OnInit {
     return spares.length;
   }
 
+
+  // export file
+  exportToExcel(): void {
+    const currentMonth = dayjs().format('MMM YYYY');
+    const filename = `${currentMonth}-stock-sheet.xlsx`;
+
+    const table = document.getElementById('stockSheetTable');
+    // generate sheet
+    const workSheet: XLSX.WorkSheet = XLSX.utils.table_to_sheet(table);
+
+    // generate workbook
+    const workBook: XLSX.WorkBook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workBook, workSheet, `${currentMonth}`);
+
+    // save file
+    XLSX.writeFile(workBook, filename);
+  }
 }

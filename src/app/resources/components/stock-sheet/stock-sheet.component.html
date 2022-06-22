@@ -1,8 +1,25 @@
-<table id="stockSheetTable" #stockSheetTable mat-table [dataSource]="dataSource" class="mat-elevation-z8">
-   <ng-container matColumnDef="No">
+<ng-container>
+  <div
+    class="export-to-excel-button my-3"
+    style="width: 100%; background: #eceff1; text-decoration: none;"
+  >
+    <button class="btn btn-link btn-sm mx-auto" (click)="exportToExcel()">
+      Export to Excel
+    </button>
+  </div>
+</ng-container>
+
+<table
+  id="stockSheetTable"
+  #stockSheetTable
+  mat-table
+  [dataSource]="dataSource"
+  class="mat-elevation-z8"
+>
+  <ng-container matColumnDef="No">
     <th mat-header-cell *matHeaderCellDef>No.</th>
-    <td mat-cell *matCellDef="let spare; let i = index;">{{ i+1 }}</td>
-  </ng-container> 
+    <td mat-cell *matCellDef="let spare; let i = index">{{ i + 1 }}</td>
+  </ng-container>
   <ng-container matColumnDef="code">
     <th mat-header-cell *matHeaderCellDef>Code</th>
     <td mat-cell *matCellDef="let spare">{{ spare.code }}</td>
