@@ -10,6 +10,9 @@ import { EditMachineComponent } from '@resources/components/edit-resources/edit-
 import { AddResourcesComponent } from '@resources/components/add-resources/add-resources.component';
 import { EditResourcesComponent } from '@resources/components/edit-resources/edit-resources.component';
 
+// stock
+import { StockSheetComponent } from './components/stock-sheet/stock-sheet.component';
+
 
 // firebase auth guards
 import { canActivate, redirectUnauthorizedTo } from '@angular/fire/auth-guard';
@@ -28,6 +31,11 @@ const routes: Routes = [
       },
       {
         path: 'edit-resources', component: EditResourcesComponent,
+        ...canActivate(redirectToLogin)
+      }
+      ,
+      {
+        path: 'stock-sheet', component: StockSheetComponent,
         ...canActivate(redirectToLogin)
       }
     ]

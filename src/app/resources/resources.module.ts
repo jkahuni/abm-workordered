@@ -10,6 +10,7 @@ import {
 import { SharedModule } from '@shared/shared.module';
 import { AddResourcesComponent } from '@resources/components/add-resources/add-resources.component';
 import { EditResourcesComponent } from '@resources/components/edit-resources/edit-resources.component';
+import { StockSheetComponent } from './components/stock-sheet/stock-sheet.component';
 
 
 
@@ -20,6 +21,7 @@ import { EditResourcesComponent } from '@resources/components/edit-resources/edi
     editResourcesComponents,
     AddResourcesComponent,
     EditResourcesComponent,
+    StockSheetComponent,
   ],
   imports: [
     CommonModule,
