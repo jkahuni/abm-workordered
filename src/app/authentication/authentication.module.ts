@@ -16,6 +16,8 @@ import { ValidatePhoneFormatDirective } from '@authentication/directives/validat
 
 // shared
 import { SharedModule } from '@shared/shared.module';
+import { PhoneNumberComponent } from './components/phone-number/phone-number.component';
+import { VerificationCodeComponent } from './components/verification-code/verification-code.component';
 
 @NgModule({
   declarations: [
@@ -26,7 +28,9 @@ import { SharedModule } from '@shared/shared.module';
     // directives
     ComparePasswordsDirective,
     ValidateNameFormatDirective,
-    ValidatePhoneFormatDirective
+    ValidatePhoneFormatDirective,
+    PhoneNumberComponent,
+    VerificationCodeComponent
   ],
   imports: [
     CommonModule,

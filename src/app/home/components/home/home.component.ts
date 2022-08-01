@@ -79,6 +79,7 @@ export class HomeComponent implements OnInit {
     onAuthStateChanged(this.auth,
       (user: User | null) => {
         this.user = user;
+        console.log(user);
         if (user !== null) {
           this.userUid = user.uid;
           if (!user.emailVerified) {

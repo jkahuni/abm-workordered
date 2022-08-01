@@ -12,6 +12,7 @@ export interface IntFirestoreUser {
     fullName: string;
     email: string;
     phoneNumber: string;
+    phoneNumberVerified: boolean;
     group: string;
     technicianGroup: string;
     supervisorGroup: string;

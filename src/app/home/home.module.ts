@@ -10,6 +10,7 @@ import { MatCardModule } from '@angular/material/card';
 // spinner
 import { NgxSpinnerModule } from 'ngx-spinner';
 import { HomeComponent } from './components/home/home.component';
+import { MatStepperModule } from '@angular/material/stepper';
 
 
 @NgModule({
@@ -22,6 +23,7 @@ import { HomeComponent } from './components/home/home.component';
     MatButtonModule,
     MatCardModule,
     NgxSpinnerModule,
+    MatStepperModule
   ]
 })
 export class HomeModule { }

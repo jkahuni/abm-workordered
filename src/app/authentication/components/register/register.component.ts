@@ -111,8 +111,12 @@ export class RegisterComponent implements OnInit {
       return true;
     }
     return false;
+  }
 
-
+  // adds country code to phone number
+  private formatPhoneNumber(phoneNumber: string): string {
+    const phone = phoneNumber.slice(-9);
+    return `+254${phone}`;
   }
 
   register = () => {
@@ -164,7 +168,8 @@ export class RegisterComponent implements OnInit {
             uid: user.uid,
             fullName: fullName.trim().toLocaleLowerCase(),
             email: email.trim().toLocaleLowerCase(),
-            phoneNumber,
+            phoneNumber: this.formatPhoneNumber(phoneNumber),
+            phoneNumberVerified: false,
             group,
             technicianGroup,
             supervisorGroup,
@@ -189,6 +194,11 @@ export class RegisterComponent implements OnInit {
                   { duration: 10000, id: 'sign-up-success-1' });
               this.router.navigate(['/']);
               this.spinner.hide('app-sign-up-spinner');
+            }).catch(() => {
+              this.spinner.hide('app-sign-up-spinner');
+              this.toast.error('An error occured during registration. Please try again or contact the admin.',
+                { id: 'sign-up-error-7', duration: 5000 });
+
             });
         })
         .catch((error) => {
@@ -213,9 +223,7 @@ export class RegisterComponent implements OnInit {
               { id: 'sign-up-error-6', duration: 4000 });
           }
           else {
-            console.log('USER REGISTRATION err', error);
-            console.log('USER REGISTRATION code', error.code);
-            console.log('USER REGISTRATION msg', error.message);
+
             this.toast.error('An error occured during registration. Please try again or contact the admin.',
               { id: 'sign-up-error-7', duration: 5000 });
           }
