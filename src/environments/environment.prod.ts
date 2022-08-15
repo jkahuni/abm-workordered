@@ -12,7 +12,7 @@ export const environment = {
         measurementId: 'G-C7WK73ZL6Y' 
     },
     africasTalkingCredentials: {
-        apiKey: 'fa8315549a493e578d6b1b4e611c3db3b7e2dfd1afcde5025f4ffd864b4b4a8e',
+        apiKey: 'fa8315549a493e47578d6j98ytrb1b4e611c3db3b7e2dfd1afcde50df25f4ffd864b4b4a8e',
         username: 'sandbox'
     }
 }
