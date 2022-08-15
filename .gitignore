@@ -48,3 +48,10 @@ Thumbs.db
 .firebase
 *-debug.log
 .runtimeconfig.json
+
+# angular environment
+environment.ts
+environment.prod.ts
+
+# env vile
+.env
